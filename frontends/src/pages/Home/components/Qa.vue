@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-breadcrumb separator-class="el-icon-arrow-right" style="font-size:16px">
+    <el-breadcrumb separator-class="el-icon-arrow-right" style="font-size:16px; margin-top: 5px;">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>QA</el-breadcrumb-item>
     </el-breadcrumb>
@@ -47,7 +47,7 @@
               </el-col>
               <el-col :span="8">
                 <el-form-item>
-                  <el-button type="primary" @click="onSubmit('form')"
+                  <el-button type="primary" @click="onSubmit('form')" :disabled="liaison.fstatus !== '2' "
                     >立即创建</el-button
                   >
                   <el-button type="text" @click="resetForm('form')"
@@ -146,6 +146,7 @@ export default {
         fprojectcd: "",
         fslipno: "",
         fobjectid: "",
+        fstatus:"1"
       },
       rules: {
         fobjectid: [
@@ -235,16 +236,16 @@ export default {
   },
   mounted: async function() {
     var slipno = this.$route.query.slipno;
-    var resp = await getSingleLiaisonBySlipNo(slipno);
+    var resp = await getSingleLiaisonBySlipNo(slipno).catch(()=>{
+      this.$message.error("联络票号:" + slipno + "数据获取异常");
+    });
 
     if (resp.status === 200) {
       this.liaison = resp.data.results[0];
       this.form.fslipno = this.liaison.fslipno;
       this.form.fsystemcd = this.liaison.fsystemcd;
       this.form.fprojectcd = this.liaison.fprojectcd;
-    } else {
-      this.$message.error("联络票号:" + slipno + "数据获取异常");
-    }
+    } 
     this.refreshQaHead(slipno);
   },
 };

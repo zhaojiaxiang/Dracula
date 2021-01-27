@@ -1,8 +1,8 @@
 <template>
   <div>
     <el-menu
-      default-active="1-4-1"
-      background-color="#F5F7FA"
+      default-active="1"
+      background-color="#f7f7f7"
       :collapse="isCollapse"
       class="side-height"
     >

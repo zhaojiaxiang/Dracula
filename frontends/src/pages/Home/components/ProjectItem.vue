@@ -4,7 +4,7 @@
       <el-col
         v-for="item in orderInfo"
         :key="item.order_no"
-        :span="6"
+        :span="7"
         class="card-style"
       >
         <el-card shadow="hover" class="card-color">

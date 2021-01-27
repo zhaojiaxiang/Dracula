@@ -83,7 +83,7 @@
       <el-table-column fixed prop="fslipno" label="联络票号" min-width="160">
         <template slot-scope="scope">
           <el-link
-            @click="openSlipNoQa(scope.row.fslipno)"
+            @click="openSlipNoQa(scope.row.fslipno, scope.row.fstatus)"
             type="primary"
             :underline="false"
             >{{ scope.row.fslipno }}</el-link
@@ -160,8 +160,10 @@ export default {
     openSlipNoModifiy(id) {
       this.bus.$emit("openSlipNoModifiy", id);
     },
-    openSlipNoQa(fslipno) {
-      this.$router.push({ path: "/qa/", query: { slipno: fslipno } });
+    openSlipNoQa(fslipno, fstatus) {
+      if (fstatus !== "待办"){
+        this.$router.push({ path: "/qa/", query: { slipno: fslipno } });
+      }
     },
     filterStatus(value, row) {
       return row.fstatus === value;

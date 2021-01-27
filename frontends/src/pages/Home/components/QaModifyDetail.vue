@@ -1,5 +1,9 @@
 <template>
-  <el-dialog title="测试对象修改明细" :visible.sync="dialogFormVisible">
+  <el-dialog
+    title="测试对象修改明细"
+    lock-scroll
+    :visible.sync="dialogFormVisible"
+  >
     <el-form ref="form" label-width="20%" :rules="rules" :model="form">
       <el-form-item prop="fttlcodelines" label="影响总行数:" required>
         <el-input
@@ -22,10 +26,42 @@
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
-      <el-button type="primary" @click="onSubmit('form')">确 定</el-button>
+      <el-button type="primary" v-show="qahead_status==='1' ||qahead_status==='2'  "  @click="onSubmit('form')">确 定</el-button>
       <el-button @click="resetForm('form')">重 置</el-button>
       <el-button @click="dialogFormVisible = false">取 消</el-button>
     </div>
+    <el-table
+      :data="testplan"
+      border
+      ref="testplan"
+      :cell-class-name="tableCellClassName"
+      style="width: 100%"
+    >
+      <el-table-column prop="target_tests" label="目标测试数" width="95">
+      </el-table-column>
+      <el-table-column
+        prop="target_regressions"
+        label="目标回归测试数"
+        width="120"
+      >
+      </el-table-column>
+      <el-table-column prop="target_total" label="目标总测试数" width="120">
+      </el-table-column>
+      <el-table-column prop="target_ng" label="目标NG数" width="95">
+      </el-table-column>
+      <el-table-column prop="actual_tests" label="实际测试数" width="100">
+      </el-table-column>
+      <el-table-column
+        prop="actual_regressions"
+        label="实际回归测试数"
+        width="120"
+      >
+      </el-table-column>
+      <el-table-column prop="actual_total" label="实际总测试数" width="120">
+      </el-table-column>
+      <el-table-column prop="actual_ng" label="实际NG数" width="100">
+      </el-table-column>
+    </el-table>
   </el-dialog>
 </template>
 
@@ -33,11 +69,14 @@
 import {
   updateQaHeadModifyDetail,
   getQaHeadModifyDetail,
+  getQaHeadPlanActual,
 } from "./../../../services/qaService";
 export default {
   data() {
     return {
       dialogFormVisible: false,
+      testplan: [],
+      qahead_status:"",
       form: {
         id: "",
         fttlcodelines: "",
@@ -58,13 +97,29 @@ export default {
     };
   },
   methods: {
+    tableCellClassName({ row, columnIndex }) {
+      if (row.actual_ng < row.target_ng) {
+        if (columnIndex === 7) {
+          console.log("hah ");
+          return "error-cell";
+        }
+      }
+    },
+
     async handleDialog(id) {
+      this.testplan = [];
       this.dialogFormVisible = !this.dialogFormVisible;
       var resp = await getQaHeadModifyDetail(id).catch(() => {
         this.$message.error("测试对象修改明细获取异常");
       });
 
       this.form = resp.data;
+
+      var plan_resp = await getQaHeadPlanActual(id).catch(() => {
+        this.$message.error("生成测试计划实绩数据异常");
+      });
+      this.qahead_status = plan_resp.data.fstatus
+      this.testplan.push(plan_resp.data);
     },
     async onSubmit(formName) {
       this.$refs[formName].validate(async (valid) => {
@@ -97,5 +152,16 @@ export default {
 <style scoped>
 .width-sytle {
   width: 90%;
+}
+.el-dialog__body {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.warning-cell {
+  background: oldlace;
+}
+
+.el-row .error-cell {
+  color: #ff0000;
 }
 </style>

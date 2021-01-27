@@ -37,7 +37,7 @@ export default {
   overflow:visible;
 }
 .el-main{
-  padding: 5px;
+  padding: 0px;
   height: calc(100vh - 60px);
 }
 </style>

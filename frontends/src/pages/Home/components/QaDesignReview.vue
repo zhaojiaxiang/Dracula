@@ -1,19 +1,29 @@
 <template>
-    <ckeditor :editor="editor" v-model="editorData" :config="editorConfig"></ckeditor>
+  <div>
+    <el-dialog title="填写设计Review" :visible.sync="dialogFormVisible">
+    <el-form ref="form" :rules="rules" :model="form">
+      <el-form-item prop="fcontent" required>
+        <Myeditor></Myeditor>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button type="primary" @click="onSubmit('form')">确 定</el-button>
+      <el-button @click="resetForm('form')">重 置</el-button>
+      <el-button @click="dialogFormVisible = false">取 消</el-button>
+    </div>
+  </el-dialog>
+  </div>
 </template>
 
 <script>
-    import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-
-    export default {
-        data() {
-            return {
-                editor: ClassicEditor,
-                editorData: '<p>Content of the editor.</p>',
-                editorConfig: {
-                    // The configuration of the editor.
-                }
-            };
-        }
-    }
+import Myeditor from "../../Commond/Myeditor";
+export default {
+  components:{
+    Myeditor
+  }
+}
 </script>
+
+<style>
+
+</style>

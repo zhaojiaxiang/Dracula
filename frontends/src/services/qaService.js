@@ -61,6 +61,14 @@ export async function getQaDetailContentText(id) {
   return resp;
 }
 
+export async function updateQaDetailContentText(id, form) {
+  var resp = await axios.put(
+    "/api/qa/mcl_detail_update_content_text/" + id + "/", form
+  );
+  return resp;
+}
+
+
 export async function updateQaDetail(id, qaDetailInfo) {
   var resp = await axios.put("/api/qa/mcl_detail/" + id + "/", qaDetailInfo);
   return resp;
@@ -74,4 +82,19 @@ export async function getQaDetail(id) {
 export async function deleteQaDetail(id) {
   var resp = await axios.delete("/api/qa/mcl_detail/" + id + "/");
   return resp;
+}
+
+export async function getQaHeadPlanActual(id){
+  var resp = await axios.get("/api/qa/mcl_head_target_actual/" + id + "/");
+  return resp;
+}
+
+export async function updateQaDetailResult(id, qaDetailInfo){
+  var resp = await axios.put("/api/qa/mcl_detail_update_result/"+ id +"/", qaDetailInfo)
+  return resp
+}
+
+export async function fileUpdate(form){
+  var resp = await axios.post("/api/file_upload/", form)
+  return resp
 }

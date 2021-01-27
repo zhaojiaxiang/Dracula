@@ -1,27 +1,57 @@
 <template>
-  <div>
-    <el-breadcrumb separator-class="el-icon-arrow-right" style="font-size:16px">
+  <div class="goTop">
+    <el-breadcrumb
+      separator-class="el-icon-arrow-right"
+      style="font-size:16px;margin-top: 5px;"
+    >
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item
+        v-show="paramtype !== 'testing'"
         :to="{ path: '/qa/', query: { slipno: this.qahead.fslipno } }"
-        >QA</el-breadcrumb-item
+        >QA列表</el-breadcrumb-item
       >
-      <el-breadcrumb-item>QA List</el-breadcrumb-item>
+      <el-breadcrumb-item
+        v-show="paramtype === 'testing'"
+        :to="{ path: '/task/', query: { type: this.paramtype } }"
+        >任务列表</el-breadcrumb-item
+      >
+      <el-breadcrumb-item
+        >MCL列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
+      >
     </el-breadcrumb>
 
     <el-row style="margin-top:20px">
       <el-col :span="12">
         <div>
-          <el-button type="danger" :disabled="qahead.fstatus !== '1'"
+          <el-button
+            type="danger"
+            :disabled="isCanBatchDelete()"
+            v-loading.fullscreen.lock="fullscreenLoading"
+            @click="batchDeleteQaDetail()"
             >删除选中项</el-button
           >
         </div>
       </el-col>
       <el-col :span="12">
         <div style="text-align:right;margin-right:40px">
-          <el-button @click="detailModify()">修改明细</el-button>
-          <el-button @click="singleAdd()">逐条添加</el-button>
-          <el-button @click="batchAdd()">批量添加</el-button>
+          <el-button-group>
+            <el-button @click="detailModify()">修改明细</el-button>
+            <el-button v-show="isCanAdd()" @click="singleAdd()"
+              >逐条添加</el-button
+            >
+            <el-button v-show="isCanAdd()" @click="batchAdd()"
+              >批量添加</el-button
+            >
+            <el-button
+              type="primary"
+              v-show="isCanSubmit()"
+              @click="resultSubmit()"
+              >提交结果</el-button
+            >
+            <el-button v-show="isCanRoback()" @click="resultRollback()"
+              >结果撤回</el-button
+            >
+          </el-button-group>
         </div>
       </el-col>
     </el-row>
@@ -68,13 +98,53 @@
         prop="fresult"
         label="结果"
         width="100"
-      ></el-table-column>
+        :filters="[
+          { text: 'NULL', value: null },
+          { text: 'OK', value: 'OK' },
+          { text: 'NG', value: 'NG' },
+          { text: 'NGOK', value: 'NGOK' },
+          { text: 'CANCEL', value: 'CANCEL' },
+        ]"
+        :filter-method="filterResult"
+        filter-placement="bottom-end"
+      >
+        <template slot-scope="scope">
+          <el-dropdown trigger="click" @command="handleResult">
+            <el-tag :type="handleTag(scope.row.fresult)">{{
+              scope.row.fresult
+            }}</el-tag>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item
+                :disabled="!isCanTest()"
+                :command="beforeHandleResult('OK', scope.row)"
+                >OK</el-dropdown-item
+              >
+              <el-dropdown-item
+                :disabled="!isCanTest()"
+                :command="beforeHandleResult('NG', scope.row)"
+                >NG</el-dropdown-item
+              >
+              <el-dropdown-item
+                :disabled="!isCanTest()"
+                :command="beforeHandleResult('NGOK', scope.row)"
+                >NGOK</el-dropdown-item
+              >
+              <el-dropdown-item
+                :command="beforeHandleResult('CANCEL', scope.row)"
+                :disabled="!isCanTest()"
+                >CANCEL</el-dropdown-item
+              >
+            </el-dropdown-menu>
+          </el-dropdown>
+        </template>
+      </el-table-column>
       <el-table-column label="贴图" width="100">
         <template slot-scope="scope">
           <el-link
             type="primary"
             :underline="false"
             style="margin-left:15px"
+            @click="handleContentText(scope.row.id)"
             v-show="scope.row.fcontent_text.length > 0"
             >已贴图</el-link
           >
@@ -82,7 +152,8 @@
             style="margin-left:20px"
             type="primary"
             :underline="false"
-            v-show="scope.row.fcontent_text.length === 0"
+            @click="handleContentText(scope.row.id)"
+            v-show="scope.row.fcontent_text.length === 0 && isCanTest()"
             >贴图</el-link
           >
         </template>
@@ -120,14 +191,16 @@
       @refreshQaList="refreshQaList"
     ></BatchNewQaList>
 
-    <QaModifyDetail
-      ref="QaModifyDetail"
-    ></QaModifyDetail>
+    <QaModifyDetail ref="QaModifyDetail"></QaModifyDetail>
 
     <SingleModifyQaList
       ref="SingleModifyQaList"
       @refreshQaList="refreshQaList"
     ></SingleModifyQaList>
+
+    <el-backtop target=".goTop" :bottom="100">
+      <i class="el-icon-caret-top"></i>
+    </el-backtop>
   </div>
 </template>
 
@@ -136,6 +209,8 @@ import {
   getQaHead,
   getQaDetailByQaHead,
   deleteQaDetail,
+  updateQaDetailResult,
+  updateQaHead,
 } from "./../../../services/qaService";
 import SingleNewQaList from "../components/SingleNewQaList";
 import BatchNewQaList from "../components/BatchNewQaList";
@@ -150,8 +225,11 @@ export default {
   },
   data() {
     return {
-      regressionTag:"",
-      approvalTag:"",
+      paramtype: "",
+      parentroute: "",
+      fullscreenLoading: false,
+      regressionTag: "",
+      approvalTag: "",
       qahead: {},
       qadetails: [],
       multipleSelection: [],
@@ -163,33 +241,201 @@ export default {
       if (row.fapproval === "已审核") {
         return false;
       } else {
-        if (row.fcontent_text.length > 0) {
+        if (row.fcontent_text || row.fresult) {
           return false;
         }
       }
       return true;
     },
 
+    isCanAdd() {
+      if (this.qahead.fstatus === "1" || this.qahead.fstatus === "2") {
+        return true;
+      }
+      return false;
+    },
+
+    isCanTest() {
+      if (this.qahead.fstatus === "2") {
+        return true;
+      }
+      return false;
+    },
+
+    isCanRoback() {
+      if (this.qahead.fstatus === "3") {
+        return true;
+      }
+      return false;
+    },
+
+    isCanBatchDelete() {
+      if (this.qahead.fstatus === "1") {
+        return false;
+      }
+      return true;
+    },
+
+    isCanSubmit() {
+      if (
+        this.qahead.fstatus === "3" ||
+        this.qahead.fstatus === "4" ||
+        this.qahead.fstatus === "1"
+      ) {
+        return false;
+      }
+
+      for (var i in this.qadetails) {
+        if (!this.qadetails[i].fresult) {
+          return false;
+        }
+        if (this.qadetails[i].fresult === "NG") {
+          return false;
+        }
+      }
+
+      return true;
+    },
+
+    handleTag(result) {
+      if (!result) {
+        return "";
+      } else if (result === "OK" || result === "NGOK") {
+        return "success";
+      } else if (result === "NG") {
+        return "danger";
+      } else {
+        return "info";
+      }
+    },
+
+    beforeHandleResult(item, row) {
+      return {
+        command: item,
+        row: row,
+      };
+    },
+
+    handleContentText(id){
+      this.$router.push({name: "QaContentText",query:{qadf_id:id}})
+    },
+
+    async batchDeleteQaDetail() {
+      this.$confirm("此操作将永久删除选中的数据, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(async (action) => {
+          if (action === "confirm") {
+            this.fullscreenLoading = true;
+            var selectData = this.$refs.multipleTable.selection;
+            if (selectData.length > 0) {
+              for (var i in selectData) {
+                var resp = await deleteQaDetail(selectData[i].id).catch(() => {
+                  this.$message.error("测试项删除异常");
+                });
+                if (
+                  Object.prototype.hasOwnProperty.call(resp.data, "message")
+                ) {
+                  this.$message.error(resp.data.message);
+                }
+              }
+              this.refreshQaList();
+              this.fullscreenLoading = false;
+              this.$message({
+                message: "批量删除成功！",
+                type: "success",
+              });
+            }
+          }
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "取消删除",
+          });
+        });
+    },
+
+    async resultSubmit() {
+      this.qahead.fstatus = "3";
+      var resp = await updateQaHead(this.qahead.id, this.qahead).catch(() => {
+        this.$message.error("测试结果提交异常");
+      });
+      if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
+        this.$message.error(resp.data.message);
+      } else {
+        this.$message.success("测试结果提交成功");
+      }
+    },
+
+    async resultRollback() {
+      this.qahead.fstatus = "2";
+      var resp = await updateQaHead(this.qahead.id, this.qahead).catch(() => {
+        this.$message.error("测试结果撤回异常");
+      });
+      console.log(resp);
+      if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
+        this.$message.error(resp.data.message);
+      } else {
+        this.$message.success("测试结果撤回成功");
+      }
+    },
+
+    async handleResult(command) {
+      var qadetailInfo = {};
+
+      qadetailInfo["id"] = command.row.id;
+      qadetailInfo["fresult"] = command.command;
+
+      var resp = await updateQaDetailResult(command.row.id, qadetailInfo).catch(
+        () => {
+          this.$message.error("测试项测试结果更新异常");
+        }
+      );
+
+      if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
+        this.$message.error(resp.data.message);
+      } else {
+        this.$message.success("测试项更新成功");
+      }
+
+      var newqadetail = this.qadetails;
+      for (var i in newqadetail) {
+        if (newqadetail[i].id === command.row.id) {
+          newqadetail[i] = command.command;
+        }
+      }
+      // this.qadetails = []
+      // this.qadetails = newqadetail
+      this.refreshQaList();
+    },
+
+    filterResult(value, row) {
+      return row.fresult === value;
+    },
+
     async refreshQaList() {
-      var resp = await getQaDetailByQaHead(this.qahead.id).catch(()=>{
-        this.$message.error("测试项数据获取异常")
+      var resp = await getQaDetailByQaHead(this.qahead.id).catch(() => {
+        this.$message.error("测试项数据获取异常");
       });
       if (resp.status === 200) {
         var qadata = resp.data;
-        for(var i in qadata){
-          if (qadata[i].fregression === "Y"){
-            qadata[i].fregression = "是"
-            this.regressionTag = ""
-          }else{
-            qadata[i].fregression = "否"
-            this.regressionTag = "info"
+        for (var i in qadata) {
+          if (qadata[i].fregression === "Y") {
+            qadata[i].fregression = "是";
+            this.regressionTag = "";
+          } else {
+            qadata[i].fregression = "否";
+            this.regressionTag = "info";
           }
-          if( qadata[i].fapproval === "Y"){
-            qadata[i].fapproval = "已审核"
-            this.approvalTag = ""
-          }else{
-            qadata[i].fapproval = "未审核"
-            this.approvalTag = "info"
+          if (qadata[i].fapproval === "Y") {
+            qadata[i].fapproval = "已审核";
+            this.approvalTag = "";
+          } else {
+            qadata[i].fapproval = "未审核";
+            this.approvalTag = "info";
           }
         }
         this.qadetails = resp.data;
@@ -215,8 +461,8 @@ export default {
     },
 
     async singleDelete(id) {
-      var resp = await deleteQaDetail(id).catch(()=>{
-        this.$$message.error("测试项删除异常")
+      var resp = await deleteQaDetail(id).catch(() => {
+        this.$message.error("测试项删除异常");
       });
       if (resp.status === 204) {
         this.refreshQaList();
@@ -229,18 +475,28 @@ export default {
   },
   mounted: async function() {
     var id = this.$route.query.qahf_id;
-    var resp = await getQaHead(id).catch(()=>{
-      this.$message.error("测试对象数据获取异常")
+    this.paramtype = this.$route.query.type;
+    this.parentroute = this.$route.path.split("/")[1];
+    var resp = await getQaHead(id).catch(() => {
+      this.$message.error("测试对象数据获取异常");
     });
     if (resp.status === 200) {
       this.qahead = resp.data;
       this.refreshQaList();
     }
+
+    this.bus.$on('refreshList', function(){
+        this.refreshQaList();
+    })
   },
 };
 </script>
 
 <style>
+.goTop {
+  height: calc(100vh - 70px);
+  overflow-x: hidden;
+}
 .el-table--medium td,
 .el-table--medium th {
   padding: 2px 0px;

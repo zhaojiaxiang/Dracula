@@ -48,3 +48,28 @@ export async function myOrderInfo(){
   var resp = await axios.get("api/mine-order-info/")
   return resp;
 }
+
+export async function getMyTaskBar(){
+  var resp = await axios.get('/api/mine-task-bar/')
+  return resp
+}
+
+export async function getMyTesting(){
+  var resp = await axios.get('/api/mine-task-testing/')
+  return resp
+}
+
+export async function getMyApproval(){
+  var resp = await axios.get('/api/mine-task-approval/')
+  return resp
+}
+
+export async function getMyConfirm(){
+  var resp = await axios.get('/api/mine-task-conform/')
+  return resp
+}
+
+export async function getMyRelease(){
+  var resp = await axios.get('/api/mine-task-release/')
+  return resp
+}
