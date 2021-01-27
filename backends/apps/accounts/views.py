@@ -6,6 +6,7 @@ from rest_framework import status
 
 from accounts.models import SystemSetting
 from accounts.serializers import UserSerializer, SystemSettingSerializer, MyGroupUserSerializer
+from qa.models import QaHead
 from utils.db_connection import db_connection_execute, query_single_with_no_parameter
 
 User = get_user_model()
@@ -19,6 +20,32 @@ def jwt_response_payload_handler(token, user=None, request=None):
         'token': token,
         'user': UserSerializer(user, context={'request': request}).data
     }
+
+
+def api_exception_handler(exc, context):
+    """
+    自定义异常返回接口格式
+    :param exc:
+    :param context:
+    :return:
+    """
+    from rest_framework.views import exception_handler
+    response = exception_handler(exc, context)
+
+    # Now add the HTTP status code to the response.
+    data = {}
+    if response is not None:
+        data = {
+            'code': response.status_code,
+            'message': response.reason_phrase
+        }
+        if hasattr(exc, 'detail'):
+            if response.status_code != "400":
+                data['message'] = exc.detail
+            else:
+                data['message'] = exc.detail[0]
+
+    return Response(data=data, status=status.HTTP_200_OK)
 
 
 class UserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -133,20 +160,208 @@ class UserDevelopmentDetail(APIView):
         return Response(data=response_data, status=status.HTTP_200_OK)
 
 
-def api_exception_handler(exc, context):
-    # Call REST framework's default exception handler first,
-    # to get the standard error response.
-    from rest_framework.views import exception_handler
-    response = exception_handler(exc, context)
+class MyTaskBar(APIView):
 
-    # Now add the HTTP status code to the response.
-    data = {}
-    if response is not None:
-        data = {
-            'code': response.status_code,
-            'message': response.reason_phrase
-        }
-        if hasattr(exc, 'detail'):
-            data['message'] = exc.detail[0]
+    def get(self, request, format=None):
+        user = request.user
+        testing = QaHead.objects.filter(fcreateusr__exact=user.name, fstatus__exact='2').count()
 
-    return Response(data=data, status=status.HTTP_200_OK)
+        approval_sql = f"""
+                       select count(*)
+                       from (
+                           select distinct qahf.id
+                           from qahf,
+                                qadf
+                           where qadf.qahf_id = qahf.id
+                           and qahf.fcreateusr in (select name from users where ammic_group_id = '{user.ammic_group.id}')
+                           and qadf.fapproval = 'N') a;
+                       """
+
+        approval_list = query_single_with_no_parameter(approval_sql, 'list')
+        approval = approval_list[0]
+
+
+        confirm_sql = f"""
+                      select count(*)
+                          from qahf
+                          where fcreateusr in (select name from users where ammic_group_id = '{user.ammic_group.id}')
+                            and fstatus = '3'
+                      """
+        confirm_list = query_single_with_no_parameter(confirm_sql, 'list')
+        confirm = confirm_list[0]
+
+        dev_count_sql = """
+                        select count(*)
+                            from (
+                                 select a.*
+                                 from (select distinct liaisonf.*
+                                       from liaisonf,
+                                            qahf
+                                       where qahf.fslipno = liaisonf.fslipno
+                                         and liaisonf.fstatus = '3'
+                                         and qahf.fstatus = '4'
+                                         and liaisonf.ftype = '追加开发') a,
+                                      qahf
+                                 where a.fodrno = qahf.fslipno
+                                   and qahf.fstatus = '4') b
+                        """
+
+        dev_count_list = query_single_with_no_parameter(dev_count_sql, 'list')
+        dev_count = dev_count_list[0]
+
+        non_dev_count_sql = """
+                            select count(*)
+                                from (
+                                     select distinct liaisonf.*
+                                     from liaisonf,
+                                          qahf
+                                     where qahf.fslipno = liaisonf.fslipno
+                                       and liaisonf.fstatus = '3'
+                                       and qahf.fstatus = '4'
+                                       and liaisonf.ftype <> '追加开发') a
+                                """
+
+        non_dev_count_list = query_single_with_no_parameter(non_dev_count_sql, 'list')
+        non_dev_count = non_dev_count_list[0]
+
+        release = dev_count + non_dev_count
+
+        response_data = []
+        task_dict = {}
+
+        task_dict['testing'] = testing
+        task_dict['approval'] = approval
+        task_dict['confirm'] = confirm
+        task_dict['release'] = release
+
+        response_data.append(task_dict)
+
+        return Response(data=response_data, status=status.HTTP_200_OK)
+
+
+class MyTesting(APIView):
+
+    def get(self, request, format=None):
+        user = request.user
+
+        testing_sql = f"""
+                       select
+                           liaisonf.id,
+                           liaisonf.fslipno,
+                           liaisonf.fodrno,
+                           qahf.id qahf_id,
+                           qahf.fobjectid,
+                           qahf.fstatus,
+                           qahf.ftesttyp,
+                           qahf.fobjmodification,
+                           (select codereview.id from codereview where 
+                                codereview.fobjectid = qahf.fobjectid and codereview.fslipno = qahf.fslipno) code_id,
+                           (select codereview.id from codereview where 
+                                codereview.fobjectid = 'Design Review' and codereview.fslipno = qahf.fslipno) design_id
+                           from qahf,
+                                liaisonf
+                           where qahf.fstatus = '2'
+                                and qahf.fcreateusr = '{user.name}'
+                                and (liaisonf.fslipno = qahf.fslipno or liaisonf.fodrno = qahf.fslipno)
+                           order by liaisonf.fodrno, liaisonf.fslipno
+                      """
+
+        testing_dict = db_connection_execute(testing_sql, 'dict')
+
+        return Response(data=testing_dict, status=status.HTTP_200_OK)
+
+
+class MyApproval(APIView):
+
+    def get(self, request, format=None):
+        user = request.user
+
+        approval_sql = f"""
+                       select  distinct liaisonf.id,
+                               liaisonf.fslipno,
+                               liaisonf.fodrno,
+                               qahf.id      qahf_id,
+                               qahf.fobjectid,
+                               qahf.fstatus,
+                               qahf.ftesttyp,
+                               qahf.fobjmodification,
+                               (select codereview.id from codereview where codereview.fobjectid = qahf.fobjectid 
+                               and codereview.fslipno = qahf.fslipno)  code_id,
+                               (select codereview.id from codereview where codereview.fobjectid = 'Design Review' 
+                               and codereview.fslipno = qahf.fslipno) design_id
+                        from liaisonf,
+                             qahf,
+                             qadf
+                        where qadf.qahf_id = qahf.id
+                          and (liaisonf.fslipno = qahf.fslipno or liaisonf.fodrno = qahf.fslipno)
+                          and qahf.fcreateusr in (select name from users where ammic_group_id = '{user.ammic_group.id}')
+                          and qadf.fapproval = 'N'
+                      """
+
+        approval_dict = db_connection_execute(approval_sql, 'dict')
+
+        return Response(data=approval_dict, status=status.HTTP_200_OK)
+
+
+class MyConfirm(APIView):
+
+    def get(self, request, format=None):
+        user = request.user
+
+        confirm_sql = f"""
+                       select liaisonf.id,
+                               liaisonf.fslipno,
+                               liaisonf.fodrno,
+                               qahf.id      qahf_id,
+                               qahf.fobjectid,
+                               qahf.fstatus,
+                               qahf.ftesttyp,
+                               qahf.fobjmodification,
+                               (select codereview.id from codereview where codereview.fobjectid = qahf.fobjectid 
+                               and codereview.fslipno = qahf.fslipno)  code_id,
+                               (select codereview.id from codereview where codereview.fobjectid = 'Design Review' 
+                               and codereview.fslipno = qahf.fslipno) design_id
+                        from liaisonf,
+                             qahf
+                        where (liaisonf.fslipno = qahf.fslipno or liaisonf.fodrno = qahf.fslipno)
+                          and qahf.fcreateusr in (select name from users where ammic_group_id = '{user.ammic_group.id}')
+                          and qahf.fstatus = '3'
+                      """
+
+        confirm_dict = db_connection_execute(confirm_sql, 'dict')
+
+        return Response(data=confirm_dict, status=status.HTTP_200_OK)
+
+
+class MyRelease(APIView):
+
+    def get(self, request, format=None):
+        user = request.user
+
+        testing_sql = f"""
+                       select distinct b.fodrno, b.fslipno, b.fsirno, b.ftype, b.fbrief, b.fassignedto, b.fleader from (
+                            select a.*
+                            from (select distinct liaisonf.*
+                                  from liaisonf,
+                                       qahf
+                                  where qahf.fslipno = liaisonf.fslipno
+                                    and liaisonf.fstatus = '3'
+                                    and qahf.fstatus = '4'
+                                    and liaisonf.ftype = '追加开发') a,
+                                 qahf
+                            where a.fodrno = qahf.fslipno
+                              and qahf.fstatus = '4'
+                            union all
+                            select distinct liaisonf.*
+                            from liaisonf,
+                                 qahf
+                            where qahf.fslipno = liaisonf.fslipno
+                              and liaisonf.fstatus = '3'
+                              and qahf.fstatus = '4'
+                              and liaisonf.ftype <> '追加开发') b
+                            order by fodrno, fslipno
+                      """
+
+        testing_dict = db_connection_execute(testing_sql, 'dict')
+
+        return Response(data=testing_dict, status=status.HTTP_200_OK)

@@ -1,16 +1,17 @@
 import datetime
 
 from django.db import transaction
+from math import ceil
 from rest_framework import serializers
 
 from qa.models import QaHead, QaDetail
+from reviews.models import CodeReview
 
 
 class QaHeadSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     fcreatedte = serializers.DateTimeField(read_only=True)
     fcreateusr = serializers.CharField(read_only=True)
-    fstatus = serializers.CharField(read_only=True)
     ftesttyp = serializers.CharField(read_only=True)
 
     qadfcount = serializers.SerializerMethodField()
@@ -18,7 +19,7 @@ class QaHeadSerializer(serializers.ModelSerializer):
     class Meta:
         model = QaHead
         fields = ('id', 'fsystemcd', 'fprojectcd', 'fslipno', 'fobjectid', 'fobjmodification',
-                  'fcreatedte', 'fcreateusr', 'fstatus', 'ftesttyp', 'qadfcount')
+                  'fcreatedte', 'fcreateusr', 'fstatus', 'ftesttyp', 'qadfcount', 'freviewcode', 'flevel')
 
     def get_qadfcount(self, obj):
         qadf = QaDetail.objects.filter(qahf_id__exact=obj.id)
@@ -46,19 +47,129 @@ class QaHeadSerializer(serializers.ModelSerializer):
 
     @transaction.atomic()
     def update(self, instance, validated_data):
-        qa_detail = QaDetail.objects.filter(qahf__exact=instance)
-        if instance.fstatus != '1':
-            raise serializers.ValidationError('只有在初始状态下可以修改')
-        elif qa_detail:
-            raise serializers.ValidationError('已经存在测试项不可修改')
+        qa_details = QaDetail.objects.filter(qahf__exact=instance)
+        orig_status = instance.fstatus
+        new_status = validated_data['fstatus']
+        user = self.context['request'].user
+
+        diff_status = int(new_status) - int(orig_status)
+        if abs(diff_status) > 1:
+            raise serializers.ValidationError("测试对象状态不可跨级修改，系统流程控制Bug！")
+
+        if diff_status > 0:
+            if new_status == '2':
+                """审核"""
+                lot = instance.flastapprovallot + 1
+                instance.fstatus = new_status
+                instance.fauditdte = datetime.datetime.now().strftime('%Y-%m-%d')
+                instance.flastapprovallot = lot
+                instance.fauditor = user.name
+                instance.fupdteusr = user.name
+                instance.fupdteprg = "MCL QA Approval"
+                instance.save()
+
+                for qa in qa_details:
+                    if qa.fapproval != "Y":
+                        qa.fapproval = "Y"
+                        qa.fapprovallot = lot
+                        qa.fupdteusr = user.name
+                        qa.fupdteprg = "MCL QA Approval"
+                        qa.save()
+
+            if new_status == '3':
+                """测试结果提交"""
+                # if instance.ftesttyp == "MCL":
+                #     if instance.fobjmodification is None:
+                #         raise serializers.ValidationError("请先填写测试对象修改概要")
+                #
+                #     if instance.fttlcodelines is None:
+                #         raise serializers.ValidationError("请先填写修改明细")
+                #
+                #     code_review = CodeReview.objects.filter(fobjectid__exact=instance.fobjectid)
+                #     if code_review.count() == 0:
+                #         raise serializers.ValidationError("请先填写代码Review")
+                #
+                #     design_review = CodeReview.objects.filter(fobjectid__exact="Design Review",
+                #                                               fslipno__exact=instance.fslipno)
+                #     if design_review.count() == 0:
+                #         raise serializers.ValidationError("请先填写设计Review")
+
+                instance.fstatus = new_status
+                instance.ftestdte = datetime.datetime.now().strftime('%Y-%m-%d')
+                instance.ftestusr = user.name
+                instance.fupdteusr = user.name
+                instance.fupdteprg = "MCL QA Submit"
+                instance.save()
+
+            if new_status == '4':
+                """确认"""
+                instance.fstatus = new_status
+                instance.fconfirmdte = datetime.datetime.now().strftime('%Y-%m-%d')
+                instance.flevel = validated_data['flevel']
+                instance.freviewcode = validated_data['freviewcode']
+                instance.fconfirmusr = user.name
+                instance.fupdteusr = user.name
+                instance.fupdteprg = "MCL QA Confirm"
+                instance.save()
+        elif diff_status < 0:
+            if new_status == '3':
+                """取消确认"""
+                instance.fstatus = new_status
+                instance.fconfirmdte = None
+                instance.fconfirmusr = ""
+                instance.flevel = ''
+                instance.freviewcode = ''
+                instance.fupdteusr = user.name
+                instance.fupdteprg = "MCL QA Confirm Cancel"
+                instance.save()
+
+            if new_status == '2':
+                """取消结果提交"""
+                instance.fstatus = new_status
+                instance.ftestdte = None
+                instance.ftestusr = ""
+                instance.fupdteusr = user.name
+                instance.fupdteprg = "MCL QA Submit Cancel"
+                instance.save()
+
+            if new_status == '1':
+                """审核审核， 该逻辑原则上不会出现"""
+                lot = instance.flastapprovallot - 1
+                instance.fstatus = new_status
+                instance.fauditdte = None
+                instance.fauditor = ""
+                instance.flastapprovallot = lot
+                instance.fupdteusr = user.name
+                instance.fupdteprg = "MCL QA Approval Cancel"
+                instance.save()
+
+                for qa in qa_details:
+                    qa.fapproval = "N"
+                    qa.fupdteusr = user.name
+                    qa.fapprovallot = qa.fapprovallot - 1
+                    qa.fupdteprg = "MCL QA Approval Cancel"
+                    qa.save()
         else:
-            user = self.context['request'].user
-            instance.fobjectid = validated_data['fobjectid']
-            instance.fobjectnm = validated_data['fobjectid']
-            instance.fupdteusr = user.name
-            instance.fupdteprg = "MCL QA Modify"
-            instance.save()
-            return instance
+            if new_status == '2':
+                """审核"""
+                lot = instance.flastapprovallot + 1
+                instance.fstatus = new_status
+                instance.fauditdte = datetime.datetime.now().strftime('%Y-%m-%d')
+                instance.flastapprovallot = lot
+                instance.fauditor = user.name
+                instance.fupdteusr = user.name
+                instance.fupdteprg = "MCL QA Approval"
+                instance.save()
+
+                for qa in qa_details:
+                    if qa.fapproval != "Y":
+                        qa.fapproval = "Y"
+                        qa.fapprovallot = lot
+                        qa.fupdteusr = user.name
+                        qa.fupdteprg = "MCL QA Approval"
+                        qa.save()
+
+        return instance
 
 
 class QaHeadDisplayNoteSerializer(serializers.ModelSerializer):
@@ -81,6 +192,60 @@ class QaHeadModifyDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = QaHead
         fields = ('id', 'fttlcodelines', 'fmodifiedlines', 'fcomplexity')
+
+
+class QaHeadTargetAndActualSerializer(serializers.ModelSerializer):
+    target_tests = serializers.SerializerMethodField()
+    target_regressions = serializers.SerializerMethodField()
+    target_total = serializers.SerializerMethodField()
+    target_ng = serializers.SerializerMethodField()
+    actual_tests = serializers.SerializerMethodField()
+    actual_regressions = serializers.SerializerMethodField()
+    actual_total = serializers.SerializerMethodField()
+    actual_ng = serializers.SerializerMethodField()
+
+    class Meta:
+        model = QaHead
+        fields = ('id', 'fttlcodelines', 'fmodifiedlines', 'fcomplexity', 'fstatus', 'target_tests', 'target_regressions',
+                  'target_total', 'target_ng', 'actual_tests', 'actual_regressions', 'actual_total', 'actual_ng')
+
+    def get_target_tests(self, obj):
+        if obj.fmodifiedlines:
+            return ceil(obj.fmodifiedlines * obj.fcomplexity / 11)
+        return 0
+
+    def get_target_regressions(self, obj):
+        if obj.fttlcodelines:
+            return ceil(obj.fttlcodelines / 50)
+        return 0
+
+    def get_target_total(self, obj):
+        if obj.fttlcodelines:
+            return self.get_target_regressions(obj) + self.get_target_tests(obj)
+        return 0
+
+    def get_target_ng(self, obj):
+        if obj.fmodifiedlines:
+            return ceil(self.get_target_tests(obj) / 11)
+        return 0
+
+    def get_actual_tests(self, obj):
+        return QaDetail.objects.filter(fregression__exact='N',
+                                       fresult__in=('OK', 'NG', 'NGOK', ),
+                                       qahf_id__exact=obj.id).count()
+
+    def get_actual_regressions(self, obj):
+        return QaDetail.objects.filter(fregression__exact='Y',
+                                       fresult__in=('OK', 'NG', 'NGOK', ),
+                                       qahf_id__exact=obj.id).count()
+
+    def get_actual_total(self, obj):
+        return QaDetail.objects.filter(fresult__in=('OK', 'NG', 'NGOK',),
+                                       qahf_id__exact=obj.id).count()
+
+    def get_actual_ng(self, obj):
+        return QaDetail.objects.filter(fresult__contains='NG',
+                                       qahf_id__exact=obj.id).count()
 
 
 class QaDetailSerializer(serializers.ModelSerializer):
@@ -150,11 +315,12 @@ class QaDetailUpdateResultSerializer(serializers.ModelSerializer):
         result_original = instance.fresult
         result_present = validated_data['fresult']
 
-        if "NG" in result_original and result_present == "OK":
-            raise serializers.ValidationError("测试结果不可由NG修改为OK！！！")
+        if result_original:
+            if "NG" in result_original and result_present == "OK":
+                raise serializers.ValidationError("测试结果不可由NG修改为OK！！！")
 
-        if result_original == "CANCEL":
-            raise serializers.ValidationError("已经取消的测试项不可修改")
+            if result_original == "CANCEL":
+                raise serializers.ValidationError("已经取消的测试项不可修改")
 
         instance.fresult = result_present
         instance.ftestusr = user.name
@@ -168,5 +334,4 @@ class QaDetailUpdateContentTextSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QaDetail
-        fields = ('id', 'fcontent_text')
-
+        fields = ('id', 'fcontent', 'fcontent_text')

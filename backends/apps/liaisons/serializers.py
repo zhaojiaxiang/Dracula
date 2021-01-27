@@ -128,10 +128,11 @@ class LiaisonUpdateStatusSerializer(serializers.ModelSerializer):
                 if all_obj.count() != confirmed_obj.count():
                     raise serializers.ValidationError("该联络票下存在未确认的测试项")
 
-                pcl_obj = QaHead.objects.filter(fslipno__exact=instance.fodrno)
-                if pcl_obj:
-                    if pcl_obj.fstatus != "4":
-                        raise serializers.ValidationError("该联络票下的PCL没有确认")
+                pcl_objs = QaHead.objects.filter(fslipno__exact=instance.fodrno)
+                if pcl_objs:
+                    for pcl in pcl_objs:
+                        if pcl.fstatus != "4":
+                            raise serializers.ValidationError("该联络票下的PCL没有确认")
                 instance.freleasedt = current_date
         else:
             if new_status == "3":
