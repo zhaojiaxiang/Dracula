@@ -78,21 +78,22 @@ class QaHeadSerializer(serializers.ModelSerializer):
 
             if new_status == '3':
                 """测试结果提交"""
-                # if instance.ftesttyp == "MCL":
-                #     if instance.fobjmodification is None:
-                #         raise serializers.ValidationError("请先填写测试对象修改概要")
-                #
-                #     if instance.fttlcodelines is None:
-                #         raise serializers.ValidationError("请先填写修改明细")
-                #
-                #     code_review = CodeReview.objects.filter(fobjectid__exact=instance.fobjectid)
-                #     if code_review.count() == 0:
-                #         raise serializers.ValidationError("请先填写代码Review")
-                #
-                #     design_review = CodeReview.objects.filter(fobjectid__exact="Design Review",
-                #                                               fslipno__exact=instance.fslipno)
-                #     if design_review.count() == 0:
-                #         raise serializers.ValidationError("请先填写设计Review")
+                if instance.ftesttyp == "MCL":
+                    if instance.fobjmodification is None:
+                        raise serializers.ValidationError("请先填写测试对象修改概要")
+
+                    if instance.fttlcodelines is None:
+                        raise serializers.ValidationError("请先填写修改明细")
+
+                    code_review = CodeReview.objects.filter(fobjectid__exact=instance.fobjectid,
+                                                            fslipno__exact=instance.fslipno)
+                    if code_review.count() == 0:
+                        raise serializers.ValidationError("请先填写代码Review")
+
+                    design_review = CodeReview.objects.filter(fobjectid__exact="Design Review",
+                                                              fslipno__exact=instance.fslipno)
+                    if design_review.count() == 0:
+                        raise serializers.ValidationError("请先填写设计Review")
 
                 instance.fstatus = new_status
                 instance.ftestdte = datetime.datetime.now().strftime('%Y-%m-%d')

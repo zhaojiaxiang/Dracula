@@ -40,7 +40,7 @@ def api_exception_handler(exc, context):
             'message': response.reason_phrase
         }
         if hasattr(exc, 'detail'):
-            if response.status_code != "400":
+            if response.status_code != status.HTTP_400_BAD_REQUEST:
                 data['message'] = exc.detail
             else:
                 data['message'] = exc.detail[0]

@@ -7,6 +7,7 @@ from rest_framework import viewsets, status, mixins, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from liaisons.models import Liaisons
 from qa.filters import QaHeadFilter, QaDetailFilter
 from qa.models import QaHead, QaDetail
 from qa.serializers import QaHeadSerializer, QaDetailSerializer, QaDetailUpdateResultSerializer, \
@@ -140,4 +141,15 @@ class FileUpload(APIView):
         ret_path = f'<p><a href="{ret_url}">{orig_file}</a></p>'
 
         data = {"path": ret_path}
+
+        if 'liaison' in request.data:
+            file_path = os.path.join("upload/file", file_name[0], file_name[1], file_name)
+            liaison_id = request.data['liaison']
+            liaison = Liaisons.objects.get(pk=liaison_id)
+            liaison.freleaserpt = file_path
+            liaison.save()
+
+            ret_url = os.path.join(request.stream._current_scheme_host, "media", file_path)
+            data['liaison'] = ret_url
+
         return Response(data=data, status=status.HTTP_200_OK)
