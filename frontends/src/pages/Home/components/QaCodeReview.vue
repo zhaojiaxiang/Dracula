@@ -1,10 +1,10 @@
 <template>
   <div>
-    <el-dialog title="填写设计Review" :visible.sync="dialogFormVisible">
+    <el-dialog title="填写代码Review" :visible.sync="dialogFormVisible">
       <el-form ref="form">
         <el-form-item>
           <Myeditor
-            @handleContentText="updateQaDesignReview"
+            @handleContentText="updateQaCodeReview"
             :editorData="contentText"
           ></Myeditor>
         </el-form-item>
@@ -18,9 +18,9 @@
 
 <script>
 import {
-  getDesignReview,
-  newDesignReview,
-  updateDesignReview,
+  getCodeReview,
+  newCodeReview,
+  updateCodeReview,
 } from "./../../../services/qaService";
 import Myeditor from "../../Commond/Myeditor";
 export default {
@@ -32,16 +32,19 @@ export default {
       dialogFormVisible: false,
       contentText: "",
       slipno: "",
+      objectid: "",
+      query_objectid: "",
       id: 0,
     };
   },
   methods: {
-    async handleDialog(slipno) {
-      var objectid = "Design+Review"
+    async handleDialog(slipno, objectid) {
       this.slipno = slipno;
+      this.objectid = objectid;
+      this.query_objectid = objectid.replace(/ /g, "+");
       this.dialogFormVisible = !this.dialogFormVisible;
-      var resp = await getDesignReview(slipno, objectid).catch(() => {
-        this.$message.error("设计Review数据获取异常");
+      var resp = await getCodeReview(slipno, this.query_objectid).catch(() => {
+        this.$message.error("代码Review数据获取异常");
         return;
       });
       if (resp.data.length !== 0) {
@@ -49,38 +52,37 @@ export default {
         this.id = resp.data[0].id;
       }
     },
-    async updateQaDesignReview(val) {
-      var objectid = "Design+Review"
+    async updateQaCodeReview(val) {
       var form = {
         fslipno: this.slipno,
-        fobjectid: "Design Review",
+        fobjectid: this.objectid,
         fcontent_text: val,
       };
 
-      var resp = await getDesignReview(this.slipno, objectid).catch(
+      var resp = await getCodeReview(this.slipno, this.query_objectid).catch(
         () => {
-          this.$message.error("设计Review数据获取异常");
+          this.$message.error("代码Review数据获取异常");
           return;
         }
       );
 
       var resp_up;
       if (resp.data.length !== 0) {
-        resp_up = await updateDesignReview(resp.data[0].id, form).catch(() => {
-          this.$message.error("设计Review数据更新异常");
+        resp_up = await updateCodeReview(resp.data[0].id, form).catch(() => {
+          this.$message.error("代码Review数据更新异常");
           return;
         });
       } else {
-        resp_up = await newDesignReview(form).catch(() => {
-          this.$message.error("设计Review数据新建异常");
+        resp_up = await newCodeReview(form).catch(() => {
+          this.$message.error("代码Review数据新建异常");
           return;
         });
       }
-      if(Object.prototype.hasOwnProperty.call(resp_up.data, 'message')){
+      if (Object.prototype.hasOwnProperty.call(resp_up.data, "message")) {
         this.$message.error(resp_up.data.message);
-      }else{
+      } else {
         this.$message.success("操作成功");
-        this.dialogFormVisible = false
+        this.dialogFormVisible = false;
       }
     },
   },
@@ -88,3 +90,4 @@ export default {
 </script>
 
 <style></style>
+ 

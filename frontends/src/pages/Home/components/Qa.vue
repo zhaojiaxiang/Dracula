@@ -1,6 +1,9 @@
 <template>
   <div>
-    <el-breadcrumb separator-class="el-icon-arrow-right" style="font-size:16px; margin-top: 5px;">
+    <el-breadcrumb
+      separator-class="el-icon-arrow-right"
+      style="font-size:16px; margin-top: 5px;"
+    >
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>QA</el-breadcrumb-item>
     </el-breadcrumb>
@@ -47,10 +50,13 @@
               </el-col>
               <el-col :span="8">
                 <el-form-item>
-                  <el-button type="primary" @click="onSubmit('form')" :disabled="liaison.fstatus !== '2' "
+                  <el-button
+                    type="primary"
+                    @click="onSubmit('form')"
+                    :disabled="liaison.fstatus !== '2'"
                     >立即创建</el-button
                   >
-                  <el-button type="text" @click="resetForm('form')"
+                  <el-button type="text" @click="addDesignReview(form.fslipno)"
                     >设计Review</el-button
                   >
                 </el-form-item>
@@ -94,20 +100,21 @@
                   >概要</el-link
                 >
                 <el-link
-                  @click="handleClick(scope.row)"
                   style="margin-left:10px"
                   type="text"
                   size="medium"
                   :underline="false"
+                  @click="addCodeReview(scope.row.fslipno, scope.row.fobjectid)"
                   >代码Review</el-link
                 >
-                <el-link 
+                <el-link
                   style="margin-left:10px"
-                  type="text" 
+                  type="text"
                   size="medium"
                   :underline="false"
                   @click="openQaTestList(scope.row.id, scope.row.fobjectid)"
-                  >测试</el-link>
+                  >测试</el-link
+                >
                 <el-link
                   style="margin-left:10px"
                   type="primary"
@@ -122,19 +129,28 @@
       ></el-col>
       <el-col :xs="2" :sm="3" :md="3" :lg="4" :xl="4"><div></div></el-col>
     </el-row>
-    <QaObjectSummary
-    ref="QaObjectSummary"
-    ></QaObjectSummary>
+    <QaObjectSummary ref="QaObjectSummary"></QaObjectSummary>
+
+    <QaDesignReview ref="QaDesignReview"></QaDesignReview>
+    <QaCodeReview ref="QaCodeReview"></QaCodeReview>
   </div>
 </template>
 
 <script>
 import { getSingleLiaisonBySlipNo } from "./../../../services/liaisonService";
-import { getQaHeadBySlipNo, newQaHead, deleteQaHead } from "./../../../services/qaService";
-import QaObjectSummary  from "./QaObjectSummary";
+import {
+  getQaHeadBySlipNo,
+  newQaHead,
+  deleteQaHead,
+} from "./../../../services/qaService";
+import QaObjectSummary from "./QaObjectSummary";
+import QaDesignReview from "./QaDesignReview";
+import QaCodeReview from "./QaCodeReview";
 export default {
-  components:{
+  components: {
     QaObjectSummary,
+    QaDesignReview,
+    QaCodeReview,
   },
   data() {
     return {
@@ -146,7 +162,7 @@ export default {
         fprojectcd: "",
         fslipno: "",
         fobjectid: "",
-        fstatus:"1"
+        fstatus: "1",
       },
       rules: {
         fobjectid: [
@@ -159,11 +175,11 @@ export default {
     onSubmit(formName) {
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
-          var resp = await newQaHead(this.form)
-          if (resp.status === 201){
-            this.refreshQaHead(this.liaison.fslipno)
+          var resp = await newQaHead(this.form);
+          if (resp.status === 201) {
+            this.refreshQaHead(this.liaison.fslipno);
             this.$message({
-              message: "测试对象"+this.form.fobjectid + "创建成功！",
+              message: "测试对象" + this.form.fobjectid + "创建成功！",
               type: "success",
             });
             this.$refs[formName].resetFields();
@@ -172,15 +188,26 @@ export default {
       });
     },
 
-    addObjectSummary(id){
-      this.$refs.QaObjectSummary.handleDialog(id)
+    addObjectSummary(id) {
+      this.$refs.QaObjectSummary.handleDialog(id);
     },
 
-    openQaTestList(id, obj){
-      this.$router.push({ name: "QaTestList", query: { qahf_id: id, object:obj } });
+    addDesignReview(slipno) {
+      this.$refs.QaDesignReview.handleDialog(slipno);
     },
 
-    deleteQaHead(id, fobjectid){
+    addCodeReview(slipno, objectid) {
+      this.$refs.QaCodeReview.handleDialog(slipno, objectid);
+    },
+
+    openQaTestList(id, obj) {
+      this.$router.push({
+        name: "QaTestList",
+        query: { qahf_id: id, object: obj },
+      });
+    },
+
+    deleteQaHead(id, fobjectid) {
       this.$confirm("此操作将永久删除" + fobjectid + ", 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -190,12 +217,11 @@ export default {
           if (action === "confirm") {
             var resp = await deleteQaHead(id);
             if (resp.status == 204) {
-              this.refreshQaHead(this.liaison.fslipno)
+              this.refreshQaHead(this.liaison.fslipno);
               this.$message({
                 message: fobjectid + "已经删除！",
                 type: "success",
               });
-              
             } else {
               this.$message.error(fobjectid + "删除失败");
             }
@@ -211,7 +237,7 @@ export default {
 
     async refreshQaHead(slipno) {
       var qa_resp = await getQaHeadBySlipNo(slipno);
-      this.qaheads = []
+      this.qaheads = [];
       if (qa_resp.status === 200) {
         var qaH = qa_resp.data;
         for (var i in qaH) {
@@ -236,7 +262,7 @@ export default {
   },
   mounted: async function() {
     var slipno = this.$route.query.slipno;
-    var resp = await getSingleLiaisonBySlipNo(slipno).catch(()=>{
+    var resp = await getSingleLiaisonBySlipNo(slipno).catch(() => {
       this.$message.error("联络票号:" + slipno + "数据获取异常");
     });
 
@@ -245,7 +271,7 @@ export default {
       this.form.fslipno = this.liaison.fslipno;
       this.form.fsystemcd = this.liaison.fsystemcd;
       this.form.fprojectcd = this.liaison.fprojectcd;
-    } 
+    }
     this.refreshQaHead(slipno);
   },
 };

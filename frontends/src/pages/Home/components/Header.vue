@@ -20,13 +20,13 @@
           </b-nav-item>
           <b-nav-item-dropdown id="dropdown-1">
               <template #button-content>
-              <b-icon icon="person-fill"></b-icon>赵加响
+              <b-icon icon="person-fill"></b-icon>{{userInfo.name}}
             </template>
             <b-dropdown-item @click="settingClick"><b-icon icon="gear-fill" aria-hidden="true"></b-icon>  设置</b-dropdown-item>
             <b-dropdown-item><b-icon icon="power" aria-hidden="true"></b-icon>  退出</b-dropdown-item>
           </b-nav-item-dropdown>
 
-        <b-avatar variant="info" src="http://127.0.0.1:8000/media/avatar/aaa.jpg" class="mr-sm-2"></b-avatar>
+        <b-avatar variant="info" :src="userInfo.avatar" class="mr-sm-2"></b-avatar>
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
@@ -38,9 +38,8 @@ import { getLiaisons } from '@/services/userService'
 export default {
   data() {
     return {
-      url:
-        "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg",
-    };
+      userInfo:{}
+    }
   },
   methods: {
     openSlipNoNew(){
@@ -54,6 +53,9 @@ export default {
       console.log(resp)
     }
   },
+  mounted:function(){
+    this.userInfo = JSON.parse(localStorage.getItem("UserInfo"));
+  }
 };
 </script>
 

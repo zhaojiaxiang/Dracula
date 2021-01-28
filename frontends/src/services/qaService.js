@@ -98,3 +98,33 @@ export async function fileUpdate(form){
   var resp = await axios.post("/api/file_upload/", form)
   return resp
 }
+
+export async function getDesignReview(slipno, objectid){
+  var resp = await axios.get("/api/qa/design_review/?fslipno="+ slipno +"&fobjectid=" + objectid)
+  return resp
+}
+
+export async function newDesignReview(form){
+  var resp = await axios.post("/api/qa/design_review/", form)
+  return resp
+}
+
+export async function updateDesignReview(id, form){
+  var resp = await axios.put("/api/qa/design_review/" + id + "/", form)
+  return resp
+}
+
+export async function getCodeReview(slipno, objectid){
+  var resp = await axios.get("/api/qa/code_review/?fslipno="+ slipno +"&fobjectid=" + objectid)
+  return resp
+}
+
+export async function newCodeReview(form){
+  var resp = await axios.post("/api/qa/code_review/", form)
+  return resp
+}
+
+export async function updateCodeReview(id, form){
+  var resp = await axios.put("/api/qa/code_review/" + id + "/", form)
+  return resp
+}

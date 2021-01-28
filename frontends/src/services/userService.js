@@ -8,6 +8,8 @@ export async function login(loginInfo) {
   if (token) {
     // 把令牌保存下来
     localStorage.setItem("token", token);
+    var user = resp.data.user;
+    localStorage.setItem("UserInfo", JSON.stringify(user));
   }
   return resp;
 }

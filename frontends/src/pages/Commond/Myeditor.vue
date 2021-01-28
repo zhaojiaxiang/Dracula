@@ -138,13 +138,8 @@ export default {
             "removeFormat",
             "|",
             "imageInsert",
-            "imageStyle:alignLeft",
-            "imageStyle:alignCenter",
-            "imageStyle:alignRight",
-            "imageStyle:full",
-            "imageStyle:side",
-            "imageResize",
-            "imageTextAlternative",
+            // "imageResize",
+            // "imageTextAlternative",
             "|",
             "highlight",
             "code",
@@ -155,6 +150,42 @@ export default {
 
         table: {
           contentToolbar: ["tableColumn", "tableRow", "mergeTableCells"],
+        },
+
+        image: {
+            // Configure the available styles.
+            styles: [
+                'alignLeft', 'alignCenter', 'alignRight'
+            ],
+
+            // Configure the available image resize options.
+            resizeOptions: [
+                {
+                    name: 'imageResize:original',
+                    label: 'Original',
+                    value: null
+                },
+                {
+                    name: 'imageResize:50',
+                    label: '50%',
+                    value: '50'
+                },
+                {
+                    name: 'imageResize:75',
+                    label: '75%',
+                    value: '75'
+                }
+            ],
+
+            // You need to configure the image toolbar, too, so it shows the new style
+            // buttons as well as the resize buttons.
+            toolbar: [
+                'imageStyle:alignLeft', 'imageStyle:alignCenter', 'imageStyle:alignRight',
+                '|',
+                'imageResize',
+                '|',
+                'imageTextAlternative'
+            ]
         },
 
         heading: {
@@ -253,5 +284,10 @@ function RemoveFormatLinks(editor) {
 /*编辑框最低高度*/
 .ck-editor__editable {
   min-height: 200px;
+}
+.ck-content .image-style-side {
+    max-width: 50%;
+    float: right;
+    margin-left: var(--ck-image-style-spacing);
 }
 </style>

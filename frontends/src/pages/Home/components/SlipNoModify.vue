@@ -87,7 +87,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item prop="fleader" size="medium" class="width-sytle">
+            <el-form-item prop="fleader" size="medium" class="width-sytle" required>
               <el-select
                 v-model="form.fleader"
                 multiple
@@ -237,24 +237,32 @@
           required
           v-show="true ? form.fstatus != '1' : form.fstatus != '1'"
         >
-          <el-col :span="16">
+          <el-col :span="2">
             <el-form-item size="medium">
               <el-upload
                 class="upload-demo"
-                action="https://jsonplaceholder.typicode.com/posts/"
-                :disabled="true ? form.fstatus != '4' : form.fstatus == '4'"
-                :on-preview="handlePreview"
-                :on-remove="handleRemove"
-                :before-remove="beforeRemove"
+                action="/api/file_upload/"
+                :before-upload="beforeFileUpload"
                 :limit="1"
-                :on-exceed="handleExceed"
-                :file-list="fileList"
               >
-                <el-button size="small" type="primary">点击上传</el-button>
-                <div slot="tip" class="el-upload__tip">
-                  只能上传jpg/png文件，且不超过500kb
-                </div>
+                <el-link
+                  :disabled="isCanUpload()"
+                  :underline="false"
+                  icon="el-icon-upload2"
+                  >上传</el-link
+                >
               </el-upload>
+            </el-form-item>
+          </el-col>
+          <el-col :span="14">
+            <el-form-item size="medium">
+              <el-link
+                :underline="false"
+                :disabled="isCanDownload()"
+                icon="el-icon-download"
+                :href="form.freleaserpt"
+                >下载</el-link
+              >
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -287,6 +295,7 @@ import {
   getGroupUsers,
   getAllUsers,
 } from "../../../services/commonService";
+import { fileUpdate } from "../../../services/qaService";
 export default {
   data() {
     return {
@@ -371,17 +380,19 @@ export default {
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
           var fleader_arr = this.form.fleader;
-          if (fleader_arr.length === 0) {
-            this.form.fleader = "";
-          } else {
+
+
+          if (fleader_arr) {
             this.form.fleader = fleader_arr.join(",");
+          } else {
+            this.form.fleader = "";
           }
 
           var fhelper_arr = this.form.fhelper;
-          if (fhelper_arr.length === 0) {
-            this.form.fhelper = "";
-          } else {
+          if (fhelper_arr) {
             this.form.fhelper = fhelper_arr.join(",");
+          } else {
+            this.form.fhelper = "";
           }
 
           var resp = await modifyLiaison(this.form.id, this.form);
@@ -401,6 +412,48 @@ export default {
     resetForm(formName) {
       this.$refs[formName].resetFields();
     },
+
+    isCanDownload() {
+      if (this.form.freleaserpt) {
+        return false;
+      }
+      return true;
+    },
+
+    isCanUpload() {
+      if (this.form.fstatus === "3") {
+        return false;
+      }
+      return true;
+    },
+
+    async beforeFileUpload(file) {
+      const isLt2M = file.size / 1024 / 1024 < 2;
+
+      let fileForm = new FormData();
+
+      if (!isLt2M) {
+        this.$message.error("上传文件大小不能超过 2MB!");
+      }
+
+      fileForm.append("file", file);
+      fileForm.append("liaison", this.form.id);
+
+      var resp = await fileUpdate(fileForm).catch(() => {
+        this.$message.error("文件上传到服务器异常");
+      });
+
+      if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
+        this.$message.error(resp.data.message);
+      } else {
+        this.$message.success("文件上传成功");
+        var resp_l = await getSingleLiaison(this.form.id).catch(() => {
+          this.$message.error("联络票数据获取异常");
+          return;
+        });
+        this.form = resp_l.data;
+      }
+    },
   },
   mounted: function() {
     var this_ = this;
@@ -408,23 +461,23 @@ export default {
       this_.drawer = true;
       var p_resp = await getProjects().catch(() => {
         this.$message.error("项目主表数据获取异常");
-        return
+        return;
       });
-      var s_resp = await getSystems().catch(()=>{
+      var s_resp = await getSystems().catch(() => {
         this.$message.error("系统主表数据获取异常");
-        return
+        return;
       });
-      var g_resp = await getGroupUsers().catch(()=>{
+      var g_resp = await getGroupUsers().catch(() => {
         this.$message.error("分组用户主表数据获取异常");
-        return
+        return;
       });
-      var u_resp = await getAllUsers().catch(()=>{
+      var u_resp = await getAllUsers().catch(() => {
         this.$message.error("用户主表数据获取异常");
-        return
+        return;
       });
-      var resp = await getSingleLiaison(id).catch(()=>{
+      var resp = await getSingleLiaison(id).catch(() => {
         this.$message.error("联络票数据获取异常");
-        return
+        return;
       });
 
       var liaison = resp.data;
