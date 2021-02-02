@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from liaisons.models import Liaisons
 from qa.models import QaHead
-from utils.db_connection import man_power_connection_execute
+from utils.db_connection import man_power_connection_execute, db_connection_execute, query_single_with_no_parameter
 
 
 class LiaisonsSerializer(serializers.ModelSerializer):
@@ -100,7 +100,6 @@ class LiaisonsSerializer(serializers.ModelSerializer):
 
 
 class LiaisonUpdateStatusSerializer(serializers.ModelSerializer):
-
     fslipno = serializers.CharField(read_only=True)
     fodrno = serializers.CharField(read_only=True)
 
@@ -153,3 +152,94 @@ class LiaisonUpdateStatusSerializer(serializers.ModelSerializer):
         instance.fupdteprg = "Liaison No Modify"
         instance.save()
         return super().update(instance, validated_data)
+
+
+class QaProjectSerializer(serializers.ModelSerializer):
+    fodrno = serializers.CharField()
+    note = serializers.SerializerMethodField()
+    partner = serializers.SerializerMethodField()
+    slipno_all = serializers.SerializerMethodField()
+    slipno_working = serializers.SerializerMethodField()
+    slipno_close = serializers.SerializerMethodField()
+    slipno_release = serializers.SerializerMethodField()
+    objectcount = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Liaisons
+        fields = (
+            'fodrno', 'note', 'partner', 'slipno_all', 'slipno_working', 'slipno_close', 'slipno_release',
+            'objectcount', 'status')
+
+    def get_note(self, obj):
+        sql_str = f"select fnote from odrrlsf where fodrno = '{obj['fodrno']}' "
+        note_list = man_power_connection_execute(sql_str)
+        return note_list[0][0] if note_list else "******"
+
+    def get_partner(self, obj):
+        order_partner_sql = f"select fassignedto, fleader, fhelper from liaisonf where fodrno = '{obj['fodrno']}'"
+        order_partner_result = db_connection_execute(order_partner_sql)
+
+        user_tuple = ()
+        for order_partner_tuple in order_partner_result:
+            user_tuple = user_tuple + order_partner_tuple
+
+        user_list = []
+        user_tuple = set(user_tuple)
+        for username in user_tuple:
+            if len(username) > 0:
+                if "," in username:
+                    split_list = username.split(",")
+                    user_list = user_list + split_list
+                else:
+                    user_list.append(username)
+        user_list = list(set(user_list))
+        return user_list
+
+    def get_slipno_all(self, obj):
+        liaison = Liaisons.objects.filter(fodrno__exact=obj['fodrno'])
+        if liaison:
+            return liaison.count()
+        return 0
+
+    def get_slipno_working(self, obj):
+        liaison = Liaisons.objects.filter(fodrno__exact=obj['fodrno'], fstatus__exact=2)
+        if liaison:
+            return liaison.count()
+        return 0
+
+    def get_slipno_close(self, obj):
+        liaison = Liaisons.objects.filter(fodrno__exact=obj['fodrno'], fstatus__exact=3)
+        if liaison:
+            return liaison.count()
+        return 0
+
+    def get_slipno_release(self, obj):
+        liaison = Liaisons.objects.filter(fodrno__exact=obj['fodrno'], fstatus__exact=4)
+        if liaison:
+            return liaison.count()
+        return 0
+
+    def get_objectcount(self, obj):
+        test_object_sql = f"select count(*) from qahf where fslipno in (select fslipno from liaisonf " \
+            f"where fodrno = '{obj['fodrno']}')"
+        test_object_list = query_single_with_no_parameter(test_object_sql, "list")
+        test_object = test_object_list[0]
+        return test_object
+
+    def get_status(self, obj):
+        order_slipno_working = self.get_slipno_working(obj)
+        order_slipno_close = self.get_slipno_close(obj)
+        order_slipno_all = self.get_slipno_all(obj)
+        order_slipno_release = self.get_slipno_release(obj)
+
+        order_status = 1
+        if order_slipno_working > 0 or \
+                (order_slipno_working == 0 and order_slipno_close > 0 and order_slipno_close != order_slipno_all):
+            order_status = 2
+        elif order_slipno_working == 0 and order_slipno_close == order_slipno_all:
+            order_status = 3
+        elif order_slipno_release == order_slipno_all:
+            order_status = 4
+
+        return order_status

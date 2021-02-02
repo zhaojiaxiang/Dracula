@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status, filters, mixins
 from rest_framework.pagination import PageNumberPagination
@@ -7,7 +8,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from liaisons.filters import LiaisonsFilter
 from liaisons.models import Liaisons
-from liaisons.serializers import LiaisonsSerializer, LiaisonUpdateStatusSerializer
+from liaisons.serializers import LiaisonsSerializer, LiaisonUpdateStatusSerializer, QaProjectSerializer
 from qa.models import QaHead, QaDetail
 
 
@@ -73,3 +74,37 @@ class LiaisonUpdateStatusViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixi
                                  mixins.UpdateModelMixin, GenericViewSet):
     queryset = Liaisons.objects.all()
     serializer_class = LiaisonUpdateStatusSerializer
+
+
+class QaProjectForGroupViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
+    """
+    本组项目明细ViewSet
+    """
+    def get_queryset(self):
+        user = self.request.user
+        return Liaisons.objects.values("fodrno").filter(fgroups__ammic_group__exact=user.ammic_group.id).distinct()
+
+    serializer_class = QaProjectSerializer
+
+
+class QaProjectForMineViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
+    """
+    与本人相关的项目明细ViewSet
+    """
+    def get_queryset(self):
+        user = self.request.user
+        return Liaisons.objects.values("fodrno").filter(Q(fassignedto__exact=user.name) |
+                                                        Q(fleader__contains=user.name) |
+                                                        Q(fhelper__contains=user.name)).distinct()
+
+    serializer_class = QaProjectSerializer
+
+
+class QaProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
+    """
+    所有项目明细ViewSet
+    """
+    def get_queryset(self):
+        return Liaisons.objects.values("fodrno").distinct()
+
+    serializer_class = QaProjectSerializer

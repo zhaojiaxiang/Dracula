@@ -21,9 +21,10 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_jwt.views import obtain_jwt_token
 
 from accounts.views import UserViewSet, SystemSettingViewSet, MyGroupUserViewSet, UserDevelopmentDetail, MyTaskBar, \
-    MyTesting, MyRelease, MyConfirm, MyApproval
+    MyMcl, MyRelease, MyConfirm, MyApproval, MyPcl
 from backends import settings
-from liaisons.views import LiaisonsViewSet, LiaisonUpdateStatusViewSet
+from liaisons.views import LiaisonsViewSet, LiaisonUpdateStatusViewSet, QaProjectViewSet, QaProjectForMineViewSet, \
+    QaProjectForGroupViewSet
 from projects.views import ProjectsViewSet
 from qa.views import MCLQaHeadViewSet, MCLQaDetailViewSet, MCLQaDetailUpdateResultViewSet, \
     MCLQaDetailUpdateContentTextViewSet, QaHeadUpdateObjectSummaryViewSet, QaHeadModifyDetailViewSet, \
@@ -52,6 +53,10 @@ router.register('qa/mcl_detail_update_content_text', MCLQaDetailUpdateContentTex
 router.register('qa/design_review', DesignReviewViewSet, basename='design_review')
 router.register('qa/code_review', CodeReviewViewSet, basename='code_review')
 router.register('accounts/system_setting', SystemSettingViewSet, basename='system_setting')
+# 开发项目，和上面的项目代码不一样
+router.register('qa_project', QaProjectViewSet, basename='qa_project')
+router.register('qa_project_group', QaProjectForGroupViewSet, basename='qa_project_group')
+router.register('qa_project_mine', QaProjectForMineViewSet, basename='qa_project_mine')
 
 
 urlpatterns = [
@@ -61,12 +66,13 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/login/', obtain_jwt_token),
     #
-    path('api/mine-order-info/', UserDevelopmentDetail.as_view()),
-    path('api/mine-task-bar/', MyTaskBar.as_view()),
-    path('api/mine-task-testing/', MyTesting.as_view()),
-    path('api/mine-task-approval/', MyApproval.as_view()),
-    path('api/mine-task-conform/', MyConfirm.as_view()),
-    path('api/mine-task-release/', MyRelease.as_view()),
+    path('api/mine_order_info/', UserDevelopmentDetail.as_view()),
+    path('api/mine_task_bar/', MyTaskBar.as_view()),
+    path('api/mine_task_mcl/', MyMcl.as_view()),
+    path('api/mine_task_pcl/', MyPcl.as_view()),
+    path('api/mine_task_approval/', MyApproval.as_view()),
+    path('api/mine_task_conform/', MyConfirm.as_view()),
+    path('api/mine_task_release/', MyRelease.as_view()),
     path('api/image_upload/', ImageUpload.as_view()),
     path('api/file_upload/', FileUpload.as_view()),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

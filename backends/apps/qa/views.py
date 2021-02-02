@@ -10,19 +10,19 @@ from rest_framework.views import APIView
 from liaisons.models import Liaisons
 from qa.filters import QaHeadFilter, QaDetailFilter
 from qa.models import QaHead, QaDetail
-from qa.serializers import QaHeadSerializer, QaDetailSerializer, QaDetailUpdateResultSerializer, \
+from qa.serializers import MCLQaHeadSerializer, QaDetailSerializer, QaDetailUpdateResultSerializer, \
     QaDetailUpdateContentTextSerializer, QaHeadUpdateObjectSummarySerializer, QaHeadModifyDetailSerializer, \
     QaHeadTargetAndActualSerializer
 from utils.utils import create_folder
 
 
 class MCLQaHeadViewSet(viewsets.ModelViewSet):
-    queryset = QaHead.objects.filter(ftesttyp__exact='MCL')
-    serializer_class = QaHeadSerializer
+    queryset = QaHead.objects.order_by('fstatus', '-fcreatedte')
+    serializer_class = MCLQaHeadSerializer
 
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filter_class = QaHeadFilter
-    ordering_fields = ['fstatus', '-fcreatedte']
+    # ordering_fields = ['fstatus', '-fcreatedte']
 
     @transaction.atomic()
     def destroy(self, request, *args, **kwargs):
@@ -69,12 +69,12 @@ class QaHeadTargetAndActualViewSet(mixins.ListModelMixin, mixins.RetrieveModelMi
 
 
 class MCLQaDetailViewSet(viewsets.ModelViewSet):
-    queryset = QaDetail.objects.all()
+    queryset = QaDetail.objects.all().order_by('fsortrule', 'fclass1', 'fregression')
     serializer_class = QaDetailSerializer
 
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filter_class = QaDetailFilter
-    ordering_fields = ['fsortrule']
+    # ordering_fields = ['fsortrule']
 
 
 class MCLQaDetailUpdateResultViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,

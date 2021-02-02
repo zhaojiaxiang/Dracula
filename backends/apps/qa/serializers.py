@@ -1,6 +1,7 @@
 import datetime
 
 from django.db import transaction
+from django.db.models import Max
 from math import ceil
 from rest_framework import serializers
 
@@ -8,17 +9,18 @@ from qa.models import QaHead, QaDetail
 from reviews.models import CodeReview
 
 
-class QaHeadSerializer(serializers.ModelSerializer):
+class MCLQaHeadSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     fcreatedte = serializers.DateTimeField(read_only=True)
     fcreateusr = serializers.CharField(read_only=True)
-    ftesttyp = serializers.CharField(read_only=True)
+    fslipno2 = serializers.IntegerField(read_only=True)
+    # ftesttyp = serializers.CharField(read_only=True)
 
     qadfcount = serializers.SerializerMethodField()
 
     class Meta:
         model = QaHead
-        fields = ('id', 'fsystemcd', 'fprojectcd', 'fslipno', 'fobjectid', 'fobjmodification',
+        fields = ('id', 'fsystemcd', 'fprojectcd', 'fslipno', 'fslipno2', 'fobjectid', 'fobjmodification',
                   'fcreatedte', 'fcreateusr', 'fstatus', 'ftesttyp', 'qadfcount', 'freviewcode', 'flevel')
 
     def get_qadfcount(self, obj):
@@ -28,20 +30,26 @@ class QaHeadSerializer(serializers.ModelSerializer):
     @transaction.atomic()
     def create(self, validated_data):
 
-        is_exist = QaHead.objects.filter(fslipno__exact=validated_data['fslipno'],
-                                         fobjectid__exact=validated_data['fobjectid'])
+        test_type = validated_data['ftesttyp']
+        slip_no2 = 1
+        if test_type == 'MCL':
+            is_exist = QaHead.objects.filter(fslipno__exact=validated_data['fslipno'],
+                                             fobjectid__exact=validated_data['fobjectid'])
 
-        if is_exist.count() > 0:
-            raise serializers.ValidationError("该测试对象已经在该联络下存在")
+            if is_exist.count() > 0:
+                raise serializers.ValidationError("该测试对象已经在该联络下存在")
+        else:
+            slip_no2 = QaHead.objects.aggregate(Max('fslipno')) + 1
 
         user = self.context['request'].user
         qahead = QaHead.objects.create(**validated_data)
         qahead.ftesttyp = 'MCL'
         qahead.fobjectnm = validated_data['fobjectid']
         qahead.fcreateusr = user.name
+        qahead.fslipno2 = slip_no2
         qahead.fstatus = '1'
         qahead.fentusr = user.name
-        qahead.fupdteprg = 'MCL QA New'
+        qahead.fupdteprg = 'QA New'
         qahead.save()
         return qahead
 
@@ -65,7 +73,7 @@ class QaHeadSerializer(serializers.ModelSerializer):
                 instance.flastapprovallot = lot
                 instance.fauditor = user.name
                 instance.fupdteusr = user.name
-                instance.fupdteprg = "MCL QA Approval"
+                instance.fupdteprg = "QA Approval"
                 instance.save()
 
                 for qa in qa_details:
@@ -73,7 +81,7 @@ class QaHeadSerializer(serializers.ModelSerializer):
                         qa.fapproval = "Y"
                         qa.fapprovallot = lot
                         qa.fupdteusr = user.name
-                        qa.fupdteprg = "MCL QA Approval"
+                        qa.fupdteprg = "QA Approval"
                         qa.save()
 
             if new_status == '3':
@@ -81,6 +89,9 @@ class QaHeadSerializer(serializers.ModelSerializer):
                 if instance.ftesttyp == "MCL":
                     if instance.fobjmodification is None:
                         raise serializers.ValidationError("请先填写测试对象修改概要")
+
+                    if instance.fcomplexity is None:
+                        raise serializers.ValidationError("请先填写测试明细")
 
                     if instance.fttlcodelines is None:
                         raise serializers.ValidationError("请先填写修改明细")
@@ -99,7 +110,7 @@ class QaHeadSerializer(serializers.ModelSerializer):
                 instance.ftestdte = datetime.datetime.now().strftime('%Y-%m-%d')
                 instance.ftestusr = user.name
                 instance.fupdteusr = user.name
-                instance.fupdteprg = "MCL QA Submit"
+                instance.fupdteprg = "QA Submit"
                 instance.save()
 
             if new_status == '4':
@@ -110,7 +121,7 @@ class QaHeadSerializer(serializers.ModelSerializer):
                 instance.freviewcode = validated_data['freviewcode']
                 instance.fconfirmusr = user.name
                 instance.fupdteusr = user.name
-                instance.fupdteprg = "MCL QA Confirm"
+                instance.fupdteprg = "QA Confirm"
                 instance.save()
         elif diff_status < 0:
             if new_status == '3':
@@ -121,7 +132,7 @@ class QaHeadSerializer(serializers.ModelSerializer):
                 instance.flevel = ''
                 instance.freviewcode = ''
                 instance.fupdteusr = user.name
-                instance.fupdteprg = "MCL QA Confirm Cancel"
+                instance.fupdteprg = "QA Confirm Cancel"
                 instance.save()
 
             if new_status == '2':
@@ -130,7 +141,7 @@ class QaHeadSerializer(serializers.ModelSerializer):
                 instance.ftestdte = None
                 instance.ftestusr = ""
                 instance.fupdteusr = user.name
-                instance.fupdteprg = "MCL QA Submit Cancel"
+                instance.fupdteprg = "QA Submit Cancel"
                 instance.save()
 
             if new_status == '1':
@@ -141,14 +152,14 @@ class QaHeadSerializer(serializers.ModelSerializer):
                 instance.fauditor = ""
                 instance.flastapprovallot = lot
                 instance.fupdteusr = user.name
-                instance.fupdteprg = "MCL QA Approval Cancel"
+                instance.fupdteprg = "QA Approval Cancel"
                 instance.save()
 
                 for qa in qa_details:
                     qa.fapproval = "N"
                     qa.fupdteusr = user.name
                     qa.fapprovallot = qa.fapprovallot - 1
-                    qa.fupdteprg = "MCL QA Approval Cancel"
+                    qa.fupdteprg = "QA Approval Cancel"
                     qa.save()
         else:
             if new_status == '2':
@@ -159,7 +170,7 @@ class QaHeadSerializer(serializers.ModelSerializer):
                 instance.flastapprovallot = lot
                 instance.fauditor = user.name
                 instance.fupdteusr = user.name
-                instance.fupdteprg = "MCL QA Approval"
+                instance.fupdteprg = "QA Approval"
                 instance.save()
 
                 for qa in qa_details:
@@ -167,7 +178,7 @@ class QaHeadSerializer(serializers.ModelSerializer):
                         qa.fapproval = "Y"
                         qa.fapprovallot = lot
                         qa.fupdteusr = user.name
-                        qa.fupdteprg = "MCL QA Approval"
+                        qa.fupdteprg = "QA Approval"
                         qa.save()
 
         return instance
@@ -207,8 +218,9 @@ class QaHeadTargetAndActualSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QaHead
-        fields = ('id', 'fttlcodelines', 'fmodifiedlines', 'fcomplexity', 'fstatus', 'target_tests', 'target_regressions',
-                  'target_total', 'target_ng', 'actual_tests', 'actual_regressions', 'actual_total', 'actual_ng')
+        fields = (
+        'id', 'fttlcodelines', 'fmodifiedlines', 'fcomplexity', 'fstatus', 'target_tests', 'target_regressions',
+        'target_total', 'target_ng', 'actual_tests', 'actual_regressions', 'actual_total', 'actual_ng')
 
     def get_target_tests(self, obj):
         if obj.fmodifiedlines:
@@ -232,12 +244,12 @@ class QaHeadTargetAndActualSerializer(serializers.ModelSerializer):
 
     def get_actual_tests(self, obj):
         return QaDetail.objects.filter(fregression__exact='N',
-                                       fresult__in=('OK', 'NG', 'NGOK', ),
+                                       fresult__in=('OK', 'NG', 'NGOK',),
                                        qahf_id__exact=obj.id).count()
 
     def get_actual_regressions(self, obj):
         return QaDetail.objects.filter(fregression__exact='Y',
-                                       fresult__in=('OK', 'NG', 'NGOK', ),
+                                       fresult__in=('OK', 'NG', 'NGOK',),
                                        qahf_id__exact=obj.id).count()
 
     def get_actual_total(self, obj):

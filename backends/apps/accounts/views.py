@@ -6,6 +6,7 @@ from rest_framework import status
 
 from accounts.models import SystemSetting
 from accounts.serializers import UserSerializer, SystemSettingSerializer, MyGroupUserSerializer
+from liaisons.models import Liaisons
 from qa.models import QaHead
 from utils.db_connection import db_connection_execute, query_single_with_no_parameter
 
@@ -76,7 +77,7 @@ class UserDevelopmentDetail(APIView):
         all_not_release_order_sql = f"""
                                    select distinct fodrno from liaisonf 
                                    where (fassignedto = '{current_username}' or fhelper like '{current_username}' 
-                                   or fleader like '{current_username}') and ftype = '追加开发' and fstatus <> 5"""
+                                   or fleader like '{current_username}') and ftype = '追加开发' and fstatus <> 4 """
 
         all_not_release_orders = db_connection_execute(all_not_release_order_sql)
 
@@ -108,11 +109,11 @@ class UserDevelopmentDetail(APIView):
             order_slipno_all_list = query_single_with_no_parameter(order_slipno_all_sql, "list")
             order_slipno_all = order_slipno_all_list[0]
 
-            order_slipno_close_sql = f"select count(*) from liaisonf where fodrno = '{order_no}' and fstatus in ('3', '4', '5')"
+            order_slipno_close_sql = f"select count(*) from liaisonf where fodrno = '{order_no}' and fstatus = 3"
             order_slipno_close_list = query_single_with_no_parameter(order_slipno_close_sql, "list")
             order_slipno_close = order_slipno_close_list[0]
 
-            order_slipno_release_sql = f"select count(*) from liaisonf where fodrno = '{order_no}' and fstatus = 5 "
+            order_slipno_release_sql = f"select count(*) from liaisonf where fodrno = '{order_no}' and fstatus = 4 "
             order_slipno_release_list = query_single_with_no_parameter(order_slipno_release_sql, "list")
             order_slipno_release = order_slipno_release_list[0]
 
@@ -162,9 +163,16 @@ class UserDevelopmentDetail(APIView):
 
 class MyTaskBar(APIView):
 
-    def get(self, request, format=None):
+    def get(self, request):
         user = request.user
-        testing = QaHead.objects.filter(fcreateusr__exact=user.name, fstatus__exact='2').count()
+
+        mcl = QaHead.objects.filter(fcreateusr__exact=user.name,
+                                    fstatus__exact='2',
+                                    ftesttyp__exact='MCL').count()
+
+        pcl = QaHead.objects.filter(fslipno__in=Liaisons.objects.values('fodrno').filter(fleader__contains=user.name),
+                                    fstatus__in=(1, 2),
+                                    ftesttyp__exact='PCL').count()
 
         approval_sql = f"""
                        select count(*)
@@ -180,7 +188,6 @@ class MyTaskBar(APIView):
         approval_list = query_single_with_no_parameter(approval_sql, 'list')
         approval = approval_list[0]
 
-
         confirm_sql = f"""
                       select count(*)
                           from qahf
@@ -190,35 +197,51 @@ class MyTaskBar(APIView):
         confirm_list = query_single_with_no_parameter(confirm_sql, 'list')
         confirm = confirm_list[0]
 
-        dev_count_sql = """
+        dev_count_sql = f"""
                         select count(*)
                             from (
-                                 select a.*
-                                 from (select distinct liaisonf.*
-                                       from liaisonf,
-                                            qahf
-                                       where qahf.fslipno = liaisonf.fslipno
-                                         and liaisonf.fstatus = '3'
-                                         and qahf.fstatus = '4'
-                                         and liaisonf.ftype = '追加开发') a,
-                                      qahf
-                                 where a.fodrno = qahf.fslipno
-                                   and qahf.fstatus = '4') b
+                                 select qahf_c.fslipno, count(*) count
+                                 from (
+                                      select distinct fslipno, fstatus
+                                      from qahf
+                                      where fslipno in (
+                                          select fslipno
+                                          from liaisonf
+                                          where fodrno in (
+                                              select fslipno
+                                              from qahf
+                                              where fslipno in (
+                                                  select qahf_b.fslipno
+                                                  from (select fslipno, count(*) count
+                                                        from (select fslipno, fstatus from qahf 
+                                                        where ftesttyp = 'PCL') qahf_a
+                                                        group by fslipno) qahf_b
+                                                  where qahf_b.count = 1)
+                                                and fstatus = '4')
+                                            and liaisonf.fstatus = '3' and 
+                                            liaisonf.fgroups_id = '{user.ammic_group.id}')) qahf_c
+                                 group by qahf_c.fslipno) a
+                            where a.count = 1
                         """
 
         dev_count_list = query_single_with_no_parameter(dev_count_sql, 'list')
         dev_count = dev_count_list[0]
 
-        non_dev_count_sql = """
+        non_dev_count_sql = f"""
                             select count(*)
                                 from (
-                                     select distinct liaisonf.*
-                                     from liaisonf,
-                                          qahf
-                                     where qahf.fslipno = liaisonf.fslipno
-                                       and liaisonf.fstatus = '3'
-                                       and qahf.fstatus = '4'
-                                       and liaisonf.ftype <> '追加开发') a
+                                     select a.fslipno, a.fstatus, count(*) count
+                                     from (
+                                          select distinct qahf.fslipno, qahf.fstatus
+                                          from liaisonf,
+                                               qahf
+                                          where liaisonf.fslipno = qahf.fslipno
+                                            and liaisonf.ftype <> '追加开发'
+                                            and liaisonf.fstatus = '3'
+                                            and liaisonf.fgroups_id = '{user.ammic_group.id}') a
+                                     group by a.fslipno, a.fstatus) b
+                                where b.count = 1
+                                  and b.fstatus = '4';
                                 """
 
         non_dev_count_list = query_single_with_no_parameter(non_dev_count_sql, 'list')
@@ -229,7 +252,8 @@ class MyTaskBar(APIView):
         response_data = []
         task_dict = {}
 
-        task_dict['testing'] = testing
+        task_dict['mcl'] = mcl
+        task_dict['pcl'] = pcl
         task_dict['approval'] = approval
         task_dict['confirm'] = confirm
         task_dict['release'] = release
@@ -239,63 +263,120 @@ class MyTaskBar(APIView):
         return Response(data=response_data, status=status.HTTP_200_OK)
 
 
-class MyTesting(APIView):
+class MyMcl(APIView):
 
-    def get(self, request, format=None):
+    def get(self, request):
         user = request.user
 
-        testing_sql = f"""
-                       select
-                           liaisonf.id,
-                           liaisonf.fslipno,
-                           liaisonf.fodrno,
-                           qahf.id qahf_id,
-                           qahf.fobjectid,
-                           qahf.fstatus,
-                           qahf.ftesttyp,
-                           qahf.fobjmodification,
-                           (select codereview.id from codereview where 
-                                codereview.fobjectid = qahf.fobjectid and codereview.fslipno = qahf.fslipno) code_id,
-                           (select codereview.id from codereview where 
-                                codereview.fobjectid = 'Design Review' and codereview.fslipno = qahf.fslipno) design_id
-                           from qahf,
-                                liaisonf
-                           where qahf.fstatus = '2'
-                                and qahf.fcreateusr = '{user.name}'
-                                and (liaisonf.fslipno = qahf.fslipno or liaisonf.fodrno = qahf.fslipno)
-                           order by liaisonf.fodrno, liaisonf.fslipno
-                      """
+        mcl_sql = f"""
+                   select
+                   liaisonf.id,
+                   liaisonf.fslipno,
+                   liaisonf.fodrno,
+                   qahf.id qahf_id,
+                   qahf.fobjectid,
+                   qahf.fstatus,
+                   qahf.ftesttyp,
+                   qahf.fobjmodification,
+                   (select codereview.id from codereview where 
+                        codereview.fobjectid = qahf.fobjectid and codereview.fslipno = qahf.fslipno) code_id,
+                   (select codereview.id from codereview where 
+                        codereview.fobjectid = 'Design Review' and codereview.fslipno = qahf.fslipno) design_id
+                   from qahf,
+                        liaisonf
+                   where qahf.fstatus = '2'
+                        and qahf.fcreateusr = '{user.name}'
+                        and qahf.ftesttyp = 'MCL'
+                        and (liaisonf.fslipno = qahf.fslipno or liaisonf.fodrno = qahf.fslipno)
+                   order by liaisonf.fodrno, liaisonf.fslipno
+                  """
 
-        testing_dict = db_connection_execute(testing_sql, 'dict')
+        mcl_dict = db_connection_execute(mcl_sql, 'dict')
 
-        return Response(data=testing_dict, status=status.HTTP_200_OK)
+        return Response(data=mcl_dict, status=status.HTTP_200_OK)
+
+
+class MyPcl(APIView):
+
+    def get(self, request):
+        user = request.user
+
+        pcl_sql = f"""
+                   select distinct
+                       qahf.id    qahf_id,
+                       liaisonf.fodrno,
+                       qahf.fslipno2 fslipno,
+                       qahf.fnote fobjmodification,
+                       qahf.fobjectid,
+                       qahf.ftesttyp,
+                       qahf.fstatus,
+                       ''         design_id,
+                       ''         code_id
+                   from liaisonf,
+                         qahf
+                   where liaisonf.fodrno = qahf.fslipno
+                      and liaisonf.ftype = '追加开发'
+                      and liaisonf.fleader like '%{user.name}%'
+                      and qahf.ftesttyp = 'PCL'
+                      and qahf.fstatus in (1, 2)
+                    order by qahf.fstatus, liaisonf.fodrno
+                  """
+
+        pcl_dict = db_connection_execute(pcl_sql, 'dict')
+
+        return Response(data=pcl_dict, status=status.HTTP_200_OK)
 
 
 class MyApproval(APIView):
 
-    def get(self, request, format=None):
+    def get(self, request):
         user = request.user
 
         approval_sql = f"""
-                       select  distinct liaisonf.id,
-                               liaisonf.fslipno,
-                               liaisonf.fodrno,
-                               qahf.id      qahf_id,
-                               qahf.fobjectid,
-                               qahf.fstatus,
-                               qahf.ftesttyp,
-                               qahf.fobjmodification,
-                               (select codereview.id from codereview where codereview.fobjectid = qahf.fobjectid 
-                               and codereview.fslipno = qahf.fslipno)  code_id,
-                               (select codereview.id from codereview where codereview.fobjectid = 'Design Review' 
-                               and codereview.fslipno = qahf.fslipno) design_id
-                        from liaisonf,
-                             qahf,
-                             qadf
-                        where qadf.qahf_id = qahf.id
-                          and (liaisonf.fslipno = qahf.fslipno or liaisonf.fodrno = qahf.fslipno)
-                          and qahf.fcreateusr in (select name from users where ammic_group_id = '{user.ammic_group.id}')
-                          and qadf.fapproval = 'N'
+                       select *
+                            from (
+                                 select distinct qahf.id  qahf_id,
+                                     qahf.ftesttyp,
+                                     liaisonf.fodrno,
+                                     liaisonf.fslipno,
+                                     qahf.fobjectid,
+                                     qahf.fstatus,
+                                     qahf.fobjmodification,
+                                     (select codereview.id
+                                      from codereview
+                                      where codereview.fobjectid = qahf.fobjectid
+                                        and codereview.fslipno = qahf.fslipno) code_id,
+                                     (select codereview.id
+                                      from codereview
+                                      where codereview.fobjectid = 'Design Review'
+                                        and codereview.fslipno = qahf.fslipno) design_id
+                                 from liaisonf,
+                                      qahf,
+                                      qadf
+                                 where qadf.qahf_id = qahf.id
+                                   and (liaisonf.fslipno = qahf.fslipno or liaisonf.fodrno = qahf.fslipno)
+                                   and qahf.fcreateusr in (select name from users where ammic_group_id = '{user.ammic_group.id}')
+                                   and qadf.fapproval = 'N'
+                                   and qahf.ftesttyp = 'MCL'
+                                 union all
+                                 select distinct qahf.id,
+                                                 qahf.ftesttyp,
+                                                 qahf.fslipno,
+                                                 qahf.fslipno2 fslipno,
+                                                 qahf.fobjectid,
+                                                 qahf.fstatus,
+                                                 qahf.fnote,
+                                                 ''            code_id,
+                                                 ''            design_id
+                                 from qahf,
+                                      qadf,
+                                      liaisonf
+                                 where ftesttyp = 'PCL'
+                                   and qahf.id = qadf.qahf_id
+                                   and qadf.fapproval = 'N'
+                                   and liaisonf.fodrno = qahf.fslipno
+                                   and liaisonf.fleader like '%{user.name}%') a
+                            order by ftesttyp, fodrno, fslipno
                       """
 
         approval_dict = db_connection_execute(approval_sql, 'dict')
@@ -305,27 +386,47 @@ class MyApproval(APIView):
 
 class MyConfirm(APIView):
 
-    def get(self, request, format=None):
+    def get(self, request):
         user = request.user
 
         confirm_sql = f"""
-                       select liaisonf.id,
-                               liaisonf.fslipno,
+                       select qahf.id                                   qahf_id,
+                               qahf.ftesttyp,
                                liaisonf.fodrno,
-                               qahf.id      qahf_id,
+                               liaisonf.fslipno,
                                qahf.fobjectid,
                                qahf.fstatus,
-                               qahf.ftesttyp,
                                qahf.fobjmodification,
-                               (select codereview.id from codereview where codereview.fobjectid = qahf.fobjectid 
-                               and codereview.fslipno = qahf.fslipno)  code_id,
-                               (select codereview.id from codereview where codereview.fobjectid = 'Design Review' 
-                               and codereview.fslipno = qahf.fslipno) design_id
+                               (select codereview.id
+                                from codereview
+                                where codereview.fobjectid = qahf.fobjectid
+                                  and codereview.fslipno = qahf.fslipno) code_id,
+                               (select codereview.id
+                                from codereview
+                                where codereview.fobjectid = 'Design Review'
+                                  and codereview.fslipno = qahf.fslipno) design_id
                         from liaisonf,
                              qahf
                         where (liaisonf.fslipno = qahf.fslipno or liaisonf.fodrno = qahf.fslipno)
                           and qahf.fcreateusr in (select name from users where ammic_group_id = '{user.ammic_group.id}')
                           and qahf.fstatus = '3'
+                          and qahf.ftesttyp = 'MCL'
+                        union all
+                        select distinct qahf.id,
+                                        qahf.ftesttyp,
+                                        qahf.fslipno,
+                                        qahf.fslipno2 fslipno,
+                                        qahf.fobjectid,
+                                        qahf.fstatus,
+                                        qahf.fnote,
+                                        ''            code_id,
+                                        ''            design_id
+                        from qahf,
+                             liaisonf
+                        where qahf.ftesttyp = 'PCL'
+                          and qahf.fstatus = '3'
+                          and liaisonf.fodrno = qahf.fslipno
+                          and liaisonf.fleader like '%{user.name}%'
                       """
 
         confirm_dict = db_connection_execute(confirm_sql, 'dict')
@@ -335,31 +436,53 @@ class MyConfirm(APIView):
 
 class MyRelease(APIView):
 
-    def get(self, request, format=None):
+    def get(self, request):
         user = request.user
 
         testing_sql = f"""
-                       select distinct b.fodrno, b.fslipno, b.fsirno, b.ftype, b.fbrief, b.fassignedto, b.fleader from (
-                            select a.*
-                            from (select distinct liaisonf.*
-                                  from liaisonf,
-                                       qahf
-                                  where qahf.fslipno = liaisonf.fslipno
-                                    and liaisonf.fstatus = '3'
-                                    and qahf.fstatus = '4'
-                                    and liaisonf.ftype = '追加开发') a,
-                                 qahf
-                            where a.fodrno = qahf.fslipno
-                              and qahf.fstatus = '4'
-                            union all
-                            select distinct liaisonf.*
-                            from liaisonf,
-                                 qahf
-                            where qahf.fslipno = liaisonf.fslipno
-                              and liaisonf.fstatus = '3'
-                              and qahf.fstatus = '4'
-                              and liaisonf.ftype <> '追加开发') b
-                            order by fodrno, fslipno
+                       select *
+                            from liaisonf
+                            where fslipno in (
+                                select fslipno
+                                from (
+                                     select qahf_c.fslipno, count(*) count
+                                     from (
+                                          select distinct fslipno, fstatus
+                                          from qahf
+                                          where fslipno in (
+                                              select fslipno
+                                              from liaisonf
+                                              where fodrno in (
+                                                  select fslipno
+                                                  from qahf
+                                                  where fslipno in (
+                                                      select qahf_b.fslipno
+                                                      from (select fslipno, count(*) count
+                                                            from (select fslipno, fstatus from qahf where 
+                                                            ftesttyp = 'PCL') qahf_a
+                                                            group by fslipno) qahf_b
+                                                      where qahf_b.count = 1)
+                                                    and fstatus = '4')
+                                                and liaisonf.fstatus = '3'
+                                                and liaisonf.fgroups_id = '{user.ammic_group.id}')) qahf_c
+                                     group by qahf_c.fslipno) a
+                                where a.count = 1
+                                union all
+                                select fslipno
+                                from (
+                                     select a.fslipno, a.fstatus, count(*) count
+                                     from (
+                                          select distinct qahf.fslipno, qahf.fstatus
+                                          from liaisonf,
+                                               qahf
+                                          where liaisonf.fslipno = qahf.fslipno
+                                            and liaisonf.ftype <> '追加开发'
+                                            and liaisonf.fstatus = '3'
+                                            and liaisonf.fgroups_id = '{user.ammic_group.id}') a
+                                     group by a.fslipno, a.fstatus) b
+                                where b.count = 1
+                                  and b.fstatus = '4')
+                            order by fslipno
                       """
 
         testing_dict = db_connection_execute(testing_sql, 'dict')
