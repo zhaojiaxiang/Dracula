@@ -12,11 +12,18 @@
       border
       style="width:98%;margin-top:20px"
       size="medium"
+      v-loading="loading"
     >
+      <el-table-column prop="ftesttyp" label="测试类型" width="80">
+      </el-table-column>
       <el-table-column prop="fodrno" label="订单号" width="100">
       </el-table-column>
 
-      <el-table-column prop="fslipno" label="联络票" width="180">
+      <el-table-column
+        prop="fslipno"
+        label="联络票/订单支号"
+        width="200"
+      >
       </el-table-column>
 
       <el-table-column
@@ -25,9 +32,6 @@
         width="250"
         show-overflow-tooltip
       >
-      </el-table-column>
-
-      <el-table-column prop="ftesttyp" label="测试类型" width="80">
       </el-table-column>
 
       <el-table-column
@@ -44,7 +48,7 @@
             style="margin-left:10px"
             type="text"
             size="medium"
-            :v-show="scope.row.design_id"
+            v-show="scope.row.design_id"
             :underline="false"
             >设计Review</el-link
           >
@@ -58,7 +62,7 @@
             style="margin-left:10px"
             type="text"
             size="medium"
-            :v-show="scope.row.code_id"
+            v-show="scope.row.code_id"
             :underline="false"
             >代码Review</el-link
           >
@@ -72,7 +76,7 @@
             type="text"
             size="medium"
             :underline="false"
-            v-show="paramtype === 'testing'"
+            v-show="paramtype === 'mcl' || paramtype === 'pcl'"
             @click="openQaTestList(scope.row.qahf_id, paramtype)"
             >测试</el-link
           >
@@ -104,7 +108,8 @@
 
 <script>
 import {
-  getMyTesting,
+  getMyMCL,
+  getMyPCL,
   getMyConfirm,
   getMyApproval,
   getMyRelease,
@@ -112,14 +117,21 @@ import {
 export default {
   data() {
     return {
+      loading: false,
       paramtype: "",
       tasktable: [],
     };
   },
   methods: {
     openQaTestList(id, paramtype) {
+      var routername;
+      if (paramtype === "mcl") {
+        routername = "QaTestList";
+      } else {
+        routername = "QaPclList";
+      }
       this.$router.push({
-        name: "QaTestList",
+        name: routername,
         query: { qahf_id: id, type: paramtype },
       });
     },
@@ -140,9 +152,15 @@ export default {
         });
         this.tasktable = resp.data;
       } else {
-        if (this.paramtype === "testing") {
-          resp = await getMyTesting().catch(() => {
-            this.$message.error("测试中数据获取异常");
+        if (this.paramtype === "mcl") {
+          resp = await getMyMCL().catch(() => {
+            this.$message.error("单体测试数据获取异常");
+          });
+          this.tasktable = resp.data;
+        }
+        if (this.paramtype === "pcl") {
+          resp = await getMyPCL().catch(() => {
+            this.$message.error("单体测试数据获取异常");
           });
           this.tasktable = resp.data;
         }
@@ -162,7 +180,9 @@ export default {
     },
   },
   mounted: function() {
+    this.loading = true;
     this.refreshTask();
+    this.loading = false;
   },
 };
 </script>

@@ -13,6 +13,7 @@
         label-width="10%"
         size="medium"
         style="width: 95%; margin-top:20px;"
+        v-loading="loading"
       >
         <el-form-item
           size="medium"
@@ -299,6 +300,7 @@ import { fileUpdate } from "../../../services/qaService";
 export default {
   data() {
     return {
+      loading:false,
       drawer: false,
       projects: {},
       systems: {},
@@ -405,6 +407,8 @@ export default {
             this.drawer = false;
           } else {
             this.$message.error(this.form.fslipno + resp.data.message);
+            this.form.fleader = this.form.fleader.split(",");
+            this.form.fhelper = this.form.fhelper.split(",");
           }
         }
       });
@@ -456,38 +460,44 @@ export default {
     },
   },
   mounted: function() {
+    this.loading = true;
     var this_ = this;
     this.bus.$on("openSlipNoModifiy", async function(id) {
       this_.drawer = true;
       var p_resp = await getProjects().catch(() => {
         this.$message.error("项目主表数据获取异常");
+        this.loading = false;
         return;
       });
       var s_resp = await getSystems().catch(() => {
         this.$message.error("系统主表数据获取异常");
+        this.loading = false;
         return;
       });
       var g_resp = await getGroupUsers().catch(() => {
         this.$message.error("分组用户主表数据获取异常");
+        this.loading = false;
         return;
       });
       var u_resp = await getAllUsers().catch(() => {
         this.$message.error("用户主表数据获取异常");
+        this.loading = false;
         return;
       });
       var resp = await getSingleLiaison(id).catch(() => {
         this.$message.error("联络票数据获取异常");
+        this.loading = false;
         return;
       });
 
       var liaison = resp.data;
-      if (liaison.fhelper.length > 0) {
+      if (liaison.fhelper) {
         liaison.fhelper = liaison.fhelper.split(",");
       } else {
         liaison.fhelper = [];
       }
 
-      if (liaison.fleader.length > 0) {
+      if (liaison.fleader) {
         liaison.fleader = liaison.fleader.split(",");
       } else {
         liaison.fleader = [];
@@ -500,6 +510,7 @@ export default {
       var usersjson = u_resp.data;
       this_.allusers = handleAllUser(usersjson);
     });
+    this.loading = false;
   },
 };
 </script>

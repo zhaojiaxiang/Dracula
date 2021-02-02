@@ -70,6 +70,7 @@
             height="420"
             style="margin-top:20px"
             size="medium"
+            v-loading="loading"
           >
             <el-table-column
               fixed
@@ -154,6 +155,7 @@ export default {
   },
   data() {
     return {
+      loading:false,
       liaison: {},
       qaheads: [],
       tagtype: "",
@@ -163,6 +165,7 @@ export default {
         fslipno: "",
         fobjectid: "",
         fstatus: "1",
+        ftesttyp: "MCL",
       },
       rules: {
         fobjectid: [
@@ -261,6 +264,7 @@ export default {
     },
   },
   mounted: async function() {
+    this.loading = true;
     var slipno = this.$route.query.slipno;
     var resp = await getSingleLiaisonBySlipNo(slipno).catch(() => {
       this.$message.error("联络票号:" + slipno + "数据获取异常");
@@ -273,6 +277,7 @@ export default {
       this.form.fprojectcd = this.liaison.fprojectcd;
     }
     this.refreshQaHead(slipno);
+    this.loading = false
   },
 };
 </script>

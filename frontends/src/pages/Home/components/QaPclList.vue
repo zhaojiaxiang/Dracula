@@ -6,17 +6,17 @@
     >
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item
-        v-show="paramtype !== 'mcl'"
+        v-show="paramtype !== 'pcl'"
         :to="{ path: '/qa/', query: { slipno: this.qahead.fslipno } }"
         >QA列表</el-breadcrumb-item
       >
       <el-breadcrumb-item
-        v-show="paramtype === 'mcl'"
+        v-show="paramtype === 'pcl'"
         :to="{ path: '/task/', query: { type: this.paramtype } }"
         >任务列表</el-breadcrumb-item
       >
       <el-breadcrumb-item
-        >MCL列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
+        >PCL列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
       >
     </el-breadcrumb>
 
@@ -35,7 +35,6 @@
       <el-col :span="12">
         <div style="text-align:right;margin-right:40px">
           <el-button-group>
-            <el-button @click="detailModify()">修改明细</el-button>
             <el-button v-show="isCanAdd()" @click="singleAdd()"
               >逐条添加</el-button
             >
@@ -74,13 +73,7 @@
         show-overflow-tooltip
       >
       </el-table-column>
-      <el-table-column prop="fregression" label="回归？" width="70">
-        <template slot-scope="scope">
-          <el-tag :type="regressionTag" disable-transitions>{{
-            scope.row.fregression
-          }}</el-tag>
-        </template>
-      </el-table-column>
+
       <el-table-column prop="fapproval" label="状态" width="70">
       </el-table-column>
       <el-table-column prop="fcontent" label="测试用例" show-overflow-tooltip>
@@ -192,8 +185,6 @@
       @refreshQaList="refreshQaList"
     ></BatchNewQaList>
 
-    <QaModifyDetail ref="QaModifyDetail"></QaModifyDetail>
-
     <SingleModifyQaList
       ref="SingleModifyQaList"
       @refreshQaList="refreshQaList"
@@ -216,17 +207,15 @@ import {
 import SingleNewQaList from "../components/SingleNewQaList";
 import BatchNewQaList from "../components/BatchNewQaList";
 import SingleModifyQaList from "../components/SingleModifyQaList";
-import QaModifyDetail from "../components/QaModifyDetail";
 export default {
   components: {
     SingleNewQaList,
     SingleModifyQaList,
     BatchNewQaList,
-    QaModifyDetail,
   },
   data() {
     return {
-      loading:false,
+      loading: false,
       paramtype: "",
       parentroute: "",
       fullscreenLoading: false,
@@ -318,8 +307,8 @@ export default {
       };
     },
 
-    handleContentText(id){
-      this.$router.push({name: "QaContentText",query:{qadf_id:id}})
+    handleContentText(id) {
+      this.$router.push({ name: "QaContentText", query: { qadf_id: id } });
     },
 
     async batchDeleteQaDetail() {
@@ -367,8 +356,6 @@ export default {
       });
       if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
         this.$message.error(resp.data.message);
-        this.qahead.fstatus = "2";
-        return;
       } else {
         this.$message.success("测试结果提交成功");
       }
@@ -460,10 +447,6 @@ export default {
       this.$refs.SingleModifyQaList.handleDialog(id);
     },
 
-    detailModify() {
-      this.$refs.QaModifyDetail.handleDialog(this.qahead.id);
-    },
-
     async singleDelete(id) {
       var resp = await deleteQaDetail(id).catch(() => {
         this.$message.error("测试项删除异常");
@@ -485,14 +468,15 @@ export default {
     var resp = await getQaHead(id).catch(() => {
       this.$message.error("测试对象数据获取异常");
     });
+    console.log(resp);
     if (resp.status === 200) {
       this.qahead = resp.data;
       this.refreshQaList();
     }
 
-    this.bus.$on('refreshList', function(){
-        this.refreshQaList();
-    })
+    this.bus.$on("refreshList", function() {
+      this.refreshQaList();
+    });
     this.loading = false;
   },
 };

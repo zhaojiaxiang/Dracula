@@ -10,12 +10,12 @@
     <el-row>
       <el-col>
         <el-card shadow="hover" class="task-card-color">
-          <div @click="testing()">
+          <div @click="mcl()">
             <el-row>
               <el-col :span="24"
                 ><div style="text-align:center">
                   <h6 class="clear-margin-padding">
-                    {{ taskbar.testing }}
+                    {{ taskbar.mcl }}
                   </h6>
                 </div></el-col
               >
@@ -23,7 +23,27 @@
             <el-row>
               <el-col :span="24"
                 ><div style="text-align:center">
-                  测试中
+                  单体测试
+                </div></el-col
+              >
+            </el-row>
+          </div>
+        </el-card>
+        <el-card shadow="hover" class="task-card-color">
+          <div @click="pcl()">
+            <el-row>
+              <el-col :span="24"
+                ><div style="text-align:center">
+                  <h6 class="clear-margin-padding">
+                    {{ taskbar.pcl }}
+                  </h6>
+                </div></el-col
+              >
+            </el-row>
+            <el-row>
+              <el-col :span="24"
+                ><div style="text-align:center">
+                  结合测试
                 </div></el-col
               >
             </el-row>
@@ -107,8 +127,11 @@ export default {
     };
   },
   methods: {
-    testing() {
-      this.$router.push({ name: "Task", query: { type: 'testing' } });
+    mcl() {
+      this.$router.push({ name: "Task", query: { type: 'mcl' } });
+    },
+    pcl() {
+      this.$router.push({ name: "Task", query: { type: 'pcl' } });
     },
     approval() {
       this.$router.push({ name: "Task", query: { type: 'approval' } });
@@ -117,7 +140,7 @@ export default {
       this.$router.push({ name: "Task", query: { type: 'confirm' } });
     },
     release() {
-      this.$router.push({ name: "Task", query: { type: 'release' } });
+      this.$router.push({ name: "TaskRelease", query: { type: 'release' } });
     },
     async refreshTaskBar() {
       var resp = await getMyTaskBar().catch(() => {

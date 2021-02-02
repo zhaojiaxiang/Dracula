@@ -23,3 +23,9 @@ export async function getAllUsers(){
   var resp = await axios.get("/api/accounts/")
   return resp
 }
+
+
+export async function getSettings(id){
+  var resp = await axios.get("/api/accounts/system_setting/" +id+"/")
+  return resp
+}

@@ -30,6 +30,12 @@ export default {
         component: () => import("@/pages/Home/components/QaTestList"),
       },
       {
+        path: "/qa/pcllist",
+        name: "QaPclList",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/Home/components/QaPclList"),
+      },
+      {
         path: "/qa/content_text",
         name: "QaContentText",
         meta: { requiresAuth: true },
@@ -42,10 +48,22 @@ export default {
         component: () => import("@/pages/Home/components/MyTask"),
       },
       {
+        path: "/task/release",
+        name: "TaskRelease",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/Home/components/MyTaskRelease"),
+      },
+      {
         path: "/task/list",
         name: "TaskList",
         meta: { requiresAuth: true },
         component: () => import("@/pages/Home/components/MyTaskList"),
+      },
+      {
+        path: "/project/overview",
+        name: "ProjectOverview",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/Project/components/ProjectItemOverView"),
       },
       
     ],

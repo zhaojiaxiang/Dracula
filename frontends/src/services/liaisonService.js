@@ -45,31 +45,36 @@ export async function modifyLiaison(id, liaisonInfo) {
 }
 
 export async function myOrderInfo(){
-  var resp = await axios.get("api/mine-order-info/")
+  var resp = await axios.get("api/mine_order_info/")
   return resp;
 }
 
 export async function getMyTaskBar(){
-  var resp = await axios.get('/api/mine-task-bar/')
+  var resp = await axios.get('/api/mine_task_bar/')
   return resp
 }
 
-export async function getMyTesting(){
-  var resp = await axios.get('/api/mine-task-testing/')
+export async function getMyMCL(){
+  var resp = await axios.get('/api/mine_task_mcl/')
+  return resp
+}
+
+export async function getMyPCL(){
+  var resp = await axios.get('/api/mine_task_pcl/')
   return resp
 }
 
 export async function getMyApproval(){
-  var resp = await axios.get('/api/mine-task-approval/')
+  var resp = await axios.get('/api/mine_task_approval/')
   return resp
 }
 
 export async function getMyConfirm(){
-  var resp = await axios.get('/api/mine-task-conform/')
+  var resp = await axios.get('/api/mine_task_conform/')
   return resp
 }
 
 export async function getMyRelease(){
-  var resp = await axios.get('/api/mine-task-release/')
+  var resp = await axios.get('/api/mine_task_release/')
   return resp
 }

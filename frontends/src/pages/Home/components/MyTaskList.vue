@@ -10,7 +10,7 @@
         >任务列表</el-breadcrumb-item
       >
       <el-breadcrumb-item
-        >MCL列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
+        >测试列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
       >
     </el-breadcrumb>
 
@@ -18,9 +18,15 @@
       <el-col :span="24">
         <div style="text-align:right;margin-right:40px">
           <el-button-group>
-            <el-button v-show="paramtype === 'approval'" @click="resultApproval()">审核</el-button>
-            <el-button v-show="paramtype === 'confirm'" @click="resultRollback()">结果回退</el-button>
-            <el-button v-show="paramtype === 'confirm'" @click="resultConfirm()">确认</el-button>
+            <el-button v-show="isCanApproval()" @click="resultApproval()"
+              >审核</el-button
+            >
+            <el-button v-show="isCanConfirm()" @click="resultRollback()"
+              >结果回退</el-button
+            >
+            <el-button v-show="isCanConfirm()" @click="resultConfirm()"
+              >确认</el-button
+            >
           </el-button-group>
         </div>
       </el-col>
@@ -31,6 +37,7 @@
       border
       size="medium"
       style="width: 98%; margin-top:5px"
+      v-loading="loading"
     >
       <el-table-column label="序号" type="index" width="50"> </el-table-column>
       <el-table-column
@@ -95,6 +102,8 @@
       </el-table-column>
     </el-table>
 
+    <QaConfirm @confirmed="confirmed()" ref="QaConfirm"></QaConfirm>
+
     <el-backtop target=".goTop" :bottom="100">
       <i class="el-icon-caret-top"></i>
     </el-backtop>
@@ -107,11 +116,17 @@ import {
   getQaDetailByQaHead,
   updateQaHead,
 } from "./../../../services/qaService";
+import QaConfirm from "./QaConfirm";
 export default {
+  components: {
+    QaConfirm,
+  },
   data() {
     return {
+      loading: false,
       paramtype: "",
       parentroute: "",
+      qaheadId:'',
       qahead: {},
       qadetails: [],
     };
@@ -130,8 +145,26 @@ export default {
       }
     },
 
-    handleContentText(id){
-      this.$router.push({name: "QaContentText",query:{qadf_id:id}})
+    isCanApproval() {
+      if (this.paramtype === "approval" && this.qahead.fstatus === "1") {
+        return true;
+      }
+      return false;
+    },
+
+    isCanConfirm() {
+      if (this.paramtype === "confirm" && this.qahead.fstatus === "3") {
+        return true;
+      }
+      return false;
+    },
+
+    confirmed() {
+      this.refreshQaList();
+    },
+
+    handleContentText(id) {
+      this.$router.push({ name: "QaContentText", query: { qadf_id: id } });
     },
 
     async resultApproval() {
@@ -143,6 +176,7 @@ export default {
         this.$message.error(resp.data.message);
       } else {
         this.$message.success("审核成功");
+        this.refreshQaList();
       }
     },
 
@@ -155,19 +189,12 @@ export default {
         this.$message.error(resp.data.message);
       } else {
         this.$message.success("结果回退成功");
+        this.refreshQaList();
       }
     },
 
-    async resultConfirm() {
-      this.qahead.fstatus = "4";
-      var resp = await updateQaHead(this.qahead.id, this.qahead).catch(() => {
-        this.$message.error("结果确认异常");
-      });
-      if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
-        this.$message.error(resp.data.message);
-      } else {
-        this.$message.success("结果确认成功");
-      }
+    resultConfirm() {
+      this.$refs.QaConfirm.handleDialog(this.qahead.id);
     },
 
     async resultApprovalRollback() {
@@ -179,6 +206,7 @@ export default {
         this.$message.error(resp.data.message);
       } else {
         this.$message.success("撤销审核成功");
+        this.refreshQaList();
       }
     },
 
@@ -187,6 +215,17 @@ export default {
     },
 
     async refreshQaList() {
+      var resp_head;
+      resp_head = await getQaHead(this.qaheadId).catch(() => {
+        this.$message.error("测试对象数据获取异常");
+      });
+
+      if (Object.prototype.hasOwnProperty.call(resp_head.data, "message")) {
+        this.$message.error(resp_head.data.message);
+      }
+
+      this.qahead = resp_head.data;
+
       var resp = await getQaDetailByQaHead(this.qahead.id).catch(() => {
         this.$message.error("测试项数据获取异常");
       });
@@ -213,17 +252,14 @@ export default {
     },
   },
   mounted: async function() {
-    var id = this.$route.query.qahf_id;
+    this.loading = true;
+    this.qaheadId = this.$route.query.qahf_id;
     this.paramtype = this.$route.query.type;
     this.parentroute = this.$route.path.split("/")[1];
 
-    var resp = await getQaHead(id).catch(() => {
-      this.$message.error("测试对象数据获取异常");
-    });
-    if (resp.status === 200) {
-      this.qahead = resp.data;
-      this.refreshQaList();
-    }
+    this.refreshQaList();
+
+    this.loading = false;
   },
 };
 </script>

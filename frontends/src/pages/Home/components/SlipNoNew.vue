@@ -8,6 +8,7 @@
         label-width="30%"
         size="medium"
         style="width: 95%;"
+        v-loading="loading"
       >
         <el-form-item label="系统名称" size="medium" required>
           <el-col :span="10">
@@ -194,6 +195,7 @@ import { handleAllUser } from "../../../static/js/commonJs";
 export default {
   data() {
     return {
+      loading:false,
       drawer: false,
       projects: {},
       systems: {},
@@ -270,6 +272,7 @@ export default {
   },
   methods: {
     onSubmit(formName) {
+      this.loading = true;
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
           if (this.form.fleader.length === 0) {
@@ -295,12 +298,12 @@ export default {
             this.drawer = false;
           } else {
             this.$message.error(this.form.fslipno + resp.data.message);
-            var form_bak = this.form;
-            this.$refs[formName].resetFields();
-            this.form = form_bak;
+            this.form.fleader = this.form.fleader.split(",");
+            this.form.fhelper = this.form.fhelper.split(",");
           }
         }
       });
+      this.loading = false
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
@@ -308,23 +311,28 @@ export default {
   },
   mounted: function() {
     var this_ = this;
+    this_.loading = true
     this.bus.$on("openSlipNoNew", async function() {
       this_.drawer = true;
 
       var p_resp = await getProjects().catch(() => {
         this.$message.error("项目主表数据获取异常");
+        this_.loading = false
         return;
       });
       var s_resp = await getSystems().catch(() => {
         this.$message.error("系统主表数据获取异常");
+        this_.loading = false
         return;
       });
       var g_resp = await getGroupUsers().catch(() => {
         this.$message.error("分组用户主表数据获取异常");
+        this_.loading = false
         return;
       });
       var u_resp = await getAllUsers().catch(() => {
         this.$message.error("用户主表数据获取异常");
+        this_.loading = false
         return;
       });
 
@@ -334,6 +342,7 @@ export default {
       var usersjson = u_resp.data;
       this_.allusers = handleAllUser(usersjson);
     });
+    this_.loading = false
   },
 };
 </script>
