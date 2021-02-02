@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import datetime
 import os
 import sys
+import environ
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,8 +26,16 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'extra_apps'))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '_cj8k-4jds2y-k)+21-fu@3^ps3uv*ye0dt1y(o073i_rm8#-p'
 
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, False)
+)
+# reading .env file
+environ.Env.read_env(str(BASE_DIR)+"/.env")
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = []
 
@@ -94,19 +103,19 @@ CORS_ORIGIN_ALLOW_ALL = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dracula',
-        'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST': '127.0.0.1',
-        'PORT': '3306'
+        'NAME': env('DEFAULT_NAME'),
+        'USER': env('DEFAULT_USER'),
+        'PASSWORD': env('DEFAULT_PASSWORD'),
+        'HOST': env('DEFAULT_HOST'),
+        'PORT': env('DEFAULT_PORT')
     },
     'ManPower': {
         'ENGINE': 'django.db.backends.oracle',
-        'NAME': 'sunnyutf11',
-        'USER': 'zjx',
-        'PASSWORD': 'zjx',
-        'HOST': '192.168.80.185',
-        'PORT': '1521'
+        'NAME': env('MANPOWER_NAME'),
+        'USER': env('MANPOWER_USER'),
+        'PASSWORD': env('MANPOWER_PASSWORD'),
+        'HOST': env('MANPOWER_HOST'),
+        'PORT': env('MANPOWER_PORT')
     }
 }
 
@@ -167,7 +176,7 @@ REST_FRAMEWORK = {
 # AUTHENTICATION_BACKENDS = ('accounts.views.CustomBackend',)
 
 JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=env.int('JWT_EXPIRATION_DELTA')),
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
     # 使用自定义用户验证返回接口
     'JWT_RESPONSE_PAYLOAD_HANDLER': 'accounts.views.jwt_response_payload_handler'
