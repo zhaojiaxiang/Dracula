@@ -296,7 +296,7 @@ import {
   getGroupUsers,
   getAllUsers,
 } from "../../../services/commonService";
-import { fileUpdate } from "../../../services/qaService";
+import { liaisonfileUpdate } from "../../../services/liaisonService";
 export default {
   data() {
     return {
@@ -443,7 +443,7 @@ export default {
       fileForm.append("file", file);
       fileForm.append("liaison", this.form.id);
 
-      var resp = await fileUpdate(fileForm).catch(() => {
+      var resp = await liaisonfileUpdate(fileForm).catch(() => {
         this.$message.error("文件上传到服务器异常");
       });
 
@@ -456,6 +456,7 @@ export default {
           return;
         });
         this.form = resp_l.data;
+        this.form.freleaserpt = "media/upload/file/" + this.form.freleaserpt
       }
     },
   },
@@ -503,6 +504,9 @@ export default {
         liaison.fleader = [];
       }
       this_.form = resp.data;
+      if(this_.form.freleaserpt){
+        this_.form.freleaserpt = "media/upload/file/" + this_.form.freleaserpt
+      }
 
       this_.projects = p_resp.data;
       this_.systems = s_resp.data;

@@ -96,7 +96,7 @@ import {
   updateLiaisonStatus,
   getSingleLiaison,
 } from "../../../services/liaisonService";
-import { fileUpdate } from "../../../services/qaService";
+import { liaisonfileUpdate } from "../../../services/liaisonService";
 export default {
   data() {
     return {
@@ -166,7 +166,7 @@ export default {
           fslipno: fslipno,
           fbrief: fbrief,
           actual: actual,
-          freleasedt: freleasedt,
+          freleasedt: "media/upload/file/" + freleasedt,
           factmanpower: factmanpower,
           icon: icon,
         };
@@ -186,7 +186,7 @@ export default {
       fileForm.append("file", file);
       fileForm.append("liaison", this.currentID);
 
-      var resp = await fileUpdate(fileForm).catch(() => {
+      var resp = await liaisonfileUpdate(fileForm).catch(() => {
         this.$message.error("文件上传到服务器异常");
       });
 

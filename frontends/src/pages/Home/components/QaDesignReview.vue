@@ -6,6 +6,7 @@
           <Myeditor
             @handleContentText="updateQaDesignReview"
             :editorData="contentText"
+            :isdisable="isdisable"
           ></Myeditor>
         </el-form-item>
       </el-form>
@@ -27,6 +28,7 @@ export default {
   components: {
     Myeditor,
   },
+  props:['isdisable'],
   data() {
     return {
       dialogFormVisible: false,

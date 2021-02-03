@@ -15,6 +15,20 @@ module.exports = {
           "^/api": "/api",
         },
       },
+      "/media": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+        pathRewrite: {
+          "^/media": "/media",
+        },
+      },
+      "/qa/files": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+        pathRewrite: {
+          "^/qa/files": "/files",
+        },
+      },   
     },
   },
   // The source of CKEditor is encapsulated in ES6 modules. By default, the code

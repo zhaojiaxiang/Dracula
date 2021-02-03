@@ -78,3 +78,8 @@ export async function getMyRelease(){
   var resp = await axios.get('/api/mine_task_release/')
   return resp
 }
+
+export async function liaisonfileUpdate(form){
+  var resp = await axios.post("/api/liaison_file_upload/", form)
+  return resp
+}

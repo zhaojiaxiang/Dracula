@@ -132,8 +132,8 @@
     </el-row>
     <QaObjectSummary ref="QaObjectSummary"></QaObjectSummary>
 
-    <QaDesignReview ref="QaDesignReview"></QaDesignReview>
-    <QaCodeReview ref="QaCodeReview"></QaCodeReview>
+    <QaDesignReview ref="QaDesignReview" :isdisable="isdisable"></QaDesignReview>
+    <QaCodeReview ref="QaCodeReview" :isdisable="isdisable"></QaCodeReview>
   </div>
 </template>
 
@@ -155,6 +155,7 @@ export default {
   },
   data() {
     return {
+      isdisable:false,
       loading:false,
       liaison: {},
       qaheads: [],
@@ -275,6 +276,11 @@ export default {
       this.form.fslipno = this.liaison.fslipno;
       this.form.fsystemcd = this.liaison.fsystemcd;
       this.form.fprojectcd = this.liaison.fprojectcd;
+      if(this.liaison.fstatus === '4'){
+        this.isdisable = true
+      }else{
+        this.isdisable = false
+      }
     }
     this.refreshQaHead(slipno);
     this.loading = false

@@ -35,7 +35,7 @@
       </el-col>
       <el-col :span="12">
         <div style="text-align:right;margin-right:40px; margin-top:20px">
-          <el-button type="primary" @click="handle()">提交</el-button>
+          <el-button type="primary" :disabled="isdisable" @click="handle()">提交</el-button>
         </div>
       </el-col>
     </el-row>
@@ -84,7 +84,7 @@ export default {
     // Use the <ckeditor> component in this view.
     ckeditor: CKEditor.component,
   },
-  props: ['editorData'],
+  props: ['editorData', 'isdisable'],
   data() {
     return {
       editor: ClassicEditor,
