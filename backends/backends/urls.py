@@ -24,11 +24,11 @@ from accounts.views import UserViewSet, SystemSettingViewSet, MyGroupUserViewSet
     MyMcl, MyRelease, MyConfirm, MyApproval, MyPcl
 from backends import settings
 from liaisons.views import LiaisonsViewSet, LiaisonUpdateStatusViewSet, QaProjectViewSet, QaProjectForMineViewSet, \
-    QaProjectForGroupViewSet
+    QaProjectForGroupViewSet, LiaisonFileUpload
 from projects.views import ProjectsViewSet
 from qa.views import MCLQaHeadViewSet, MCLQaDetailViewSet, MCLQaDetailUpdateResultViewSet, \
     MCLQaDetailUpdateContentTextViewSet, QaHeadUpdateObjectSummaryViewSet, QaHeadModifyDetailViewSet, \
-    QaHeadTargetAndActualViewSet, ImageUpload, FileUpload
+    QaHeadTargetAndActualViewSet, CkEditorImageUpload, CkEditorFileUpload, RecoverFile
 from reports.views import ReportListViewSet
 from reviews.views import DesignReviewViewSet, CodeReviewViewSet
 from systems.views import SystemsViewSet
@@ -73,6 +73,8 @@ urlpatterns = [
     path('api/mine_task_approval/', MyApproval.as_view()),
     path('api/mine_task_conform/', MyConfirm.as_view()),
     path('api/mine_task_release/', MyRelease.as_view()),
-    path('api/image_upload/', ImageUpload.as_view()),
-    path('api/file_upload/', FileUpload.as_view()),
+    path('files/<str:filename>', RecoverFile.as_view()),
+    path('api/image_upload/', CkEditorImageUpload.as_view()),
+    path('api/file_upload/', CkEditorFileUpload.as_view()),
+    path('api/liaison_file_upload/', LiaisonFileUpload.as_view()),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

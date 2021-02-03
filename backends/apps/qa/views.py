@@ -6,6 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status, mixins, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from sendfile import sendfile
 
 from liaisons.models import Liaisons
 from qa.filters import QaHeadFilter, QaDetailFilter
@@ -89,8 +90,20 @@ class MCLQaDetailUpdateContentTextViewSet(mixins.ListModelMixin, mixins.Retrieve
     serializer_class = QaDetailUpdateContentTextSerializer
 
 
-class ImageUpload(APIView):
+class RecoverFile(APIView):
+    """
+    富文本编辑器文件展示处理API
+    """
+    def get(self, request, filename):
+        ret_url = os.path.join("media/upload/image", filename[0], filename[1], filename)
 
+        return sendfile(request, filename=ret_url, attachment=True)
+
+
+class CkEditorImageUpload(APIView):
+    """
+    富文本编辑器图片上传API
+    """
     def post(self, request):
         image = request.FILES.get('file')
 
@@ -102,30 +115,32 @@ class ImageUpload(APIView):
 
         create_folder(upload_path)
 
-        image_path = os.path.join(upload_path, image_name)
+        image_save_path = os.path.join(upload_path, image_name)
 
         # 保存单个文件
-        with open(image_path, 'wb') as f:
+        with open(image_save_path, 'wb') as f:
             for i in image.chunks():
                 f.write(i)
 
-        ret_url = os.path.join(request.stream._current_scheme_host, image_path)
+        ret_url = os.path.join("files", image_name)
 
         ret = {"code": 0, "msg": "success", "data": {"url": ret_url}}
         return Response(data=ret, status=status.HTTP_200_OK)
 
 
-class FileUpload(APIView):
-
+class CkEditorFileUpload(APIView):
+    """
+    富文本编辑器文件上传API
+    """
     def post(self, request):
 
         orig_file = request.FILES.get('file')
 
         extension = orig_file.name.split('.')[1].lower()
 
-        file_name = str(uuid.uuid4()) + '.' + extension
+        file_name = "T"+str(uuid.uuid4()) + '.' + extension
 
-        upload_path = os.path.join("media/upload/file", file_name[0], file_name[1])
+        upload_path = os.path.join("media/upload/image", file_name[0], file_name[1])
 
         create_folder(upload_path)
 
@@ -136,20 +151,20 @@ class FileUpload(APIView):
             for i in orig_file.chunks():
                 f.write(i)
 
-        ret_url = os.path.join(request.stream._current_scheme_host, file_path)
+        ret_url = os.path.join('files', file_name)
 
         ret_path = f'<p><a href="{ret_url}">{orig_file}</a></p>'
 
         data = {"path": ret_path}
 
-        if 'liaison' in request.data:
-            file_path = os.path.join("upload/file", file_name[0], file_name[1], file_name)
-            liaison_id = request.data['liaison']
-            liaison = Liaisons.objects.get(pk=liaison_id)
-            liaison.freleaserpt = file_path
-            liaison.save()
-
-            ret_url = os.path.join(request.stream._current_scheme_host, "media", file_path)
-            data['liaison'] = ret_url
+        # if 'liaison' in request.data:
+        #     file_path = os.path.join("upload/file", file_name[0], file_name[1], file_name)
+        #     liaison_id = request.data['liaison']
+        #     liaison = Liaisons.objects.get(pk=liaison_id)
+        #     liaison.freleaserpt = file_path
+        #     liaison.save()
+        #
+        #     ret_url = os.path.join(request.stream._current_scheme_host, "media", file_path)
+        #     data['liaison'] = ret_url
 
         return Response(data=data, status=status.HTTP_200_OK)

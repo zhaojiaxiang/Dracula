@@ -1,15 +1,20 @@
+import os
+import uuid
+
 from django.db import transaction
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status, filters, mixins
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from liaisons.filters import LiaisonsFilter
 from liaisons.models import Liaisons
 from liaisons.serializers import LiaisonsSerializer, LiaisonUpdateStatusSerializer, QaProjectSerializer
 from qa.models import QaHead, QaDetail
+from utils.utils import create_folder
 
 
 class LiaisonsPagination(PageNumberPagination):
@@ -108,3 +113,33 @@ class QaProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, Generic
         return Liaisons.objects.values("fodrno").distinct()
 
     serializer_class = QaProjectSerializer
+
+
+class LiaisonFileUpload(APIView):
+    def post(self, request):
+
+        orig_file = request.FILES.get('file')
+
+        extension = orig_file.name.split('.')[1].lower()
+
+        file_name = str(uuid.uuid4()) + '.' + extension
+
+        upload_path = os.path.join("media/upload/file", file_name[0], file_name[1])
+
+        create_folder(upload_path)
+
+        file_path = os.path.join(upload_path, file_name)
+
+        # file_path
+        with open(file_path, 'wb') as f:
+            for i in orig_file.chunks():
+                f.write(i)
+
+        if 'liaison' in request.data:
+            file_path = os.path.join(file_name[0], file_name[1], file_name)
+            liaison_id = request.data['liaison']
+            liaison = Liaisons.objects.get(pk=liaison_id)
+            liaison.freleaserpt = file_path
+            liaison.save()
+
+        return Response(status=status.HTTP_200_OK)

@@ -5,6 +5,7 @@ from django.db.models import Max
 from math import ceil
 from rest_framework import serializers
 
+from liaisons.models import Liaisons
 from qa.models import QaHead, QaDetail
 from reviews.models import CodeReview
 
@@ -101,10 +102,12 @@ class MCLQaHeadSerializer(serializers.ModelSerializer):
                     if code_review.count() == 0:
                         raise serializers.ValidationError("请先填写代码Review")
 
-                    design_review = CodeReview.objects.filter(fobjectid__exact="Design Review",
-                                                              fslipno__exact=instance.fslipno)
-                    if design_review.count() == 0:
-                        raise serializers.ValidationError("请先填写设计Review")
+                    liaison = Liaisons.objects.filter(fslipno__exact=instance.fslipno)
+                    if liaison[0].ftype == "追加开发":
+                        design_review = CodeReview.objects.filter(fobjectid__exact="Design Review",
+                                                                  fslipno__exact=instance.fslipno)
+                        if design_review.count() == 0:
+                            raise serializers.ValidationError("请先填写设计Review")
 
                 instance.fstatus = new_status
                 instance.ftestdte = datetime.datetime.now().strftime('%Y-%m-%d')
@@ -344,7 +347,11 @@ class QaDetailUpdateResultSerializer(serializers.ModelSerializer):
 
 class QaDetailUpdateContentTextSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = QaDetail
-        fields = ('id', 'fcontent', 'fcontent_text')
+        fields = ('id', 'status', 'fcontent', 'fcontent_text')
+
+    def get_status(self, obj):
+        return obj.qahf.fstatus
