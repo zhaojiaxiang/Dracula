@@ -77,4 +77,5 @@ urlpatterns = [
     path('api/image_upload/', CkEditorImageUpload.as_view()),
     path('api/file_upload/', CkEditorFileUpload.as_view()),
     path('api/liaison_file_upload/', LiaisonFileUpload.as_view()),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
+              + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
