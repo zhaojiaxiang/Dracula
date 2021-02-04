@@ -107,7 +107,10 @@ DATABASES = {
         'USER': env('DEFAULT_USER'),
         'PASSWORD': env('DEFAULT_PASSWORD'),
         'HOST': env('DEFAULT_HOST'),
-        'PORT': env('DEFAULT_PORT')
+        'PORT': env('DEFAULT_PORT'),
+        'ATOMIC_REQUESTS': True,
+        # 设置数据库持久化连接
+        'CONN_MAX_AGE': env.int('CONN_MAX_AGE', default=60)
     },
     'ManPower': {
         'ENGINE': 'django.db.backends.oracle',
@@ -115,7 +118,8 @@ DATABASES = {
         'USER': env('MANPOWER_USER'),
         'PASSWORD': env('MANPOWER_PASSWORD'),
         'HOST': env('MANPOWER_HOST'),
-        'PORT': env('MANPOWER_PORT')
+        'PORT': env('MANPOWER_PORT'),
+        'CONN_MAX_AGE': env.int('CONN_MAX_AGE', default=60)
     }
 }
 

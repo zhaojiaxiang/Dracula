@@ -4,12 +4,12 @@ from DjangoUeditor.models import UEditorField
 
 
 class QaHead(models.Model):
-    ftesttyp = models.CharField(verbose_name='测试类型', max_length=6)
+    ftesttyp = models.CharField(db_index=True, verbose_name='测试类型', max_length=6)
     fsystemcd = models.CharField(verbose_name='系统名称', max_length=20)
     fprojectcd = models.CharField(verbose_name='项目名称', max_length=20)
-    fslipno = models.CharField(verbose_name='联络票号/订单号', max_length=20)
-    fslipno2 = models.IntegerField(verbose_name='订单支号（应用于PCL）', default=1)
-    fobjectid = models.CharField(verbose_name='测试对象', max_length=50)
+    fslipno = models.CharField(db_index=True, verbose_name='联络票号/订单号', max_length=20)
+    fslipno2 = models.IntegerField(db_index=True, verbose_name='订单支号（应用于PCL）', default=1)
+    fobjectid = models.CharField(db_index=True, verbose_name='测试对象', max_length=50)
     fobjectnm = models.CharField(verbose_name='测试对象', max_length=50)
     fcreatedte = models.DateTimeField(verbose_name='创建日期', auto_now_add=True)
     fcreateusr = models.CharField(verbose_name='创建者', max_length=24)
@@ -44,10 +44,10 @@ class QaHead(models.Model):
 
 
 class QaDetail(models.Model):
-    fclass1 = models.CharField(verbose_name='分类1', max_length=20, null=True, blank=True)
+    fclass1 = models.CharField(db_index=True, verbose_name='分类1', max_length=20, null=True, blank=True)
     fclass2 = models.CharField(verbose_name='分类2', max_length=20, null=True, blank=True)
-    fsortrule = models.CharField(verbose_name='排序规则', max_length=100, null=True, blank=True)
-    fregression = models.CharField(verbose_name='回归测试', max_length=1, default='N')
+    fsortrule = models.CharField(db_index=True, verbose_name='排序规则', max_length=100, null=True, blank=True)
+    fregression = models.CharField(db_index=True, verbose_name='回归测试', max_length=1, default='N')
     fcontent_text = UEditorField(verbose_name='测试截图', imagePath="qa/images/%Y%m%D/", width=1000, height=300,
                                  filePath="qa/files/%Y%m/", default='', null=True, blank=True)
     fcontent = models.TextField(verbose_name='测试用例')
@@ -57,7 +57,7 @@ class QaDetail(models.Model):
     fimpusr = models.CharField(verbose_name='新建者', max_length=24, null=True, blank=True)
     fapproval = models.CharField(verbose_name='审核标志', max_length=1, default='N')
     fapprovallot = models.IntegerField(verbose_name='审核批次', default=0)
-    fresult = models.CharField(verbose_name='测试结果', max_length=10, null=True, blank=True)
+    fresult = models.CharField(db_index=True, verbose_name='测试结果', max_length=10, null=True, blank=True)
     fngcnt = models.SmallIntegerField(verbose_name='NG次数', default=0)
     qahf = models.ForeignKey(QaHead, related_name='qahf', on_delete=models.CASCADE)
     fentdt = models.DateField(verbose_name='登入日期', auto_now_add=True)
