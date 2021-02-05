@@ -60,9 +60,9 @@ router.register('qa_project_mine', QaProjectForMineViewSet, basename='qa_project
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls')),
-    path('docs/', include_docs_urls(title="drf docs")),
+    path('api/admin/', admin.site.urls),
+    path('api/api-auth/', include('rest_framework.urls')),
+    path('api/docs/', include_docs_urls(title="drf docs")),
     path('api/', include(router.urls)),
     path('api/login/', obtain_jwt_token),
     #
