@@ -1,6 +1,6 @@
-const path = require('path');
-const CKEditorWebpackPlugin = require('@ckeditor/ckeditor5-dev-webpack-plugin');
-const {styles} = require('@ckeditor/ckeditor5-dev-utils');
+const path = require("path");
+const CKEditorWebpackPlugin = require("@ckeditor/ckeditor5-dev-webpack-plugin");
+const { styles } = require("@ckeditor/ckeditor5-dev-utils");
 
 module.exports = {
   devServer: {
@@ -9,28 +9,38 @@ module.exports = {
     disableHostCheck: true,
     proxy: {
       "/api": {
-        target: "http://127.0.0.1:8000",
+        target: "http://47.254.42.122/",
         changeOrigin: true,
         pathRewrite: {
           "^/api": "/api",
         },
       },
       "/media": {
-        target: "http://127.0.0.1:8000",
+        target: "http://47.254.42.122/",
         changeOrigin: true,
         pathRewrite: {
           "^/media": "/media",
         },
       },
       "/qa/files": {
-        target: "http://127.0.0.1:8000",
+        target: "http://47.254.42.122/",
         changeOrigin: true,
         pathRewrite: {
           "^/qa/files": "/files",
         },
-      },   
+      },
+    },
+    build: {
+      // Template for index.html
+      index: path.resolve(__dirname, "../dist/index.html"),
+
+      // Paths
+      assetsRoot: path.resolve(__dirname, "../dist"),
+      assetsSubDirectory: "static",
+      assetsPublicPath: "./",
     },
   },
+
   // The source of CKEditor is encapsulated in ES6 modules. By default, the code
   // from the node_modules directory is not transpiled, so you must explicitly tell
   // the CLI tools to transpile JavaScript files in all ckeditor5-* modules.
