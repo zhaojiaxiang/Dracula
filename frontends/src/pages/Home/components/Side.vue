@@ -35,7 +35,7 @@ export default {
   },
   methods:{
     push2home(){
-      this.$router.push({ name: "Home" });
+      this.$router.push({ name: "Home" }).catch(() => {});
     }
   }
 };

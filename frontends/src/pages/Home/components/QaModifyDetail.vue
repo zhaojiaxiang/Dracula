@@ -9,12 +9,14 @@
         <el-input
           v-model="form.fttlcodelines"
           placeholder="影响总行数"
+          type="number"
         ></el-input>
       </el-form-item>
       <el-form-item prop="fmodifiedlines" label="修改行数:" required>
         <el-input
           v-model="form.fmodifiedlines"
           placeholder="修改行数"
+          type="number"
         ></el-input>
       </el-form-item>
       <el-form-item prop="fcomplexity" label="复杂度:" required>
@@ -24,9 +26,28 @@
           <el-radio-button label="1.2"></el-radio-button>
         </el-radio-group>
       </el-form-item>
+      <el-form-item prop="fselflevel" label="自我评价难易等级:">
+        <el-select v-model="form.fselflevel" placeholder="请选择难易等级">
+          <el-option label="01" value="01"></el-option>
+          <el-option label="02" value="02"></el-option>
+          <el-option label="03" value="03"></el-option>
+          <el-option label="04" value="04"></el-option>
+          <el-option label="05" value="05"></el-option>
+          <el-option label="06" value="06"></el-option>
+          <el-option label="07" value="07"></el-option>
+          <el-option label="08" value="08"></el-option>
+          <el-option label="09" value="09"></el-option>
+          <el-option label="10" value="10"></el-option>
+        </el-select>
+      </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
-      <el-button type="primary" v-show="qahead_status==='1' ||qahead_status==='2'  "  @click="onSubmit('form')">确 定</el-button>
+      <el-button
+        type="primary"
+        v-show="qahead_status === '1' || qahead_status === '2'"
+        @click="onSubmit('form')"
+        >确 定</el-button
+      >
       <el-button @click="resetForm('form')">重 置</el-button>
       <el-button @click="dialogFormVisible = false">取 消</el-button>
     </div>
@@ -36,6 +57,7 @@
       ref="testplan"
       :cell-class-name="tableCellClassName"
       style="width: 100%"
+      :highlight-current-row="true"
     >
       <el-table-column prop="target_tests" label="目标测试数" width="95">
       </el-table-column>
@@ -59,7 +81,11 @@
       </el-table-column>
       <el-table-column prop="actual_total" label="实际总测试数" width="120">
       </el-table-column>
-      <el-table-column prop="actual_ng" label="实际NG数" width="100">
+      <el-table-column
+        prop="actual_ng"
+        label="实际NG数"
+        width="100"
+      >
       </el-table-column>
     </el-table>
   </el-dialog>
@@ -76,12 +102,13 @@ export default {
     return {
       dialogFormVisible: false,
       testplan: [],
-      qahead_status:"",
+      qahead_status: "",
       form: {
         id: "",
         fttlcodelines: "",
         fmodifiedlines: "",
         fcomplexity: "",
+        fselflevel:"",
       },
       rules: {
         fttlcodelines: [
@@ -97,12 +124,37 @@ export default {
     };
   },
   methods: {
-    tableCellClassName({ row, columnIndex }) {
-      if (row.actual_ng < row.target_ng) {
-        if (columnIndex === 7) {
-          console.log("hah ");
-          return "error-cell";
+    tableCellClassName({row, columnIndex}) {
+      var target_ng = row.target_ng
+      var target_regressions = row.target_regressions
+      var target_tests = row.target_tests
+      var target_total = row.target_total
+      var actual_ng = row.actual_ng
+      var actual_regressions = row.actual_regressions
+      var actual_tests = row.actual_tests
+      var actual_total = row.actual_total
+      if (columnIndex === 4) {
+        if(actual_tests < target_tests ){
+          return "table-cell-warning";
         }
+        return ''
+      } else if(columnIndex === 5){
+        if(actual_regressions < target_regressions ){
+          return "table-cell-warning";
+        }
+        return ''
+      }else if(columnIndex === 6){
+        if(actual_total < target_total ){
+          return "table-cell-warning";
+        }
+        return ''
+      }else if(columnIndex === 7){
+        if(actual_ng < target_ng ){
+          return "table-cell-warning";
+        }else if( actual_ng  > target_ng * 1.2 ){
+          return "table-cell-danger";
+        }
+        return ''
       }
     },
 
@@ -118,7 +170,7 @@ export default {
       var plan_resp = await getQaHeadPlanActual(id).catch(() => {
         this.$message.error("生成测试计划实绩数据异常");
       });
-      this.qahead_status = plan_resp.data.fstatus
+      this.qahead_status = plan_resp.data.fstatus;
       this.testplan.push(plan_resp.data);
     },
     async onSubmit(formName) {
@@ -149,7 +201,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .width-sytle {
   width: 90%;
 }
@@ -157,11 +209,11 @@ export default {
   padding-top: 0;
   padding-bottom: 0;
 }
-.warning-cell {
-  background: oldlace;
-}
 
-.el-row .error-cell {
-  color: #ff0000;
+.table-cell-danger {
+  background: #f5c6cb;
+}
+.table-cell-warning {
+  background: #ffeeba;
 }
 </style>

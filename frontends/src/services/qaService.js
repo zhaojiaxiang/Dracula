@@ -25,7 +25,10 @@ export async function updateQaHead(id, qaHeadInfo) {
 }
 
 export async function updateQaHeadSummary(id, qaHeadInfo) {
-  var resp = await axios.put("/api/qa/mcl_head_update_summary/" + id + "/", qaHeadInfo);
+  var resp = await axios.put(
+    "/api/qa/mcl_head_update_summary/" + id + "/",
+    qaHeadInfo
+  );
   return resp;
 }
 
@@ -35,7 +38,10 @@ export async function getQaHeadModifyDetail(id) {
 }
 
 export async function updateQaHeadModifyDetail(id, qaHeadInfo) {
-  var resp = await axios.put("/api/qa/mcl_head_modify_detail/" + id + "/", qaHeadInfo);
+  var resp = await axios.put(
+    "/api/qa/mcl_head_modify_detail/" + id + "/",
+    qaHeadInfo
+  );
   return resp;
 }
 
@@ -63,11 +69,11 @@ export async function getQaDetailContentText(id) {
 
 export async function updateQaDetailContentText(id, form) {
   var resp = await axios.put(
-    "/api/qa/mcl_detail_update_content_text/" + id + "/", form
+    "/api/qa/mcl_detail_update_content_text/" + id + "/",
+    form
   );
   return resp;
 }
-
 
 export async function updateQaDetail(id, qaDetailInfo) {
   var resp = await axios.put("/api/qa/mcl_detail/" + id + "/", qaDetailInfo);
@@ -79,52 +85,88 @@ export async function getQaDetail(id) {
   return resp;
 }
 
+export async function getPCLDetailbyClass(qahf, class1, class2) {
+  var resp = await axios.get(
+    "/api/qa/mcl_detail/?qahf=" +
+      qahf +
+      "&class1=" +
+      class1 +
+      "&class2=" +
+      class2
+  );
+  return resp;
+}
+
 export async function deleteQaDetail(id) {
   var resp = await axios.delete("/api/qa/mcl_detail/" + id + "/");
   return resp;
 }
 
-export async function getQaHeadPlanActual(id){
+export async function getQaHeadPlanActual(id) {
   var resp = await axios.get("/api/qa/mcl_head_target_actual/" + id + "/");
   return resp;
 }
 
-export async function updateQaDetailResult(id, qaDetailInfo){
-  var resp = await axios.put("/api/qa/mcl_detail_update_result/"+ id +"/", qaDetailInfo)
-  return resp
+export async function updateQaDetailResult(id, qaDetailInfo) {
+  var resp = await axios.put(
+    "/api/qa/mcl_detail_update_result/" + id + "/",
+    qaDetailInfo
+  );
+  return resp;
 }
 
-export async function fileUpdate(form){
-  var resp = await axios.post("/api/file_upload/", form)
-  return resp
+export async function fileUpdate(form) {
+  var resp = await axios.post("/api/file_upload/", form);
+  return resp;
 }
 
-export async function getDesignReview(slipno, objectid){
-  var resp = await axios.get("/api/qa/design_review/?fslipno="+ slipno +"&fobjectid=" + objectid)
-  return resp
+export async function getDesignReview(slipno, objectid) {
+  var resp = await axios.get(
+    "/api/qa/design_review/?fslipno=" + slipno + "&fobjectid=" + objectid
+  );
+  return resp;
 }
 
-export async function newDesignReview(form){
-  var resp = await axios.post("/api/qa/design_review/", form)
-  return resp
+export async function newDesignReview(form) {
+  var resp = await axios.post("/api/qa/design_review/", form);
+  return resp;
 }
 
-export async function updateDesignReview(id, form){
-  var resp = await axios.put("/api/qa/design_review/" + id + "/", form)
-  return resp
+export async function updateDesignReview(id, form) {
+  var resp = await axios.put("/api/qa/design_review/" + id + "/", form);
+  return resp;
 }
 
-export async function getCodeReview(slipno, objectid){
-  var resp = await axios.get("/api/qa/code_review/?fslipno="+ slipno +"&fobjectid=" + objectid)
-  return resp
+export async function getCodeReview(slipno, objectid) {
+  var resp = await axios.get(
+    "/api/qa/code_review/?fslipno=" + slipno + "&fobjectid=" + objectid
+  );
+  return resp;
 }
 
-export async function newCodeReview(form){
-  var resp = await axios.post("/api/qa/code_review/", form)
-  return resp
+export async function newCodeReview(form) {
+  var resp = await axios.post("/api/qa/code_review/", form);
+  return resp;
 }
 
-export async function updateCodeReview(id, form){
-  var resp = await axios.put("/api/qa/code_review/" + id + "/", form)
-  return resp
+export async function updateCodeReview(id, form) {
+  var resp = await axios.put("/api/qa/code_review/" + id + "/", form);
+  return resp;
+}
+
+export async function getPclQaClass1(id) {
+  var resp = await axios.get("/api/qa/pcl_class1/" + id + "/");
+  return resp;
+}
+
+export async function getPclQaClass2(qahf_id, class1) {
+  var resp = await axios.get(
+    "/api/qa/pcl_class2/?class1=" + class1 + "&qahf_id=" + qahf_id
+  );
+  return resp;
+}
+
+export async function getPCLCommitJudgment(qahf_id) {
+  var resp = await axios.get("/api/pcl_commit_judgment/?qahf=" + qahf_id);
+  return resp;
 }

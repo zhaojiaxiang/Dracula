@@ -84,7 +84,7 @@
           </el-col>
         </el-form-item>
 
-        <el-form-item label="负责人" size="medium" required>
+        <el-form-item label="负责人" prop="fleader" size="medium" required>
           <el-col :span="10">
             <el-form-item size="medium">
               <el-select
@@ -195,7 +195,7 @@ import { handleAllUser } from "../../../static/js/commonJs";
 export default {
   data() {
     return {
-      loading:false,
+      loading: false,
       drawer: false,
       projects: {},
       systems: {},
@@ -272,7 +272,6 @@ export default {
   },
   methods: {
     onSubmit(formName) {
-      this.loading = true;
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
           if (this.form.fleader.length === 0) {
@@ -286,8 +285,10 @@ export default {
           } else {
             this.form.fhelper = this.form.fhelper.join(",");
           }
-
-          var resp = await newLiaison(this.form);
+          this.loading = true;
+          var resp = await newLiaison(this.form).catch(() => {
+            this.$message.error("联络票创建异常！");
+          });
 
           if (!Object.prototype.hasOwnProperty.call(resp.data, "message")) {
             this.$emit("refreshHome");
@@ -303,7 +304,7 @@ export default {
           }
         }
       });
-      this.loading = false
+      this.loading = false;
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
@@ -311,28 +312,28 @@ export default {
   },
   mounted: function() {
     var this_ = this;
-    this_.loading = true
+    this_.loading = true;
     this.bus.$on("openSlipNoNew", async function() {
       this_.drawer = true;
 
       var p_resp = await getProjects().catch(() => {
         this.$message.error("项目主表数据获取异常");
-        this_.loading = false
+        this_.loading = false;
         return;
       });
       var s_resp = await getSystems().catch(() => {
         this.$message.error("系统主表数据获取异常");
-        this_.loading = false
+        this_.loading = false;
         return;
       });
       var g_resp = await getGroupUsers().catch(() => {
         this.$message.error("分组用户主表数据获取异常");
-        this_.loading = false
+        this_.loading = false;
         return;
       });
       var u_resp = await getAllUsers().catch(() => {
         this.$message.error("用户主表数据获取异常");
-        this_.loading = false
+        this_.loading = false;
         return;
       });
 
@@ -342,7 +343,7 @@ export default {
       var usersjson = u_resp.data;
       this_.allusers = handleAllUser(usersjson);
     });
-    this_.loading = false
+    this_.loading = false;
   },
 };
 </script>

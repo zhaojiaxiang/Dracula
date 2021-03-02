@@ -1,21 +1,25 @@
 <template>
-  <el-dialog title="逐条添加测试用例" :visible.sync="dialogFormVisible">
+  <el-dialog title="修改测试用例" :visible.sync="dialogFormVisible">
     <el-form ref="form" :rules="rules" :model="form">
       <el-form-item prop="fcontent" required>
-        <el-input
-          v-model="form.fcontent"
-          type="textarea"
-          :rows="3"
-          placeholder="测试用例"
-        ></el-input>
+        <el-input v-model="form.fcontent" placeholder="测试用例"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-col :span="12">
-          <el-form-item prop="fclass1">
+        <el-col :span="9">
+          <el-form-item prop="fclass1" required>
             <el-input
               v-model="form.fclass1"
               class="width-sytle"
-              placeholder="分类(非必输)"
+              placeholder="分类1"
+            ></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="9">
+          <el-form-item prop="fclass2" required>
+            <el-input
+              v-model="form.fclass2"
+              class="width-sytle"
+              placeholder="分类2"
             ></el-input>
           </el-form-item>
         </el-col>
@@ -26,17 +30,6 @@
               class="width-sytle"
               placeholder="排序规则(非必输)"
             ></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item prop="fregression">
-            <el-checkbox
-              v-model="form.fregression"
-              border
-              true-label="Y"
-              false-label="N"
-              >回归测试</el-checkbox
-            >
           </el-form-item>
         </el-col>
       </el-form-item>
@@ -50,12 +43,13 @@
 </template>
 
 <script>
-import { newQaDetail } from "./../../../services/qaService";
+import { updateQaDetail, getQaDetail } from "./../../../services/qaService";
 export default {
   data() {
     return {
       dialogFormVisible: false,
       form: {
+        id: "",
         fclass1: "",
         fclass2: "",
         fregression: "N",
@@ -68,31 +62,28 @@ export default {
           { required: true, message: "请输入测试用例", trigger: "change" },
         ],
         fregression: [{ required: false }],
-        fclass1: [{ required: false }],
+        fclass1: [{ required: true, message:"请输入分类1", trigger:"change" }],
+        fclass2: [{ required: true, message:"请输入分类2", trigger:"change" }],
         fsortrule: [{ required: false }],
       },
     };
   },
   methods: {
-    handleDialog(id) {
+    async handleDialog(id) {
       this.dialogFormVisible = !this.dialogFormVisible;
-      this.form.qahf = id;
+      var resp = await getQaDetail(id);
+      this.form = resp.data;
     },
     async onSubmit(formName) {
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
-          var resp = await newQaDetail(this.form).catch(() => {
-            this.$message.error("逐条添加测试项异常");
-          });
-
-          if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
-            this.$message.error(resp.data.message);
-          } else {
+          var resp = await updateQaDetail(this.form.id, this.form);
+          if (resp.status === 200) {
             this.$emit("refreshQaList");
             this.dialogFormVisible = false;
             this.resetForm("form");
             this.$message({
-              message: this.form.fcontent + "创建成功！",
+              message: this.form.fcontent + "修改成功！",
               type: "success",
             });
           }

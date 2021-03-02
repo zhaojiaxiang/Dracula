@@ -1,19 +1,8 @@
 <template>
   <div class="goTop">
-    <el-breadcrumb
-      separator-class="el-icon-arrow-right"
-      style="font-size:16px;margin-top: 5px;"
-    >
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item
-        :to="{ path: '/task/', query: { type: this.paramtype } }"
-        >任务列表</el-breadcrumb-item
-      >
-      <el-breadcrumb-item
-        >测试列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
-      >
-    </el-breadcrumb>
-
+    <div style="margin:10px">
+      <el-page-header @back="goBack"> </el-page-header>
+    </div>
     <el-row style="margin-top:20px">
       <el-col :span="24">
         <div style="text-align:right;margin-right:40px">
@@ -128,7 +117,7 @@ import {
   getQaDetailByQaHead,
   updateQaHead,
 } from "./../../../services/qaService";
-import QaConfirm from "./QaConfirm";
+import QaConfirm from "../../Home/components/QaConfirm";
 export default {
   components: {
     QaConfirm,
@@ -136,22 +125,16 @@ export default {
   data() {
     return {
       loading: false,
-      paramtype: "",
-      parentroute: "",
-      qaheadId:'',
+      qaheadId: "",
       qahead: {},
       qadetails: [],
     };
   },
 
   methods: {
-    isCanRollbackConfirm() {
-      if (this.qahead.fstatus === "4") {
-        return true;
-      }
-      return false;
+    goBack() {
+      window.history.go(-1);
     },
-
     handleTag(result) {
       if (!result) {
         return "";
@@ -165,23 +148,23 @@ export default {
     },
 
     isCanApproval() {
-      if (this.paramtype === "approval") {
-        if(this.qahead.fstatus === "1"){
+      for (var i in this.qadetails) {
+        if (this.qadetails[i].fapproval === "未审核") {
           return true;
-        }else{
-          for(var i in this.qadetails){
-            console.log(this.qadetails[i].fapproval);
-            if(this.qadetails[i].fapproval === '未审核'){
-              return true
-            }
-          }
         }
       }
       return false;
     },
 
     isCanConfirm() {
-      if (this.paramtype === "confirm" && this.qahead.fstatus === "3") {
+      if (this.qahead.fstatus === "3") {
+        return true;
+      }
+      return false;
+    },
+
+    isCanRollbackConfirm() {
+      if (this.qahead.fstatus === "4") {
         return true;
       }
       return false;
@@ -189,6 +172,10 @@ export default {
 
     confirmed() {
       this.refreshQaList();
+    },
+
+    handleContentText(id) {
+      this.$router.push({ name: "QaContentText", query: { qadf_id: id } });
     },
 
     async resultRollbackConfirm() {
@@ -221,10 +208,6 @@ export default {
         });
     },
 
-    handleContentText(id) {
-      this.$router.push({ name: "QaContentText", query: { qadf_id: id } });
-    },
-
     async resultApproval() {
       this.qahead.fstatus = "2";
       var resp = await updateQaHead(this.qahead.id, this.qahead).catch(() => {
@@ -239,7 +222,7 @@ export default {
     },
 
     async resultRollback() {
-      this.$confirm("此操作将取消确认该对象, 是否继续?", "提示", {
+      this.$confirm("此操作将回退该对象测试结果, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
@@ -329,11 +312,7 @@ export default {
   mounted: async function() {
     this.loading = true;
     this.qaheadId = this.$route.query.qahf_id;
-    this.paramtype = this.$route.query.type;
-    this.parentroute = this.$route.path.split("/")[1];
-
     this.refreshQaList();
-
     this.loading = false;
   },
 };

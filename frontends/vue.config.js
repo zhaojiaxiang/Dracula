@@ -1,6 +1,8 @@
 const path = require("path");
 const CKEditorWebpackPlugin = require("@ckeditor/ckeditor5-dev-webpack-plugin");
 const { styles } = require("@ckeditor/ckeditor5-dev-utils");
+// const targetUrl = "http://47.254.42.122/"
+// const targetUrl = "http://127.0.0.1:8000/"
 
 module.exports = {
   devServer: {
@@ -9,36 +11,36 @@ module.exports = {
     disableHostCheck: true,
     proxy: {
       "/api": {
-        target: "http://47.254.42.122/",
+        target: "http://127.0.0.1:8000",
         changeOrigin: true,
         pathRewrite: {
           "^/api": "/api",
         },
       },
       "/media": {
-        target: "http://47.254.42.122/",
+        target: "http://127.0.0.1:8000",
         changeOrigin: true,
         pathRewrite: {
           "^/media": "/media",
         },
       },
       "/qa/files": {
-        target: "http://47.254.42.122/",
-        changeOrigin: true,
+        target: "http://127.0.0.1:8000",
+        // changeOrigin: true,
         pathRewrite: {
-          "^/qa/files": "/files",
+          "^/qa/files": "/api/files",
         },
       },
     },
-    build: {
-      // Template for index.html
-      index: path.resolve(__dirname, "../dist/index.html"),
+    // build: {
+    //   // Template for index.html
+    //   index: path.resolve(__dirname, "../dist/index.html"),
 
-      // Paths
-      assetsRoot: path.resolve(__dirname, "../dist"),
-      assetsSubDirectory: "static",
-      assetsPublicPath: "./",
-    },
+    //   // Paths
+    //   assetsRoot: path.resolve(__dirname, "../dist"),
+    //   assetsSubDirectory: "static",
+    //   assetsPublicPath: "./",
+    // },
   },
 
   // The source of CKEditor is encapsulated in ES6 modules. By default, the code

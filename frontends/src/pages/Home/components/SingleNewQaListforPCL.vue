@@ -10,12 +10,21 @@
         ></el-input>
       </el-form-item>
       <el-form-item>
-        <el-col :span="12">
-          <el-form-item prop="fclass1">
+        <el-col :span="9">
+          <el-form-item prop="fclass1" required>
             <el-input
               v-model="form.fclass1"
               class="width-sytle"
-              placeholder="分类(非必输)"
+              placeholder="分类1"
+            ></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="9">
+          <el-form-item prop="fclass2" required>
+            <el-input
+              v-model="form.fclass2"
+              class="width-sytle"
+              placeholder="分类2"
             ></el-input>
           </el-form-item>
         </el-col>
@@ -26,17 +35,6 @@
               class="width-sytle"
               placeholder="排序规则(非必输)"
             ></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item prop="fregression">
-            <el-checkbox
-              v-model="form.fregression"
-              border
-              true-label="Y"
-              false-label="N"
-              >回归测试</el-checkbox
-            >
           </el-form-item>
         </el-col>
       </el-form-item>
@@ -68,7 +66,8 @@ export default {
           { required: true, message: "请输入测试用例", trigger: "change" },
         ],
         fregression: [{ required: false }],
-        fclass1: [{ required: false }],
+        fclass1: [{ required: true, message:"请输入分类1", trigger:"change" }],
+        fclass2: [{ required: true, message:"请输入分类2", trigger:"change" }],
         fsortrule: [{ required: false }],
       },
     };

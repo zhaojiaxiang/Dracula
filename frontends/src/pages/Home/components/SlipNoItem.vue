@@ -90,6 +90,8 @@
           >
         </template>
       </el-table-column>
+      <el-table-column prop="fodrno" label="订单号" min-width="100">
+      </el-table-column>
       <el-table-column prop="fbrief" label="详情" min-width="370" show-overflow-tooltip>
       </el-table-column>
       <el-table-column prop="plan" label="计划" width="220"> </el-table-column>
@@ -163,6 +165,8 @@ export default {
     openSlipNoQa(fslipno, fstatus) {
       if (fstatus !== "待办"){
         this.$router.push({ path: "/qa/", query: { slipno: fslipno } });
+      }else{
+        this.$message.error("请先开始该项目");
       }
     },
     filterStatus(value, row) {
@@ -211,6 +215,7 @@ export default {
         var factstart = liaisons[i].factstart;
         var factend = liaisons[i].factend;
         var freleasedt = liaisons[i].freleasedt;
+        var fodrno = liaisons[i].fodrno;
 
         var plan = fplnstart + " ~ " + fplnend;
         var actual = "";
@@ -237,6 +242,7 @@ export default {
           plan: plan,
           actual: actual,
           freleasedt: freleasedt,
+          fodrno: fodrno
         };
         this.tableData.push(liaison);
       }

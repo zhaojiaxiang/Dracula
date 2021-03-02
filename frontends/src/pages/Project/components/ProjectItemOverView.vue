@@ -3,10 +3,7 @@
     <el-row>
       <el-col :xs="22" :sm="22" :md="22" :lg="22" :xl="22">
         <div>
-          <div>1</div>
-          <div></div>
-          <div></div>
-          <div></div>
+          <ProjectSlipNoItem></ProjectSlipNoItem>
         </div>
       </el-col>
       <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2"
@@ -18,12 +15,24 @@
 </template>
 
 <script>
+import ProjectSlipNoItem  from "./ProjectSlipNoItem";
 import MyTaskBar from "./../../Home/components/MyTaskBar";
 export default {
   components: {
     MyTaskBar,
+    ProjectSlipNoItem
   },
-  methods: {},
+  data() {
+    return {
+      order_no: '',
+    };
+  },
+  methods: {
+    
+  },
+  mounted:function(){
+    this.order_no = this.$route.query.order_no;
+  }
 };
 </script>
 

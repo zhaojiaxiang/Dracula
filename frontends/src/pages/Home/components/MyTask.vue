@@ -128,7 +128,7 @@ export default {
       if (paramtype === "mcl") {
         routername = "QaTestList";
       } else {
-        routername = "QaPclList";
+        routername = "QaPclClass1";
       }
       this.$router.push({
         name: routername,

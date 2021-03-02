@@ -7,8 +7,8 @@
         :span="7"
         class="card-style"
       >
-        <el-card shadow="hover" class="card-color">
-          <div>
+        <el-card shadow="hover" class="card-color mouse_style_link">
+          <div @click="openProjectOverView(item.order_no)">
             <el-row>
               <el-col :span="24"
                 ><div>
@@ -107,6 +107,10 @@ export default {
     };
   },
   methods: {
+
+    openProjectOverView(order){
+      this.$router.push({name:'ProjectOverview',query: {order_no: order}})
+    },
     refreshProjectItems() {
       this.getProjectItems();
     },
@@ -162,5 +166,8 @@ export default {
 }
 .bg-purple-light {
   background: #e5e9f2;
+}
+.mouse_style_link{
+  cursor:pointer;  
 }
 </style>

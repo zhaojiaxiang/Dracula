@@ -9,8 +9,8 @@
     </Guide>
     <el-row>
       <el-col>
-        <el-card shadow="hover" class="task-card-color">
-          <div @click="mcl()">
+        <el-card shadow="hover" class="task-card-color mouse_style_link">
+          <div @click="mcl()" >
             <el-row>
               <el-col :span="24"
                 ><div style="text-align:center">
@@ -29,7 +29,7 @@
             </el-row>
           </div>
         </el-card>
-        <el-card shadow="hover" class="task-card-color">
+        <el-card shadow="hover" class="task-card-color mouse_style_link">
           <div @click="pcl()">
             <el-row>
               <el-col :span="24"
@@ -49,7 +49,7 @@
             </el-row>
           </div>
         </el-card>
-        <el-card shadow="hover" class="task-card-color">
+        <el-card shadow="hover" class="task-card-color mouse_style_link">
           <div @click="approval()">
             <el-row>
               <el-col :span="24"
@@ -69,7 +69,7 @@
             </el-row>
           </div>
         </el-card>
-        <el-card shadow="hover" class="task-card-color">
+        <el-card shadow="hover" class="task-card-color mouse_style_link">
           <div @click="confirm()">
             <el-row>
               <el-col :span="24"
@@ -89,7 +89,7 @@
             </el-row>
           </div>
         </el-card>
-        <el-card shadow="hover" class="task-card-color">
+        <el-card shadow="hover" class="task-card-color mouse_style_link">
           <div @click="release()">
             <el-row>
               <el-col :span="24"
@@ -167,5 +167,9 @@ export default {
 .task-card-color {
   background: #f7f7f7;
   margin-bottom: 5px;
+}
+
+.mouse_style_link{
+  cursor:pointer;  
 }
 </style>

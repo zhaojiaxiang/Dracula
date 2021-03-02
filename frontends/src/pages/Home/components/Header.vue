@@ -1,7 +1,7 @@
 <template>
   <div class="header-height">
     <b-navbar toggleable="lg" type="dark" variant="dark" class="header-height">
-      <b-img :src="settings.picture" alt="Transparent image"></b-img>
+      <b-img :src="logo" alt="Ammic Logo"></b-img>
       <b-navbar-brand style="margin-left:20px">上海埃米柯管理系统</b-navbar-brand>
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
       
@@ -23,7 +23,7 @@
               <b-icon icon="person-fill"></b-icon>{{userInfo.name}}
             </template>
             <b-dropdown-item @click="settingClick"><b-icon icon="gear-fill" aria-hidden="true"></b-icon>  设置</b-dropdown-item>
-            <b-dropdown-item><b-icon icon="power" aria-hidden="true"></b-icon>  退出</b-dropdown-item>
+            <b-dropdown-item @click="logout"><b-icon icon="power" aria-hidden="true"></b-icon>  退出</b-dropdown-item>
           </b-nav-item-dropdown>
 
         <b-avatar variant="info" :src="userInfo.avatar" class="mr-sm-2"></b-avatar>
@@ -35,12 +35,13 @@
 
 <script>
 import { getLiaisons } from '@/services/userService'
-import { getSettings } from "@/services/commonService.js";
+import { removeToken } from "@/utils/auth";
 export default {
   data() {
     return {
       userInfo:{},
-      settings:{}
+      settings:{},
+      logo:localStorage.getItem('logo')
     }
   },
   methods: {
@@ -53,13 +54,18 @@ export default {
     settingClick:function(){
       var resp = getLiaisons()
       console.log(resp)
+    },
+    logout:function(){
+      removeToken()
+      window.location.reload()
     }
     
   },
-  mounted:async function(){
+  mounted: function(){
     this.userInfo = JSON.parse(localStorage.getItem("UserInfo"));
-    var resp = await getSettings(1)
-    this.settings = resp.data
+    if(this.userInfo === null){
+      this.userInfo = {'name':'', 'avatar':''}
+    }
   }
 };
 </script>

@@ -30,6 +30,18 @@ export default {
         component: () => import("@/pages/Home/components/QaTestList"),
       },
       {
+        path: "/qa/pclclass1",
+        name: "QaPclClass1",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/Home/components/QaPclClass1"),
+      },
+      {
+        path: "/qa/pclclass2",
+        name: "QaPclClass2",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/Home/components/QaPclClass2"),
+      },
+      {
         path: "/qa/pcllist",
         name: "QaPclList",
         meta: { requiresAuth: true },
@@ -64,6 +76,12 @@ export default {
         name: "ProjectOverview",
         meta: { requiresAuth: true },
         component: () => import("@/pages/Project/components/ProjectItemOverView"),
+      },
+      {
+        path: "/project/overview/qa",
+        name: "ProjectOverviewQA",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/Project/components/ProjectQaList"),
       },
       
     ],
