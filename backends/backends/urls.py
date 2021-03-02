@@ -24,11 +24,12 @@ from accounts.views import UserViewSet, SystemSettingViewSet, MyGroupUserViewSet
     MyMcl, MyRelease, MyConfirm, MyApproval, MyPcl
 from backends import settings
 from liaisons.views import LiaisonsViewSet, LiaisonUpdateStatusViewSet, QaProjectViewSet, QaProjectForMineViewSet, \
-    QaProjectForGroupViewSet, LiaisonFileUpload
+    QaProjectForGroupViewSet, LiaisonFileUpload, QaProjectDetailView
 from projects.views import ProjectsViewSet
-from qa.views import MCLQaHeadViewSet, MCLQaDetailViewSet, MCLQaDetailUpdateResultViewSet, \
-    MCLQaDetailUpdateContentTextViewSet, QaHeadUpdateObjectSummaryViewSet, QaHeadModifyDetailViewSet, \
-    QaHeadTargetAndActualViewSet, CkEditorImageUpload, CkEditorFileUpload, RecoverFile
+from qa.views import MCLQaHeadViewSet, QaDetailViewSet, QaDetailUpdateResultViewSet, \
+    QaDetailUpdateContentTextViewSet, QaHeadUpdateObjectSummaryViewSet, QaHeadModifyDetailViewSet, \
+    QaHeadTargetAndActualViewSet, CkEditorImageUpload, CkEditorFileUpload, RecoverFile, PCLQaClass1ViewSet, \
+    PCLQaClass2ViewSet, PCLCommitJudgment
 from reports.views import ReportListViewSet
 from reviews.views import DesignReviewViewSet, CodeReviewViewSet
 from systems.views import SystemsViewSet
@@ -46,9 +47,11 @@ router.register('qa/mcl_head', MCLQaHeadViewSet, basename='mcl_head')
 router.register('qa/mcl_head_update_summary', QaHeadUpdateObjectSummaryViewSet, basename='mcl_head_update_summary')
 router.register('qa/mcl_head_modify_detail', QaHeadModifyDetailViewSet, basename='mcl_head_modify_detail')
 router.register('qa/mcl_head_target_actual', QaHeadTargetAndActualViewSet, basename='mcl_head_target_actual')
-router.register('qa/mcl_detail', MCLQaDetailViewSet, basename='mcl_detail')
-router.register('qa/mcl_detail_update_result', MCLQaDetailUpdateResultViewSet, basename='mcl_detail_update_result')
-router.register('qa/mcl_detail_update_content_text', MCLQaDetailUpdateContentTextViewSet,
+router.register('qa/mcl_detail', QaDetailViewSet, basename='mcl_detail')
+router.register('qa/pcl_class1', PCLQaClass1ViewSet, basename='pcl_class1')
+router.register('qa/pcl_class2', PCLQaClass2ViewSet, basename='pcl_class2')
+router.register('qa/mcl_detail_update_result', QaDetailUpdateResultViewSet, basename='mcl_detail_update_result')
+router.register('qa/mcl_detail_update_content_text', QaDetailUpdateContentTextViewSet,
                 basename='mcl_detail_update_content_text')
 router.register('qa/design_review', DesignReviewViewSet, basename='design_review')
 router.register('qa/code_review', CodeReviewViewSet, basename='code_review')
@@ -73,9 +76,11 @@ urlpatterns = [
     path('api/mine_task_approval/', MyApproval.as_view()),
     path('api/mine_task_conform/', MyConfirm.as_view()),
     path('api/mine_task_release/', MyRelease.as_view()),
-    path('files/<str:filename>', RecoverFile.as_view()),
+    path('api/files/<str:filename>', RecoverFile.as_view()),
     path('api/image_upload/', CkEditorImageUpload.as_view()),
     path('api/file_upload/', CkEditorFileUpload.as_view()),
     path('api/liaison_file_upload/', LiaisonFileUpload.as_view()),
+    path('api/pcl_commit_judgment/', PCLCommitJudgment.as_view()),
+    path('api/qa_project_detail_view/', QaProjectDetailView.as_view()),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
               + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

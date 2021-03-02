@@ -14,6 +14,7 @@ from liaisons.filters import LiaisonsFilter
 from liaisons.models import Liaisons
 from liaisons.serializers import LiaisonsSerializer, LiaisonUpdateStatusSerializer, QaProjectSerializer
 from qa.models import QaHead, QaDetail
+from utils.db_connection import query_single_with_no_parameter, db_connection_execute
 from utils.utils import create_folder
 
 
@@ -85,6 +86,7 @@ class QaProjectForGroupViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin,
     """
     本组项目明细ViewSet
     """
+
     def get_queryset(self):
         user = self.request.user
         return Liaisons.objects.values("fodrno").filter(fgroups__ammic_group__exact=user.ammic_group.id).distinct()
@@ -96,6 +98,7 @@ class QaProjectForMineViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, 
     """
     与本人相关的项目明细ViewSet
     """
+
     def get_queryset(self):
         user = self.request.user
         return Liaisons.objects.values("fodrno").filter(Q(fassignedto__exact=user.name) |
@@ -109,10 +112,51 @@ class QaProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, Generic
     """
     所有项目明细ViewSet
     """
+
     def get_queryset(self):
         return Liaisons.objects.values("fodrno").distinct()
 
     serializer_class = QaProjectSerializer
+
+
+class QaProjectDetailView(APIView):
+
+    def get(self, request):
+        order_no = request.GET.get('order_no')
+        sql_str = f"""
+                    select liaisonf.id           slip_id,
+                           liaisonf.fslipno      slip_slip,
+                           liaisonf.fstatus      slip_status,
+                           liaisonf.fbrief       slip_brief,
+                           liaisonf.fassignedto  slip_assignedto,
+                           liaisonf.fplnstart    slip_plnstart,
+                           liaisonf.fplnend      slip_plnend,
+                           liaisonf.factstart    slip_actstart,
+                           liaisonf.factend      slip_actend,
+                           liaisonf.freleasedt   slip_release,
+                           liaisonf.fplnmanpower slip_plnmanpower,
+                           liaisonf.factmanpower slip_actmanpower,
+                           design.id             design_id,
+                           qahf.id               qa_id,
+                           qahf.fobjectid        qa_object,
+                           qahf.fstatus          qa_status,
+                           qahf.fobjmodification qa_modification,
+                           code.id               code_id
+                    from liaisonf,
+                         qahf,
+                         codereview code,
+                         codereview design
+                    where fodrno = '{order_no}'
+                      and liaisonf.fslipno = qahf.fslipno
+                      and code.fslipno = qahf.fslipno
+                      and code.fobjectid = qahf.fobjectid
+                      and design.fslipno = liaisonf.fslipno
+                      and design.fobjectid = 'Design Review'
+                    order by liaisonf.fslipno;
+                  """
+
+        project_detail = db_connection_execute(sql_str, 'dict')
+        return Response(data=project_detail, status=status.HTTP_200_OK)
 
 
 class LiaisonFileUpload(APIView):

@@ -27,6 +27,7 @@ class QaHead(models.Model):
     fnote = models.TextField(verbose_name='备注', null=True, blank=True)
     fobjmodification = models.TextField(verbose_name='程序修改概要', null=True, blank=True)
     freviewcode = models.TextField(verbose_name='程序确认结果', null=True, blank=True)
+    fselflevel = models.CharField(verbose_name='自我评价难易等级', max_length=2, null=True, blank=True)
     flevel = models.CharField(verbose_name='难易等级', max_length=2, null=True, blank=True)
     fentdt = models.DateField(verbose_name='登入日期', auto_now_add=True)
     fentusr = models.CharField(verbose_name='登录者', max_length=24, null=True, blank=True)

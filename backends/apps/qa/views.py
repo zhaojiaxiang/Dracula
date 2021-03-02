@@ -11,18 +11,19 @@ from sendfile import sendfile
 from liaisons.models import Liaisons
 from qa.filters import QaHeadFilter, QaDetailFilter
 from qa.models import QaHead, QaDetail
-from qa.serializers import MCLQaHeadSerializer, QaDetailSerializer, QaDetailUpdateResultSerializer, \
+from qa.serializers import QaHeadSerializer, QaDetailSerializer, QaDetailUpdateResultSerializer, \
     QaDetailUpdateContentTextSerializer, QaHeadUpdateObjectSummarySerializer, QaHeadModifyDetailSerializer, \
-    QaHeadTargetAndActualSerializer
+    QaHeadTargetAndActualSerializer, PCLQaClass1Serializer, PCLQaClass2Serializer
 from utils.utils import create_folder
 
 
 class MCLQaHeadViewSet(viewsets.ModelViewSet):
     queryset = QaHead.objects.order_by('fstatus', '-fcreatedte')
-    serializer_class = MCLQaHeadSerializer
+    serializer_class = QaHeadSerializer
 
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filter_class = QaHeadFilter
+
     # ordering_fields = ['fstatus', '-fcreatedte']
 
     @transaction.atomic()
@@ -69,8 +70,8 @@ class QaHeadTargetAndActualViewSet(mixins.ListModelMixin, mixins.RetrieveModelMi
     serializer_class = QaHeadTargetAndActualSerializer
 
 
-class MCLQaDetailViewSet(viewsets.ModelViewSet):
-    queryset = QaDetail.objects.all().order_by('fsortrule', 'fclass1', 'fregression')
+class QaDetailViewSet(viewsets.ModelViewSet):
+    queryset = QaDetail.objects.all().order_by('fsortrule', 'fclass1', 'fclass2', 'fregression')
     serializer_class = QaDetailSerializer
 
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
@@ -78,22 +79,59 @@ class MCLQaDetailViewSet(viewsets.ModelViewSet):
     # ordering_fields = ['fsortrule']
 
 
-class MCLQaDetailUpdateResultViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
-                                     viewsets.GenericViewSet):
+class QaDetailUpdateResultViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+                                  viewsets.GenericViewSet):
     queryset = QaDetail.objects.all()
     serializer_class = QaDetailUpdateResultSerializer
 
 
-class MCLQaDetailUpdateContentTextViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
-                                          viewsets.GenericViewSet):
+class QaDetailUpdateContentTextViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+                                       viewsets.GenericViewSet):
     queryset = QaDetail.objects.all()
     serializer_class = QaDetailUpdateContentTextSerializer
+
+
+class PCLQaClass1ViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    queryset = QaHead.objects.filter(ftesttyp__exact='PCL')
+    serializer_class = PCLQaClass1Serializer
+
+
+class PCLQaClass2ViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    serializer_class = PCLQaClass2Serializer
+
+    def get_queryset(self):
+        qahf = self.request.GET.get('qahf_id')
+        class1 = self.request.GET.get('class1')
+        queryset = QaDetail.objects.filter(qahf_id__exact=qahf, fclass1__exact=class1).values('qahf_id',
+                                                                                              'fclass1').distinct()
+        return queryset
+
+
+class PCLCommitJudgment(APIView):
+
+    def get(self, request):
+        qahf_id = request.GET.get('qahf')
+        qahead = QaHead.objects.filter(pk=qahf_id)
+        qa_status = qahead[0].fstatus
+        qa_result = 'OK'
+        qadetail = QaDetail.objects.filter(qahf_id__exact=qahf_id).values('fresult').distinct()
+        for qa in qadetail:
+            if qa['fresult'] == 'NG':
+                qa_result = 'NG'
+                break
+            elif qa['fresult'] is None:
+                qa_result = 'NG'
+                break
+
+        data = {'status': qa_status, 'result': qa_result}
+        return Response(data=data, status=status.HTTP_200_OK)
 
 
 class RecoverFile(APIView):
     """
     富文本编辑器文件展示处理API
     """
+
     def get(self, request, filename):
         ret_url = os.path.join("media/upload/image", filename[0], filename[1], filename)
 
@@ -104,6 +142,7 @@ class CkEditorImageUpload(APIView):
     """
     富文本编辑器图片上传API
     """
+
     def post(self, request):
         image = request.FILES.get('file')
 
@@ -132,13 +171,13 @@ class CkEditorFileUpload(APIView):
     """
     富文本编辑器文件上传API
     """
-    def post(self, request):
 
+    def post(self, request):
         orig_file = request.FILES.get('file')
 
         extension = orig_file.name.split('.')[1].lower()
 
-        file_name = "T"+str(uuid.uuid4()) + '.' + extension
+        file_name = "T" + str(uuid.uuid4()) + '.' + extension
 
         upload_path = os.path.join("media/upload/image", file_name[0], file_name[1])
 

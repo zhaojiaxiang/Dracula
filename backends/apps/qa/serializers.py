@@ -1,7 +1,7 @@
 import datetime
 
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import Max, Q
 from math import ceil
 from rest_framework import serializers
 
@@ -10,7 +10,7 @@ from qa.models import QaHead, QaDetail
 from reviews.models import CodeReview
 
 
-class MCLQaHeadSerializer(serializers.ModelSerializer):
+class QaHeadSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     fcreatedte = serializers.DateTimeField(read_only=True)
     fcreateusr = serializers.CharField(read_only=True)
@@ -206,7 +206,82 @@ class QaHeadModifyDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QaHead
-        fields = ('id', 'fttlcodelines', 'fmodifiedlines', 'fcomplexity')
+        fields = ('id', 'fttlcodelines', 'fmodifiedlines', 'fcomplexity', 'fselflevel')
+
+
+class PCLQaClass1Serializer(serializers.ModelSerializer):
+    class1 = serializers.SerializerMethodField()
+
+    class Meta:
+        model = QaHead
+        fields = ('id', 'class1')
+
+    def get_class1(self, obj):
+        qadetail = QaDetail.objects.filter(qahf_id__exact=obj.id).values('fclass1').distinct()
+        for class1 in qadetail:
+            class2 = QaDetail.objects.filter(qahf_id__exact=obj.id, fclass1__exact=class1['fclass1']).values(
+                'fclass2').distinct()
+
+            class1['class2_cnt'] = class2.count()
+
+            mcl = QaDetail.objects.filter(qahf_id__exact=obj.id, fclass1__exact=class1['fclass1'])
+
+            class1['test_cnt'] = mcl.count()
+
+            qahead = QaHead.objects.filter(pk=obj.id)
+            class1['status'] = qahead[0].fstatus
+
+            tested_mcl = QaDetail.objects.filter(qahf_id__exact=obj.id, fclass1__exact=class1['fclass1'],
+                                                 fresult__in=('NG', 'NGOK', 'OK'))
+
+            class1['tested_cnt'] = tested_mcl.count()
+
+            canceled_mcl = QaDetail.objects.filter(qahf_id__exact=obj.id, fclass1__exact=class1['fclass1'],
+                                                   fresult__exact='CANCEL')
+
+            class1['canceled_cnt'] = canceled_mcl.count()
+
+            class1['ng'] = QaDetail.objects.filter(qahf_id__exact=obj.id, fclass1__exact=class1['fclass1'],
+                                                   fresult__exact='NG').count()
+
+        return qadetail
+
+
+class PCLQaClass2Serializer(serializers.ModelSerializer):
+    class2 = serializers.SerializerMethodField()
+
+    class Meta:
+        model = QaDetail
+        fields = ('fclass1', 'class2')
+
+    def get_class2(self, obj):
+        class1 = self.context['request'].GET.get('class1')
+        qahf = self.context['request'].GET.get('qahf_id')
+        qadetail = QaDetail.objects.filter(qahf_id__exact=qahf, fclass1__exact=class1).values('fclass2').distinct()
+
+        for class2 in qadetail:
+            mcl = QaDetail.objects.filter(qahf_id__exact=qahf, fclass1__exact=class1, fclass2__exact=class2['fclass2'])
+            class2['test_cnt'] = mcl.count()
+
+            qahead = QaHead.objects.filter(pk=qahf)
+            class2['status'] = qahead[0].fstatus
+
+            tested_mcl = QaDetail.objects.filter(qahf_id__exact=qahf, fclass1__exact=class1,
+                                                 fclass2__exact=class2['fclass2'],
+                                                 fresult__in=('NG', 'NGOK', 'OK'))
+
+            class2['tested_cnt'] = tested_mcl.count()
+
+            canceled_mcl = QaDetail.objects.filter(qahf_id__exact=qahf, fclass1__exact=class1,
+                                                   fclass2__exact=class2['fclass2'],
+                                                   fresult__exact='CANCEL')
+
+            class2['canceled_cnt'] = canceled_mcl.count()
+
+            class2['ng'] = QaDetail.objects.filter(qahf_id__exact=qahf, fclass1__exact=class1,
+                                                   fclass2__exact=class2['fclass2'], fresult__exact='NG').count()
+
+        return qadetail
 
 
 class QaHeadTargetAndActualSerializer(serializers.ModelSerializer):
@@ -222,8 +297,8 @@ class QaHeadTargetAndActualSerializer(serializers.ModelSerializer):
     class Meta:
         model = QaHead
         fields = (
-        'id', 'fttlcodelines', 'fmodifiedlines', 'fcomplexity', 'fstatus', 'target_tests', 'target_regressions',
-        'target_total', 'target_ng', 'actual_tests', 'actual_regressions', 'actual_total', 'actual_ng')
+            'id', 'fttlcodelines', 'fmodifiedlines', 'fcomplexity', 'fstatus', 'target_tests', 'target_regressions',
+            'target_total', 'target_ng', 'actual_tests', 'actual_regressions', 'actual_total', 'actual_ng')
 
     def get_target_tests(self, obj):
         if obj.fmodifiedlines:
@@ -279,8 +354,8 @@ class QaDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QaDetail
-        fields = ('id', 'fclass1', 'fregression', 'fcontent', 'fsortrule', 'fimpdte', 'fimpusr', 'ftestdte', 'ftestusr',
-                  'fapproval', 'fresult', 'fngcnt', 'qahf', 'fapproval', 'fcontent_text')
+        fields = ('id', 'fclass1', 'fclass2', 'fregression', 'fcontent', 'fsortrule', 'fimpdte', 'fimpusr', 'ftestdte',
+                  'ftestusr', 'fapproval', 'fresult', 'fngcnt', 'qahf', 'fapproval', 'fcontent_text')
 
         # validators = [
         #     UniqueTogetherValidator(

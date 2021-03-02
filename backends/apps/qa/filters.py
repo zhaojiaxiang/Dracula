@@ -16,7 +16,9 @@ class QaHeadFilter(django_filters.rest_framework.FilterSet):
 
 class QaDetailFilter(django_filters.rest_framework.FilterSet):
     qahf = django_filters.CharFilter(field_name='qahf__id', lookup_expr='contains')
+    class1 = django_filters.CharFilter(field_name='fclass1', lookup_expr='contains')
+    class2 = django_filters.CharFilter(field_name='fclass2', lookup_expr='contains')
 
     class Meta:
         model = QaDetail
-        fields = ("qahf", )
+        fields = ("qahf", 'class1', 'class2')
