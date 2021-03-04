@@ -1,5 +1,5 @@
 <template>
-  <el-dialog title="批量添加测试用例" :visible.sync="dialogFormVisible">
+  <el-dialog title="批量添加PCL测试用例" :visible.sync="dialogFormVisible">
     <el-form>
       <el-form-item>
         <el-input
@@ -49,33 +49,31 @@ export default {
       // }
 
       for (var i in this.qadetails) {
-        if (this.qadetails[i].length < 2) {
-          this.$message.error("粘贴文本格式错误: 测试用例，分类(非必须)，排序规则(非必须)");
+        if (this.qadetails[i].length < 3) {
+          this.$message.error("粘贴文本格式错误: 分类1，分类2，测试用例，排序规则(非必须)");
           this.fullscreenLoading = false;
           this.qadetails = [];
           return;
-        }
-        if (this.qadetails[i].length === 2) {
-          this.qadetails[i][2] = "";
-          this.qadetails[i][3] = "";
         }
         if (this.qadetails[i].length === 3) {
           this.qadetails[i][3] = "";
         }
-        if (this.qadetails[i][0] === "Y" || this.qadetails[i][0] === "N") {
-          console.log("");
-        } else {
-          var rownum = parseInt(i) + 1;
-          this.$message.error("第" + rownum + "行，回归测试只能为 Y 或者 N");
-          this.fullscreenLoading = false;
-          this.qadetails = [];
+
+        if(this.qadetails[i][0].length > 20){
+          this.$message.error("分类1长度不可大于20");
+          return;
+        }
+
+        if(this.qadetails[i][1].length > 20){
+          this.$message.error("分类2长度不可大于20");
           return;
         }
 
         var form = {};
-        form["fregression"] = this.qadetails[i][0];
-        form["fcontent"] = this.qadetails[i][1];
-        form["fclass1"] = this.qadetails[i][2];
+        form["fregression"] = "N"
+        form["fclass1"] = this.qadetails[i][0];
+        form["fclass2"] = this.qadetails[i][1];
+        form["fcontent"] = this.qadetails[i][2];
         form["fsortrule"] = this.qadetails[i][3];
         form["qahf"] = this.qaheadid;
 

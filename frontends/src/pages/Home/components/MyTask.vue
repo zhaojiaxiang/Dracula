@@ -27,6 +27,26 @@
       </el-table-column>
 
       <el-table-column
+        prop="fstatus"
+        label="状态"
+        width="100"
+        :filters="[
+          { text: '初始', value: '初始' },
+          { text: '已审核', value: '已审核' },
+          { text: '已提交', value: '已提交' },
+          { text: '已确认', value: '已确认' },
+        ]"
+        :filter-method="filterStatus"
+        filter-placement="bottom-end"
+      >
+        <template slot-scope="scope">
+          <el-tag :type="scope.row.tagtype" disable-transitions>{{
+            scope.row.fstatus
+          }}</el-tag>
+        </template>
+      </el-table-column>
+
+      <el-table-column
         prop="fobjectid"
         label="测试对象"
         width="250"
@@ -44,7 +64,7 @@
       <el-table-column label="设计Review" width="110">
         <template slot-scope="scope">
           <el-link
-            @click="handleClick(scope.row)"
+            @click="openDesignReview(scope.row.fslipno)"
             style="margin-left:10px"
             type="text"
             size="medium"
@@ -58,7 +78,7 @@
       <el-table-column label="代码Review" width="110">
         <template slot-scope="scope">
           <el-link
-            @click="handleClick(scope.row)"
+            @click="openCodeReview(scope.row.fslipno, scope.row.fobjectid)"
             style="margin-left:10px"
             type="text"
             size="medium"
@@ -103,6 +123,8 @@
         </template>
       </el-table-column>
     </el-table>
+    <QaDesignReview ref="QaDesignReview" :isdisable="isdisable"></QaDesignReview>
+    <QaCodeReview ref="QaCodeReview" :isdisable="isdisable"></QaCodeReview>
   </div>
 </template>
 
@@ -114,7 +136,13 @@ import {
   getMyApproval,
   getMyRelease,
 } from "./../../../services/liaisonService";
+import QaDesignReview from "./QaDesignReview";
+import QaCodeReview from "./QaCodeReview";
 export default {
+  components:{
+QaDesignReview,
+QaCodeReview,
+  },
   data() {
     return {
       loading: false,
@@ -136,11 +164,23 @@ export default {
       });
     },
 
+    filterStatus(value, row) {
+      return row.fstatus === value;
+    },
+
     openMyTaskList(id, paramtype) {
       this.$router.push({
         name: "TaskList",
         query: { qahf_id: id, type: paramtype },
       });
+    },
+
+    openDesignReview(slipno) {
+      this.$refs.QaDesignReview.handleDialog(slipno);
+    },
+
+    openCodeReview(slipno, objectid) {
+      this.$refs.QaCodeReview.handleDialog(slipno, objectid);
     },
 
     async refreshTask() {
@@ -175,6 +215,22 @@ export default {
             this.$message.error("待确认数据获取异常");
           });
           this.tasktable = resp.data;
+        }
+      }
+
+      for(var i in this.tasktable){
+        if (this.tasktable[i].fstatus === "1") {
+          this.tasktable[i].fstatus = "初始";
+          this.tasktable[i].tagtype = "info";
+        } else if (this.tasktable[i].fstatus === "2") {
+          this.tasktable[i].fstatus = "已审核";
+          this.tasktable[i].tagtype = "";
+        } else if (this.tasktable[i].fstatus === "3") {
+          this.tasktable[i].fstatus = "已提交";
+          this.tasktable[i].tagtype = "warning";
+        } else if (this.tasktable[i].fstatus === "4") {
+          this.tasktable[i].fstatus = "已确认";
+          this.tasktable[i].tagtype = "success";
         }
       }
     },

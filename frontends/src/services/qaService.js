@@ -60,6 +60,11 @@ export async function getQaDetailByQaHead(id) {
   return resp;
 }
 
+export async function getQaDetailByQaHeadandClass1(id, class1) {
+  var resp = await axios.get("/api/qa/mcl_detail/?qahf=" + id + "&class1=" + class1);
+  return resp;
+}
+
 export async function getQaDetailContentText(id) {
   var resp = await axios.get(
     "/api/qa/mcl_detail_update_content_text/" + id + "/"

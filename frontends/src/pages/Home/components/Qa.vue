@@ -81,7 +81,7 @@
             </el-table-column>
             <el-table-column prop="fstatus" label="状态" width="130">
               <template slot-scope="scope">
-                <el-tag :type="tagtype" disable-transitions>{{
+                <el-tag :type="scope.row.tagtype" disable-transitions>{{
                   scope.row.fstatus
                 }}</el-tag>
               </template>
@@ -159,7 +159,6 @@ export default {
       loading:false,
       liaison: {},
       qaheads: [],
-      tagtype: "",
       form: {
         fsystemcd: "",
         fprojectcd: "",
@@ -248,16 +247,16 @@ export default {
           var fstatus = qaH[i].fstatus;
           if (fstatus === "1") {
             qaH[i].fstatus = "初始";
-            this.tagtype = "info";
+            qaH[i].tagtype = "info";
           } else if (fstatus === "2") {
             qaH[i].fstatus = "已审核";
-            this.tagtype = "";
+            qaH[i].tagtype = "";
           } else if (fstatus === "3") {
             qaH[i].fstatus = "已提交";
-            this.tagtype = "warning";
+            qaH[i].tagtype = "warning";
           } else {
             qaH[i].fstatus = "已确认";
-            this.tagtype = "success";
+            qaH[i].tagtype = "success";
           }
         }
         this.qaheads = qaH;

@@ -27,6 +27,7 @@
             type="danger"
             v-loading.fullscreen.lock="fullscreenLoading"
             @click="batchDeleteQaDetail()"
+            :disabled="isCanDelete"
             >删除选中项</el-button
           >
         </div>
@@ -93,11 +94,11 @@
       @refreshQaList="refreshQaList"
     ></SingleNewQaListforPCL>
 
-    <BatchNewQaList
-      ref="BatchNewQaList"
+    <BatchNewPclList
+      ref="BatchNewPclList"
       :id="qahead.id"
       @refreshQaList="refreshQaList"
-    ></BatchNewQaList>
+    ></BatchNewPclList>
 
     <SingleModifyQaListforPCL
       ref="SingleModifyQaListforPCL"
@@ -114,19 +115,20 @@
 import {
   getQaHead,
   deleteQaDetail,
+  getQaDetailByQaHeadandClass1,
   updateQaDetailResult,
   updateQaHead,
   getPclQaClass1,
   getPCLCommitJudgment,
 } from "./../../../services/qaService";
 import SingleNewQaListforPCL from "../components/SingleNewQaListforPCL";
-import BatchNewQaList from "../components/BatchNewQaList";
+import BatchNewPclList from "../components/BatchNewPclList";
 import SingleModifyQaListforPCL from "../components/SingleModifyQaListforPCL";
 export default {
   components: {
     SingleNewQaListforPCL,
     SingleModifyQaListforPCL,
-    BatchNewQaList,
+    BatchNewPclList,
   },
   data() {
     return {
@@ -138,6 +140,7 @@ export default {
       approvalTag: "",
       isCanSubmit: false,
       isCanRollback: false,
+      isCanDelete: true,
       qahead: {},
       qadetails: [],
       multipleSelection: [],
@@ -155,15 +158,32 @@ export default {
           if (action === "confirm") {
             this.fullscreenLoading = true;
             var selectData = this.$refs.multipleTable.selection;
+            console.log(selectData);
             if (selectData.length > 0) {
               for (var i in selectData) {
-                var resp = await deleteQaDetail(selectData[i].id).catch(() => {
-                  this.$message.error("测试项删除异常");
+                var resp_head = await getQaDetailByQaHeadandClass1(
+                  this.qahead.id,
+                  selectData[i].fclass1
+                ).catch(() => {
+                  this.$message.error("测试项获取异常");
                 });
+
                 if (
-                  Object.prototype.hasOwnProperty.call(resp.data, "message")
+                  Object.prototype.hasOwnProperty.call(resp_head.data, "message")
                 ) {
                   this.$message.error(resp.data.message);
+                }
+
+                for (var j in resp_head.data) {
+                  var qadf = resp_head.data[j].id;
+                  var resp = await deleteQaDetail(qadf).catch(() => {
+                    this.$message.error("测试项删除异常");
+                  });
+                  if (
+                    Object.prototype.hasOwnProperty.call(resp.data, "message")
+                  ) {
+                    this.$message.error(resp.data.message);
+                  }
                 }
               }
               this.refreshQaList();
@@ -277,6 +297,11 @@ export default {
         } else {
           this.isCanRollback = false;
         }
+        if (pcl.status === "1") {
+          this.isCanDelete = false;
+        } else {
+          this.isCanDelete = true;
+        }
       }
     },
     handleSelectionChange(val) {
@@ -287,7 +312,7 @@ export default {
     },
 
     batchAdd() {
-      this.$refs.BatchNewQaList.handleDialog(this.qahead.id);
+      this.$refs.BatchNewPclList.handleDialog(this.qahead.id);
     },
 
     singleModify(id) {

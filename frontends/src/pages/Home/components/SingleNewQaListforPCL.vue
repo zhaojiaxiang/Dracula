@@ -1,14 +1,6 @@
 <template>
-  <el-dialog title="逐条添加测试用例" :visible.sync="dialogFormVisible">
+  <el-dialog title="逐条添加PCL测试用例" :visible.sync="dialogFormVisible">
     <el-form ref="form" :rules="rules" :model="form">
-      <el-form-item prop="fcontent" required>
-        <el-input
-          v-model="form.fcontent"
-          type="textarea"
-          :rows="3"
-          placeholder="测试用例"
-        ></el-input>
-      </el-form-item>
       <el-form-item>
         <el-col :span="9">
           <el-form-item prop="fclass1" required>
@@ -38,6 +30,14 @@
           </el-form-item>
         </el-col>
       </el-form-item>
+      <el-form-item prop="fcontent" required>
+        <el-input
+          v-model="form.fcontent"
+          type="textarea"
+          :rows="3"
+          placeholder="测试用例"
+        ></el-input>
+      </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button type="primary" @click="onSubmit('form')">确 定</el-button>
@@ -53,6 +53,8 @@ export default {
   data() {
     return {
       dialogFormVisible: false,
+      class1: "",
+      class2: "",
       form: {
         fclass1: "",
         fclass2: "",
@@ -66,8 +68,12 @@ export default {
           { required: true, message: "请输入测试用例", trigger: "change" },
         ],
         fregression: [{ required: false }],
-        fclass1: [{ required: true, message:"请输入分类1", trigger:"change" }],
-        fclass2: [{ required: true, message:"请输入分类2", trigger:"change" }],
+        fclass1: [
+          { required: true, message: "请输入分类1", trigger: "change" },
+        ],
+        fclass2: [
+          { required: true, message: "请输入分类2", trigger: "change" },
+        ],
         fsortrule: [{ required: false }],
       },
     };
@@ -76,6 +82,12 @@ export default {
     handleDialog(id) {
       this.dialogFormVisible = !this.dialogFormVisible;
       this.form.qahf = id;
+      this.class1 = this.$route.query.class1;
+      this.class2 = this.$route.query.class2;
+      if (this.class2) {
+        this.form.fclass1 = this.class1;
+        this.form.fclass2 = this.class2;
+      }
     },
     async onSubmit(formName) {
       this.$refs[formName].validate(async (valid) => {

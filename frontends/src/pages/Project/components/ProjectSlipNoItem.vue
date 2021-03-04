@@ -1,11 +1,6 @@
 <template>
   <div class="div-style">
-    <el-table
-      border
-      :data="tableData"
-      style="width: 100%"
-      size="medium"
-    >
+    <el-table border :data="tableData" style="width: 100%" size="medium">
       <el-table-column
         prop="slip_status"
         label="状态"
@@ -26,7 +21,12 @@
           }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column fixed prop="slip_slip" label="联络票号" min-width="140">
+      <el-table-column
+        fixed
+        prop="slip_slip"
+        label="联络票号"
+        min-width="140"
+      >
       </el-table-column>
       <el-table-column prop="slip_assignedto" label="对应者" min-width="60">
       </el-table-column>
@@ -75,7 +75,7 @@
         filter-placement="bottom-end"
       >
         <template slot-scope="scope">
-          <el-tag type="primary" disable-transitions>{{
+          <el-tag :type="scope.row.qa_tagtype" disable-transitions>{{
             scope.row.qa_status
           }}</el-tag>
         </template>
@@ -144,7 +144,6 @@ export default {
     };
   },
   methods: {
-    
     filterStatus(value, row) {
       return row.fstatus === value;
     },
@@ -161,19 +160,19 @@ export default {
       this.$refs.QaCodeReview.handleDialog(slipno, objectid);
     },
 
-    openQaList(qahf_id){
-        this.$router.push({name:'ProjectOverviewQA', query:{qahf_id: qahf_id}})
+    openQaList(qahf_id) {
+      this.$router.push({
+        name: "ProjectOverviewQA",
+        query: { qahf_id: qahf_id },
+      });
     },
 
     async refreshProjectDetailView() {
       this.tableData = [];
-      console.log(this.order_no);
       var resp = await getProjectDetailView(this.order_no).catch(() => {
         this.$message.error("联络票数据获取异常");
         return;
       });
-
-      console.log(resp);
 
       var projectView = [];
       projectView = resp.data;
@@ -214,14 +213,20 @@ export default {
           slip_actual = slip_actstart + " ~ " + slip_actend;
         }
 
+        var qa_tagtype = "";
+
         if (qa_status === "1") {
           qa_status = "初始";
+          qa_tagtype = "info";
         } else if (qa_status === "2") {
           qa_status = "已审核";
+          qa_tagtype = "";
         } else if (qa_status === "3") {
           qa_status = "已提交";
+          qa_tagtype = "warning";
         } else if (qa_status === "4") {
           qa_status = "已确认";
+          qa_tagtype = "success";
         }
 
         var project = {
@@ -239,6 +244,7 @@ export default {
           qa_id: qa_id,
           qa_object: qa_object,
           qa_status: qa_status,
+          qa_tagtype: qa_tagtype,
           qa_modification: qa_modification,
           code_id: code_id,
         };

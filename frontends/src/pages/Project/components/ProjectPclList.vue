@@ -4,36 +4,13 @@
       separator-class="el-icon-arrow-right"
       style="font-size:16px;margin-top: 5px;"
     >
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+      <el-breadcrumb-item :to="{ name: 'ProjectOverview', query:{order_no: this.qahead.fslipno} }">订单概览</el-breadcrumb-item>
       <el-breadcrumb-item
-        v-show="paramtype !== 'pcl'"
-        :to="{ path: '/qa/', query: { slipno: this.qahead.fslipno } }"
-        >QA列表</el-breadcrumb-item
-      >
-      <el-breadcrumb-item
-        v-show="paramtype === 'pcl'"
-        :to="{ path: '/task/', query: { type: this.paramtype } }"
-        >任务列表</el-breadcrumb-item
-      >
-      <el-breadcrumb-item
-        v-show="paramtype === 'pcl'"
-        :to="{
-          name: 'QaPclClass1',
-          query: { qahf_id: this.qahead.id, type: this.paramtype },
-        }"
+        :to="{ name: 'ProjectPclClass1', query: { qahf_id: this.qahead.id } }"
         >PCL列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
       >
-      <el-breadcrumb-item
-        v-show="paramtype === 'pcl'"
-        :to="{
-          name: 'QaPclClass2',
-          query: {
-            qahf_id: this.qahead.id,
-            type: this.paramtype,
-            class1: this.class1,
-          },
-        }"
-        >{{ this.class1 }}</el-breadcrumb-item
+      <el-breadcrumb-item :to="{ name: 'ProjectPclClass2', query:{qahf_id: this.qahead.id,  class1: this.class1} }"
+        >{{this.class1}}</el-breadcrumb-item
       >
       <el-breadcrumb-item>{{ this.class2 }}</el-breadcrumb-item>
     </el-breadcrumb>
@@ -215,9 +192,9 @@ import {
   getPCLCommitJudgment,
   updateQaHead,
 } from "./../../../services/qaService";
-import SingleNewQaListforPCL from "../components/SingleNewQaListforPCL";
-import BatchNewPclList from "../components/BatchNewPclList";
-import SingleModifyQaListforPCL from "../components/SingleModifyQaListforPCL";
+import SingleNewQaListforPCL from "../../Home/components/SingleNewQaListforPCL";
+import BatchNewPclList from "../../Home/components/BatchNewPclList";
+import SingleModifyQaListforPCL from "../../Home/components/SingleModifyQaListforPCL";
 export default {
   components: {
     SingleNewQaListforPCL,
