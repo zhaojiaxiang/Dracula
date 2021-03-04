@@ -22,7 +22,7 @@ class QaHeadSerializer(serializers.ModelSerializer):
     class Meta:
         model = QaHead
         fields = ('id', 'fsystemcd', 'fprojectcd', 'fslipno', 'fslipno2', 'fobjectid', 'fobjmodification',
-                  'fcreatedte', 'fcreateusr', 'fstatus', 'ftesttyp', 'qadfcount', 'freviewcode', 'flevel')
+                  'fcreatedte', 'fcreateusr', 'ftestusr', 'fstatus', 'ftesttyp', 'qadfcount', 'freviewcode', 'flevel')
 
     def get_qadfcount(self, obj):
         qadf = QaDetail.objects.filter(qahf_id__exact=obj.id)
@@ -40,11 +40,12 @@ class QaHeadSerializer(serializers.ModelSerializer):
             if is_exist.count() > 0:
                 raise serializers.ValidationError("该测试对象已经在该联络下存在")
         else:
-            slip_no2 = QaHead.objects.aggregate(Max('fslipno')) + 1
+            max_slipno2 = QaHead.objects.filter(fslipno__exact=validated_data['fslipno']).aggregate(Max('fslipno2'))
+            slip_no2 = max_slipno2['fslipno2__max'] + 1
 
         user = self.context['request'].user
         qahead = QaHead.objects.create(**validated_data)
-        qahead.ftesttyp = 'MCL'
+        qahead.ftesttyp = test_type
         qahead.fobjectnm = validated_data['fobjectid']
         qahead.fcreateusr = user.name
         qahead.fslipno2 = slip_no2
@@ -183,6 +184,13 @@ class QaHeadSerializer(serializers.ModelSerializer):
                         qa.fupdteusr = user.name
                         qa.fupdteprg = "QA Approval"
                         qa.save()
+
+            if new_status == '1':
+                instance.fobjectid = validated_data['fobjectid']
+                instance.fobjectnm = validated_data['fobjectid']
+                instance.fupdteusr = user.name
+                instance.fupdteprg = "QA Head Modify"
+                instance.save()
 
         return instance
 

@@ -142,16 +142,14 @@ class QaProjectDetailView(APIView):
                            qahf.fstatus          qa_status,
                            qahf.fobjmodification qa_modification,
                            code.id               code_id
-                    from liaisonf,
-                         qahf,
-                         codereview code,
-                         codereview design
+                    from qahf
+                             left join codereview code 
+                             on code.fslipno = qahf.fslipno and code.fobjectid = qahf.fobjectid,
+                         liaisonf
+                             left join codereview design 
+                             on design.fslipno = liaisonf.fslipno and design.fobjectid = 'Design Review'
                     where fodrno = '{order_no}'
                       and liaisonf.fslipno = qahf.fslipno
-                      and code.fslipno = qahf.fslipno
-                      and code.fobjectid = qahf.fobjectid
-                      and design.fslipno = liaisonf.fslipno
-                      and design.fobjectid = 'Design Review'
                     order by liaisonf.fslipno;
                   """
 

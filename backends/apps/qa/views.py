@@ -8,7 +8,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from sendfile import sendfile
 
-from liaisons.models import Liaisons
 from qa.filters import QaHeadFilter, QaDetailFilter
 from qa.models import QaHead, QaDetail
 from qa.serializers import QaHeadSerializer, QaDetailSerializer, QaDetailUpdateResultSerializer, \
@@ -18,7 +17,7 @@ from utils.utils import create_folder
 
 
 class MCLQaHeadViewSet(viewsets.ModelViewSet):
-    queryset = QaHead.objects.order_by('fstatus', '-fcreatedte')
+    queryset = QaHead.objects.order_by('fstatus', '-fslipno2', '-fcreatedte')
     serializer_class = QaHeadSerializer
 
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
