@@ -101,6 +101,12 @@ export default {
         meta: { requiresAuth: true },
         component: () => import("@/pages/Project/components/ProjectPclList"),
       },
+      {
+        path: "/project",
+        name: "Project",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/Project/Project"),
+      },
       
     ],
     mode: "history",

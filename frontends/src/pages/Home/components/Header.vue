@@ -1,8 +1,7 @@
 <template>
   <div class="header-height">
     <b-navbar toggleable="lg" type="dark" variant="dark" class="header-height">
-      <b-img :src="logo" alt="Ammic Logo"></b-img>
-      <b-navbar-brand style="margin-left:20px">上海埃米柯管理系统</b-navbar-brand>
+      <b-navbar-brand >上海埃米柯管理系统</b-navbar-brand>
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
       
       <b-collapse id="nav-collapse" is-nav>

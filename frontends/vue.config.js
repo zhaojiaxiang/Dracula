@@ -26,7 +26,7 @@ module.exports = {
       },
       "/qa/files": {
         target: "http://127.0.0.1:8000",
-        // changeOrigin: true,
+        changeOrigin: true,
         pathRewrite: {
           "^/qa/files": "/api/files",
         },

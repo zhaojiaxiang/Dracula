@@ -220,8 +220,7 @@ export default {
         fplnmanpower: null,
         factmanpower: null,
         freleaserpt: null,
-        fsirno: "",
-        fgroups: "1",
+        fsirno: ""
       },
       rules: {
         fsystemcd: [

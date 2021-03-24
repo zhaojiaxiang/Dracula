@@ -3,17 +3,17 @@
     <el-row :gutter="12">
       <el-col
         v-for="item in orderInfo"
-        :key="item.order_no"
+        :key="item.orderno"
         :span="7"
         class="card-style"
       >
         <el-card shadow="hover" class="card-color mouse_style_link">
-          <div @click="openProjectOverView(item.order_no)">
+          <div @click="openProjectOverView(item.orderno)">
             <el-row>
               <el-col :span="24"
                 ><div>
                   <h6 class="clear-margin-padding">
-                   {{ item.project }} - [ {{ item.order_no }} ]
+                    {{ item.organization }} - {{ item.project }} - [{{ item.orderno }} ]
                   </h6>
                 </div></el-col
               >
@@ -22,7 +22,7 @@
               <el-col :span="24"
                 ><div>
                   <h6 class="clear-margin-padding">
-                    {{ item.order_note }}
+                    {{ item.note }}
                   </h6>
                 </div></el-col
               >
@@ -30,7 +30,7 @@
             <el-row>
               <el-col :span="24"
                 ><div>
-                  <el-steps :active="item.order_status">
+                  <el-steps :active="item.status">
                     <el-step title="未开始" class="step-style"></el-step>
                     <el-step title="已开始"></el-step>
                     <el-step title="已结束"></el-step>
@@ -48,7 +48,7 @@
                     placement="bottom"
                     ><i class="el-icon-user"></i
                   ></el-tooltip>
-                  {{ item.order_partner }}
+                  {{ item.partner }}
                 </div></el-col
               >
               <el-col :span="4"
@@ -60,7 +60,7 @@
                     placement="bottom"
                     ><i class="el-icon-tickets"></i
                   ></el-tooltip>
-                  {{ item.order_slipno_all }}
+                  {{ item.slipno_all }}
                 </div></el-col
               >
               <el-col :span="4">
@@ -72,7 +72,7 @@
                     placement="bottom"
                     ><i class="el-icon-finished"></i
                   ></el-tooltip>
-                  {{ item.order_slipno_close }}
+                  {{ item.slipno_close }}
                 </div></el-col
               >
               <el-col :span="4"
@@ -84,7 +84,7 @@
                     placement="bottom"
                     ><i class="el-icon-s-flag"></i
                   ></el-tooltip>
-                  {{ item.order_slipno_working }}
+                  {{ item.slipno_working }}
                 </div></el-col
               >
               <el-col :span="4"
@@ -96,7 +96,7 @@
                     placement="bottom"
                     ><i class="el-icon-lollipop"></i
                   ></el-tooltip>
-                  {{ item.test_object }}
+                  {{ item.objectcount }}
                 </div></el-col
               >
             </el-row>
@@ -108,7 +108,7 @@
 </template>
 
 <script>
-import { myOrderInfo } from "../../../services/liaisonService";
+import { getQaProjectGroup } from "../../../services/projectService";
 export default {
   data: function() {
     return {
@@ -116,24 +116,31 @@ export default {
     };
   },
   methods: {
-
-    openProjectOverView(order){
-      this.$router.push({name:'ProjectOverview',query: {order_no: order}})
+    openProjectOverView(order) {
+      this.$router.push({
+        name: "ProjectOverview",
+        query: { order_no: order },
+      });
     },
     refreshProjectItems() {
       this.getProjectItems();
     },
-    async getProjectItems() {
-      var resp = await myOrderInfo();
+    //按升序排列
+    up(x, y) {
+      return x.status - y.status;
+    },
+    async getProjectItems(query_project_code, query_order_no) {
+      var resp = await getQaProjectGroup(query_project_code, query_order_no);
       if (resp.status === 200) {
         this.orderInfo = resp.data;
+        this.orderInfo.sort(this.up);
       } else {
-        this.$message.error("我的参与项目明细获取失败");
+        this.$message.error("项目明细获取失败");
       }
     },
   },
   mounted: function() {
-    this.getProjectItems();
+    this.getProjectItems("", "");
   },
 };
 </script>
@@ -176,7 +183,7 @@ export default {
 .bg-purple-light {
   background: #e5e9f2;
 }
-.mouse_style_link{
-  cursor:pointer;  
+.mouse_style_link {
+  cursor: pointer;
 }
 </style>

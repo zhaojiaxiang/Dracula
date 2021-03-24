@@ -10,7 +10,7 @@
         <i class="el-icon-menu"></i>
         <span slot="title">工作台</span>
       </el-menu-item>
-      <el-menu-item index="2">
+      <el-menu-item index="2" @click="push2project">
         <i class="el-icon-collection"></i>
         <span slot="title">项目</span>
       </el-menu-item>
@@ -36,6 +36,9 @@ export default {
   methods:{
     push2home(){
       this.$router.push({ name: "Home" }).catch(() => {});
+    },
+    push2project(){
+      this.$router.push({ name: "Project" }).catch(() => {});
     }
   }
 };

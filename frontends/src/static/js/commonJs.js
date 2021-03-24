@@ -10,30 +10,32 @@ export function handleAllUser(usersjson){
     var group4 = { label: groupName4, options: [] };
     for (var i in usersjson) {
         var option = {};
-        if (usersjson[i]["ammic_group"]["name"] == groupName1) {
-        option = { value: usersjson[i]["name"], label: usersjson[i]["name"] };
-        group1["options"].push(option);
-        }
+        if (usersjson[i]["ammic_group"]){
+            if (usersjson[i]["ammic_group"]["name"] == groupName1) {
+            option = { value: usersjson[i]["name"], label: usersjson[i]["name"] };
+            group1["options"].push(option);
+            }
 
-        if (usersjson[i]["ammic_group"]["name"] == groupName2) {
-        option = { value: usersjson[i]["name"], label: usersjson[i]["name"] };
-        group2["options"].push(option);
-        }
+            if (usersjson[i]["ammic_group"]["name"] == groupName2) {
+            option = { value: usersjson[i]["name"], label: usersjson[i]["name"] };
+            group2["options"].push(option);
+            }
 
-        if (usersjson[i]["ammic_group"]["name"] == groupName3) {
-        option = {
-            value: usersjson[i]["name"],
-            label: usersjson[i]["name"],
-        };
-        group3["options"].push(option);
-        }
+            if (usersjson[i]["ammic_group"]["name"] == groupName3) {
+            option = {
+                value: usersjson[i]["name"],
+                label: usersjson[i]["name"],
+            };
+            group3["options"].push(option);
+            }
 
-        if (usersjson[i]["ammic_group"]["name"] == groupName4) {
-        option = {
-            value: usersjson[i]["name"],
-            label: usersjson[i]["name"],
-        };
-        group4["options"].push(option);
+            if (usersjson[i]["ammic_group"]["name"] == groupName4) {
+            option = {
+                value: usersjson[i]["name"],
+                label: usersjson[i]["name"],
+            };
+            group4["options"].push(option);
+            }
         }
     }
     handledUsers.push(group1);

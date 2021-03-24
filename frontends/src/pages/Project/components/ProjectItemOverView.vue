@@ -44,7 +44,8 @@ export default {
   },
   methods: {
     goBack() {
-      this.$router.push({ name: "Home" }).catch(() => {});
+      //返回上一个路由
+      this.$router.go(-1)
     },
   },
   mounted:function(){
