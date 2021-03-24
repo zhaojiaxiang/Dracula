@@ -5,4 +5,4 @@ from systems.models import Systems
 
 @admin.register(Systems)
 class SystemsAdmin(admin.ModelAdmin):
-    list_display = ('fsystemcd', 'fsystemnm', 'group')
+    list_display = ('fsystemcd', 'fsystemnm', 'organization')

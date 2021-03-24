@@ -1,8 +1,7 @@
-
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from rbac.models import Role, Group
+from rbac.models import Role, Group, Organizations
 
 
 class User(AbstractUser):
@@ -18,13 +17,18 @@ class User(AbstractUser):
                                   'unique': '邮箱已经在系统中存在'
                               })
     avatar = models.ImageField(verbose_name='用户头像', upload_to='avatar/', null=True, blank=True)
-    ammic_group = models.ForeignKey(Group, related_name='ammic_group', on_delete=models.DO_NOTHING)
+    ammic_group = models.ForeignKey(Group, verbose_name="开发组", related_name='ammic_group', null=True,
+                                    blank=True, on_delete=models.DO_NOTHING)
+
     ammic_role = models.ManyToManyField(Role, verbose_name='拥有的所有角色',
                                         related_name='ammic_role')
 
+    ammic_organization = models.ForeignKey(Organizations, verbose_name="组织架构", related_name='ammic_organization',
+                                           on_delete=models.DO_NOTHING)
+
     class Meta:
         db_table = 'users'
-        verbose_name = '用户信息'
+        verbose_name = '用户管理'
         verbose_name_plural = verbose_name
 
     def __str__(self):

@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 from liaisons.models import Liaisons
 from qa.models import QaHead
+from rbac.models import Organizations
 from utils.db_connection import man_power_connection_execute, db_connection_execute, query_single_with_no_parameter
 
 
@@ -32,6 +33,7 @@ class LiaisonsSerializer(serializers.ModelSerializer):
     fstatus = serializers.CharField(read_only=True)
     fcreatedte = serializers.CharField(read_only=True)
     fcreateusr = serializers.CharField(read_only=True)
+    forganization = serializers.IntegerField(read_only=True)
     fentdt = serializers.DateField(read_only=True)
     fentusr = serializers.CharField(read_only=True)
     fupdtedt = serializers.DateField(read_only=True)
@@ -52,7 +54,13 @@ class LiaisonsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("联络票已经存在")
 
         user = self.context['request'].user
+
+        organization_id = user.ammic_organization.id
+        if not user.ammic_organization.isgroup:
+            organization_id = user.ammic_organization.parent.id
+
         liaison = Liaisons.objects.create(**validated_data)
+        liaison.forganization = organization_id
         liaison.fstatus = '1'
         liaison.fcreateusr = user.name
         liaison.fentusr = user.name
@@ -155,26 +163,35 @@ class LiaisonUpdateStatusSerializer(serializers.ModelSerializer):
 
 
 class QaProjectSerializer(serializers.ModelSerializer):
-    fodrno = serializers.CharField()
+    orderno = serializers.SerializerMethodField()
     note = serializers.SerializerMethodField()
     partner = serializers.SerializerMethodField()
+    project = serializers.SerializerMethodField()
     slipno_all = serializers.SerializerMethodField()
     slipno_working = serializers.SerializerMethodField()
     slipno_close = serializers.SerializerMethodField()
     slipno_release = serializers.SerializerMethodField()
     objectcount = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    organization = serializers.SerializerMethodField()
 
     class Meta:
         model = Liaisons
         fields = (
-            'fodrno', 'note', 'partner', 'slipno_all', 'slipno_working', 'slipno_close', 'slipno_release',
-            'objectcount', 'status')
+            'orderno', 'note', 'partner', 'project', 'slipno_all', 'slipno_working', 'slipno_close', 'slipno_release',
+            'objectcount', 'status', 'organization')
+
+    def get_orderno(self, obj):
+        return obj['fodrno']
 
     def get_note(self, obj):
         sql_str = f"select fnote from odrrlsf where fodrno = '{obj['fodrno']}' "
         note_list = man_power_connection_execute(sql_str)
         return note_list[0][0] if note_list else "******"
+
+    def get_project(self, obj):
+        project = Liaisons.objects.filter(fodrno__exact=obj['fodrno']).values('fprojectcd').distinct()
+        return project[0]['fprojectcd']
 
     def get_partner(self, obj):
         order_partner_sql = f"select fassignedto, fleader, fhelper from liaisonf where fodrno = '{obj['fodrno']}'"
@@ -194,7 +211,7 @@ class QaProjectSerializer(serializers.ModelSerializer):
                 else:
                     user_list.append(username)
         user_list = list(set(user_list))
-        return user_list
+        return len(user_list)
 
     def get_slipno_all(self, obj):
         liaison = Liaisons.objects.filter(fodrno__exact=obj['fodrno'])
@@ -243,3 +260,7 @@ class QaProjectSerializer(serializers.ModelSerializer):
             order_status = 4
 
         return order_status
+
+    def get_organization(self, obj):
+        organizations = Organizations.objects.values('name').filter(pk=obj['forganization'])
+        return organizations[0]['name']

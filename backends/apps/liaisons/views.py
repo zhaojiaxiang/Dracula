@@ -10,12 +10,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
-from liaisons.filters import LiaisonsFilter
+from liaisons.filters import LiaisonsFilter, QAProjectFilter
 from liaisons.models import Liaisons
 from liaisons.serializers import LiaisonsSerializer, LiaisonUpdateStatusSerializer, QaProjectSerializer
 from qa.models import QaHead, QaDetail
 from utils.db_connection import query_single_with_no_parameter, db_connection_execute
-from utils.utils import create_folder
+from utils.utils import create_folder, get_all_organization_group_belong_me
 
 
 class LiaisonsPagination(PageNumberPagination):
@@ -88,10 +88,14 @@ class QaProjectForGroupViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin,
     """
 
     def get_queryset(self):
-        user = self.request.user
-        return Liaisons.objects.values("fodrno").filter(fgroups__ammic_group__exact=user.ammic_group.id).distinct()
+        all_group_tuple = get_all_organization_group_belong_me(self.request)
+        # 此处没有对数据进行排序，因为不好排，前端获取到该数据后会进行排序
+        return Liaisons.objects.values("fodrno", "forganization").filter(forganization__in=all_group_tuple).distinct()
 
     serializer_class = QaProjectSerializer
+
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
+    filter_class = QAProjectFilter
 
 
 class QaProjectForMineViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
@@ -101,9 +105,9 @@ class QaProjectForMineViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, 
 
     def get_queryset(self):
         user = self.request.user
-        return Liaisons.objects.values("fodrno").filter(Q(fassignedto__exact=user.name) |
-                                                        Q(fleader__contains=user.name) |
-                                                        Q(fhelper__contains=user.name)).distinct()
+        return Liaisons.objects.values("fodrno", "forganization").filter(Q(fassignedto__exact=user.name) |
+                                                                         Q(fleader__contains=user.name) |
+                                                                         Q(fhelper__contains=user.name)).distinct()
 
     serializer_class = QaProjectSerializer
 

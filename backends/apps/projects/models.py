@@ -1,6 +1,6 @@
 from django.db import models
 
-from rbac.models import Group
+from rbac.models import Organizations
 
 
 class Projects(models.Model):
@@ -13,7 +13,8 @@ class Projects(models.Model):
     fupdtedt = models.DateField(verbose_name='更新日期', null=True, blank=True)
     fupdteusr = models.CharField(verbose_name='更新者', max_length=24, null=True, blank=True)
     fupdteprg = models.CharField(verbose_name='更新程序名', max_length=110, null=True, blank=True)
-    group = models.ForeignKey(Group, on_delete=models.DO_NOTHING)
+    organization = models.ForeignKey(Organizations, verbose_name='组织构架中组名', related_name='project_organization',
+                                     blank=True, null=True, on_delete=models.DO_NOTHING)
 
     class Meta:
         db_table = 'projectm'

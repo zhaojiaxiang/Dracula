@@ -23,3 +23,16 @@ class LiaisonsFilter(django_filters.rest_framework.FilterSet):
         model = Liaisons
         fields = ['fsystemcd', 'fprojectcd', 'fslipno', 'ftype', 'fstatus', 'fodrno', 'fleader', 'fhelper',
                   'fassignedto', 'fsirno', 'fgroups']
+
+
+class QAProjectFilter(django_filters.rest_framework.FilterSet):
+    """
+    QA Project的过滤类
+    """
+    fprojectcd = django_filters.CharFilter(field_name='fprojectcd', lookup_expr='exact')
+    fodrno = django_filters.CharFilter(field_name='fodrno', lookup_expr='contains')
+    forganization = django_filters.NumberFilter(field_name='forganization', lookup_expr='contains')
+
+    class Meta:
+        model = Liaisons
+        fields = ['fprojectcd', 'fodrno', 'forganization']

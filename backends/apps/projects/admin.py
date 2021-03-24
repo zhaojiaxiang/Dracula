@@ -5,4 +5,4 @@ from projects.models import Projects
 
 @admin.register(Projects)
 class ProjectsAdmin(admin.ModelAdmin):
-    list_display = ('fprojectcd', 'fprojectnm', 'fprojectsn', 'fautoflg', 'group')
+    list_display = ('fprojectcd', 'fprojectnm', 'fprojectsn', 'fautoflg', 'organization')

@@ -9,6 +9,7 @@ from accounts.serializers import UserSerializer, SystemSettingSerializer, MyGrou
 from liaisons.models import Liaisons
 from qa.models import QaHead
 from utils.db_connection import db_connection_execute, query_single_with_no_parameter
+from utils.utils import get_all_organization_belong_me, get_all_organization_group_belong_me
 
 User = get_user_model()
 
@@ -75,7 +76,7 @@ class UserDevelopmentDetail(APIView):
         current_username = request.user.name
 
         all_not_release_order_sql = f"""
-                                   select distinct fodrno from liaisonf 
+                                   select distinct fodrno, fprojectcd from liaisonf 
                                    where (fassignedto = '{current_username}' or fhelper like '{current_username}' 
                                    or fleader like '{current_username}') and ftype = '追加开发' and fstatus <> 4 """
 
@@ -85,6 +86,7 @@ class UserDevelopmentDetail(APIView):
 
         for order in all_not_release_orders:
             order_no = order[0]
+            project = order[1]
 
             order_partner_sql = f"select fassignedto, fleader, fhelper from liaisonf where fodrno = '{order_no}'"
             order_partner_result = db_connection_execute(order_partner_sql)
@@ -155,6 +157,7 @@ class UserDevelopmentDetail(APIView):
             order_dict['order_slipno_working'] = order_slipno_working + order_slipno_int
             order_dict['test_object'] = test_object
             order_dict['order_status'] = order_status
+            order_dict['project'] = project
 
             response_data.append(order_dict)
 
@@ -174,6 +177,8 @@ class MyTaskBar(APIView):
                                     fstatus__in=(1, 2),
                                     ftesttyp__exact='PCL').count()
 
+        all_organization_tuple = get_all_organization_belong_me(request)
+
         approval_sql = f"""
                        select count(*)
                        from (
@@ -181,7 +186,7 @@ class MyTaskBar(APIView):
                            from qahf,
                                 qadf
                            where qadf.qahf_id = qahf.id
-                           and qahf.fcreateusr in (select name from users where ammic_group_id = '{user.ammic_group.id}')
+                           and qahf.fcreateusr in (select name from users where ammic_organization_id in {all_organization_tuple})
                            and qadf.fapproval = 'N') a;
                        """
 
@@ -191,11 +196,13 @@ class MyTaskBar(APIView):
         confirm_sql = f"""
                       select count(*)
                           from qahf
-                          where fcreateusr in (select name from users where ammic_group_id = '{user.ammic_group.id}')
+                          where fcreateusr in (select name from users where ammic_organization_id in {all_organization_tuple})
                             and fstatus = '3'
                       """
         confirm_list = query_single_with_no_parameter(confirm_sql, 'list')
         confirm = confirm_list[0]
+
+        all_organization_group_tuple = get_all_organization_group_belong_me(request)
 
         dev_count_sql = f"""
                         select count(*)
@@ -219,7 +226,7 @@ class MyTaskBar(APIView):
                                                   where qahf_b.count = 1)
                                                 and fstatus = '4')
                                             and liaisonf.fstatus = '3' and 
-                                            liaisonf.fgroups_id = '{user.ammic_group.id}')) qahf_c
+                                            liaisonf.forganization in {all_organization_group_tuple})) qahf_c
                                  group by qahf_c.fslipno) a
                             where a.count = 1
                         """
@@ -238,7 +245,7 @@ class MyTaskBar(APIView):
                                           where liaisonf.fslipno = qahf.fslipno
                                             and liaisonf.ftype <> '追加开发'
                                             and liaisonf.fstatus = '3'
-                                            and liaisonf.fgroups_id = '{user.ammic_group.id}') a
+                                            and liaisonf.forganization in {all_organization_group_tuple}) a
                                      group by a.fslipno, a.fstatus) b
                                 where b.count = 1
                                   and b.fstatus = '4';
@@ -332,6 +339,8 @@ class MyApproval(APIView):
     def get(self, request):
         user = request.user
 
+        all_organization_tuple = get_all_organization_belong_me(request)
+
         approval_sql = f"""
                        select *
                             from (
@@ -355,7 +364,7 @@ class MyApproval(APIView):
                                       qadf
                                  where qadf.qahf_id = qahf.id
                                    and (liaisonf.fslipno = qahf.fslipno or liaisonf.fodrno = qahf.fslipno)
-                                   and qahf.fcreateusr in (select name from users where ammic_group_id = '{user.ammic_group.id}')
+                                   and qahf.fcreateusr in (select name from users where ammic_organization_id in {all_organization_tuple})
                                    and qadf.fapproval = 'N'
                                    and qahf.ftesttyp = 'MCL'
                                  union all
@@ -389,6 +398,8 @@ class MyConfirm(APIView):
     def get(self, request):
         user = request.user
 
+        all_organization_tuple = get_all_organization_belong_me(request)
+
         confirm_sql = f"""
                        select qahf.id                                   qahf_id,
                                qahf.ftesttyp,
@@ -408,7 +419,7 @@ class MyConfirm(APIView):
                         from liaisonf,
                              qahf
                         where (liaisonf.fslipno = qahf.fslipno or liaisonf.fodrno = qahf.fslipno)
-                          and qahf.fcreateusr in (select name from users where ammic_group_id = '{user.ammic_group.id}')
+                          and qahf.fcreateusr in (select name from users where ammic_organization_id in {all_organization_tuple})
                           and qahf.fstatus = '3'
                           and qahf.ftesttyp = 'MCL'
                         union all
@@ -439,6 +450,8 @@ class MyRelease(APIView):
     def get(self, request):
         user = request.user
 
+        all_organization_group_tuple = get_all_organization_group_belong_me(request)
+
         testing_sql = f"""
                        select *
                             from liaisonf
@@ -464,7 +477,7 @@ class MyRelease(APIView):
                                                       where qahf_b.count = 1)
                                                     and fstatus = '4')
                                                 and liaisonf.fstatus = '3'
-                                                and liaisonf.fgroups_id = '{user.ammic_group.id}')) qahf_c
+                                                and liaisonf.forganization in {all_organization_group_tuple})) qahf_c
                                      group by qahf_c.fslipno) a
                                 where a.count = 1
                                 union all
@@ -478,7 +491,7 @@ class MyRelease(APIView):
                                           where liaisonf.fslipno = qahf.fslipno
                                             and liaisonf.ftype <> '追加开发'
                                             and liaisonf.fstatus = '3'
-                                            and liaisonf.fgroups_id = '{user.ammic_group.id}') a
+                                            and liaisonf.forganization in {all_organization_group_tuple}) a
                                      group by a.fslipno, a.fstatus) b
                                 where b.count = 1
                                   and b.fstatus = '4')

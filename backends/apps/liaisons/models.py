@@ -1,7 +1,5 @@
 from django.db import models
 
-from rbac.models import Group
-
 
 class Liaisons(models.Model):
     fsystemcd = models.CharField(verbose_name='系统名称', max_length=20)
@@ -28,7 +26,7 @@ class Liaisons(models.Model):
     factmanpower = models.DecimalField(verbose_name='实际工数', max_digits=5, decimal_places=1, null=True, blank=True)
     freleaserpt = models.CharField(verbose_name='程序发布报告URL', max_length=200, null=True, blank=True)
     fsirno = models.CharField(verbose_name='SIR号', max_length=10, null=True, blank=True)
-    fgroups = models.ForeignKey(Group, related_name='group', verbose_name='组别', on_delete=models.DO_NOTHING)
+    forganization = models.IntegerField(verbose_name='组织构架中组名', null=True, blank=True)  # 不再使用外键
     fentdt = models.DateField(verbose_name='登入日期', auto_now_add=True)
     fentusr = models.CharField(verbose_name='登录者', max_length=24, null=True, blank=True)
     fupdtedt = models.DateField(verbose_name='更新日期', null=True, blank=True, auto_now=True)
