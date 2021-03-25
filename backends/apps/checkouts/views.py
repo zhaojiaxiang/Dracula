@@ -1,3 +1,11 @@
-from django.shortcuts import render
+from rest_framework import viewsets
 
-# Create your views here.
+from checkouts.models import CheckOutFiles
+from checkouts.serializers import CheckOutFilesSerializer
+
+
+class CheckOutFilesViewSet(viewsets.ModelViewSet):
+    serializer_class = CheckOutFilesSerializer
+
+    def get_queryset(self):
+        return CheckOutFiles.objects.all()

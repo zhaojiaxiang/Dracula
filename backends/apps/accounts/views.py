@@ -45,7 +45,10 @@ def api_exception_handler(exc, context):
             if response.status_code != status.HTTP_400_BAD_REQUEST:
                 data['message'] = exc.detail
             else:
-                data['message'] = exc.detail[0]
+                try:
+                    data['message'] = exc.detail[0]
+                except Exception as e:
+                    data['message'] = exc.detail[list(exc.detail)[0]][0]
 
     return Response(data=data, status=status.HTTP_200_OK)
 

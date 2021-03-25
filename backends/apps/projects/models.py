@@ -18,7 +18,7 @@ class Projects(models.Model):
 
     class Meta:
         db_table = 'projectm'
-        verbose_name = '系统代码'
+        verbose_name = '项目代码'
         verbose_name_plural = verbose_name
 
     def __str__(self):

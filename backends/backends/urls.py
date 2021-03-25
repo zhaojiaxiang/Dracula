@@ -23,6 +23,7 @@ from rest_framework_jwt.views import obtain_jwt_token
 from accounts.views import UserViewSet, SystemSettingViewSet, MyGroupUserViewSet, UserDevelopmentDetail, MyTaskBar, \
     MyMcl, MyRelease, MyConfirm, MyApproval, MyPcl
 from backends import settings
+from checkouts.views import CheckOutFilesViewSet
 from liaisons.views import LiaisonsViewSet, LiaisonUpdateStatusViewSet, QaProjectViewSet, QaProjectForMineViewSet, \
     QaProjectForGroupViewSet, LiaisonFileUpload, QaProjectDetailView
 from projects.views import ProjectsViewSet
@@ -60,6 +61,7 @@ router.register('accounts/system_setting', SystemSettingViewSet, basename='syste
 router.register('qa_project', QaProjectViewSet, basename='qa_project')
 router.register('qa_project_group', QaProjectForGroupViewSet, basename='qa_project_group')
 router.register('qa_project_mine', QaProjectForMineViewSet, basename='qa_project_mine')
+router.register('pb_file_checkout', CheckOutFilesViewSet, basename='pb_file_checkout')
 
 
 urlpatterns = [
