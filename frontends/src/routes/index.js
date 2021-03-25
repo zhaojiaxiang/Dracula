@@ -1,29 +1,27 @@
 import VueRouter from "vue-router";
 import Vue from "vue";
 import config from "./config";
-import { removeToken, isLogin, initLogo } from "../utils/auth";
-
+import { isLogin } from "../utils/auth";
 
 //1、安装
 Vue.use(VueRouter);
 
-initLogo()
-
 //2、创建路由对象
 var router = new VueRouter(config);
 
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location, onResolve, onReject) {
+  if (onResolve || onReject) return originalPush.call(this, location, onResolve, onReject)
+  return originalPush.call(this, location).catch(err => err)
+}
+
 // 路由判断登录 根据路由配置文件的参数
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async(to, from, next) => {
+  var islogin = await isLogin()
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     // 判断该路由是否需要登录权限
-    if (await isLogin() === true) {
-      // 判断当前的token是否存在 ； 登录存入的token
-      if (to.path === "/login") {
-        removeToken();
-        // window.location.reload();
-      } else {
-        next();
-      }
+    if (islogin === true) {
+      next();
     } else {
       next({
         path: "/login",

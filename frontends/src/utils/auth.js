@@ -1,22 +1,10 @@
 import axios from "axios";
-import { getSettings } from "@/services/commonService.js";
 
 axios.defaults.headers.post["Content-Type"] = "application/json";
-axios.defaults.headers["Authorization"] =
-  "JWT " + localStorage.getItem("token");
 
 export function getToken() {
   var token = localStorage.getItem("token");
   return token;
-}
-
-export async function initLogo() {
-    var logo = localStorage.getItem("logo")
-    if(!logo){
-        var resp = await getSettings(1);
-        localStorage.setItem("logo", resp.data.picture);
-    }
-  
 }
 
 export function removeToken() {
@@ -25,7 +13,10 @@ export function removeToken() {
 }
 
 export async function isLogin() {
+  axios.defaults.headers["Authorization"] =
+  "JWT " + localStorage.getItem("token");
   var resp = await axios.get("/api/");
+  console.log(resp);
   if (resp.data.code === 401) {
     return false;
   }

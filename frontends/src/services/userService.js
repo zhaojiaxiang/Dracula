@@ -14,7 +14,7 @@ export async function login(loginInfo) {
   return resp;
 }
 
-axios.defaults.headers['Authorization'] = 'JWT ' + localStorage.getItem("token");
+// axios.defaults.headers['Authorization'] = 'JWT ' + localStorage.getItem("token");
 export async function getLiaisons(loginInfo) {
   var resp = await axios.get("/api/liaisons/", loginInfo);
   var token = resp.headers.authorization; // 拿到服务器的令牌

@@ -68,10 +68,15 @@ export default {
     async handleSubmit(formName) {
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
-          var resp = await login(JSON.stringify(this.form));
-          if (resp.status) {
-            this.$router.push({ path: "/" });
-          }
+          await login(JSON.stringify(this.form))
+            .then((resp) => {
+              if (resp.status) {
+                this.$router.push({ path: "/" });
+              }
+            })
+            .catch(() => {
+              this.$message.error("用户不存在或者密码错误");
+            });
         }
       });
     },
