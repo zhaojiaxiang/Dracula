@@ -31,6 +31,7 @@ from qa.views import MCLQaHeadViewSet, QaDetailViewSet, QaDetailUpdateResultView
     QaDetailUpdateContentTextViewSet, QaHeadUpdateObjectSummaryViewSet, QaHeadModifyDetailViewSet, \
     QaHeadTargetAndActualViewSet, CkEditorImageUpload, CkEditorFileUpload, RecoverFile, PCLQaClass1ViewSet, \
     PCLQaClass2ViewSet, PCLCommitJudgment
+from rbac.views import WorkingOrganization, WorkingProject
 from reports.views import ReportListViewSet
 from reviews.views import DesignReviewViewSet, CodeReviewViewSet
 from systems.views import SystemsViewSet
@@ -84,5 +85,8 @@ urlpatterns = [
     path('api/liaison_file_upload/', LiaisonFileUpload.as_view()),
     path('api/pcl_commit_judgment/', PCLCommitJudgment.as_view()),
     path('api/qa_project_detail_view/', QaProjectDetailView.as_view()),
+    path('api/working_organization/', WorkingOrganization.as_view()),
+    path('api/working_project/', WorkingProject.as_view()),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
               + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
