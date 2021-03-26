@@ -8,6 +8,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import 'bootstrap-vue/dist/bootstrap-vue-icons.min.css'
 import App from './App.vue'
 import router from './routes/index';
+import interceptors from './services/interceptor';
 
 Vue.config.productionTip = false
 
@@ -18,7 +19,9 @@ Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
 Vue.use(CKEditor)
 
-new Vue({
+let vm = new Vue({
   render: function (h) { return h(App) },
   router,   //配置路由到vue实例中
 }).$mount('#app')
+
+interceptors(vm);

@@ -129,8 +129,8 @@ export default {
     up(x, y) {
       return x.status - y.status;
     },
-    async getProjectItems(query_project_code, query_order_no) {
-      var resp = await getQaProjectGroup(query_project_code, query_order_no);
+    async getProjectItems(query_organization_id, query_project_code, query_order_no) {
+      var resp = await getQaProjectGroup(query_organization_id, query_project_code, query_order_no);
       if (resp.status === 200) {
         this.orderInfo = resp.data;
         this.orderInfo.sort(this.up);
@@ -140,7 +140,7 @@ export default {
     },
   },
   mounted: function() {
-    this.getProjectItems("", "");
+    this.getProjectItems("" ,"", "");
   },
 };
 </script>

@@ -1,9 +1,5 @@
 import axios from "axios";
 
-axios.defaults.headers.post["Content-Type"] = "application/json";
-axios.defaults.headers["Authorization"] =
-  "JWT " + localStorage.getItem("token");
-
 export async function getQaHead(id) {
   var resp = await axios.get("/api/qa/mcl_head/" + id + "/");
   return resp;

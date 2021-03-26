@@ -1,7 +1,7 @@
 import VueRouter from "vue-router";
 import Vue from "vue";
 import config from "./config";
-import { isLogin } from "../utils/auth";
+// import { isLogin } from "../utils/auth";
 
 //1、安装
 Vue.use(VueRouter);
@@ -15,12 +15,14 @@ VueRouter.prototype.push = function push(location, onResolve, onReject) {
   return originalPush.call(this, location).catch(err => err)
 }
 
+
+
 // 路由判断登录 根据路由配置文件的参数
 router.beforeEach(async(to, from, next) => {
-  var islogin = await isLogin()
+  var token = localStorage.getItem("token")
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     // 判断该路由是否需要登录权限
-    if (islogin === true) {
+    if (token) {
       next();
     } else {
       next({

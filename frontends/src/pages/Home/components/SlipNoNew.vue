@@ -325,6 +325,7 @@ export default {
         this_.loading = false;
         return;
       });
+      console.log(s_resp);
       var g_resp = await getGroupUsers().catch(() => {
         this.$message.error("分组用户主表数据获取异常");
         this_.loading = false;

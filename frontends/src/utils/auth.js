@@ -1,8 +1,6 @@
 import axios from "axios";
 import { getSettings } from "@/services/commonService.js";
 
-axios.defaults.headers.post["Content-Type"] = "application/json";
-
 export function getToken() {
   var token = localStorage.getItem("token");
   return token;
@@ -23,8 +21,6 @@ export function removeToken() {
 }
 
 export async function isLogin() {
-  axios.defaults.headers["Authorization"] =
-  "JWT " + localStorage.getItem("token");
   var resp = await axios.get("/api/");
   if (resp.data.code === 401) {
     return false;
