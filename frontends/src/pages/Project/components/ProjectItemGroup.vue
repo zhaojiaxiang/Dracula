@@ -5,6 +5,7 @@
         v-for="item in orderInfo"
         :key="item.orderno"
         :span="7"
+        v-loading="loading"
         class="card-style"
       >
         <el-card shadow="hover" class="card-color mouse_style_link">
@@ -104,6 +105,18 @@
         </el-card>
       </el-col>
     </el-row>
+    <div>
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :total="orderTotal"
+        :page-size="pageSize"
+        :current-page="currentPage"
+        :page-count="pageCount"
+        @current-change="handlePage"
+      >
+      </el-pagination>
+    </div>
   </div>
 </template>
 
@@ -112,7 +125,13 @@ import { getQaProjectGroup } from "../../../services/projectService";
 export default {
   data: function() {
     return {
+      currentPage: 1,
+      orderTotal: 0,
+      pageSize: 12,
+      pageCount:1,
+      currentID: 0,
       orderInfo: [],
+      loading:false,
     };
   },
   methods: {
@@ -122,25 +141,47 @@ export default {
         query: { order_no: order },
       });
     },
-    refreshProjectItems() {
-      this.getProjectItems();
+
+    handlePage(page) {
+      this.currentPage = page;
+      this.getProjectItems("" ,"", "", this.currentPage, this.pageSize);
     },
+
+    calcPageTotal(liaisonCount, pageSize) {
+      liaisonCount = this.liaisonTotal
+      pageSize = this.pageSize
+      var remainder = liaisonCount % pageSize;
+      if (remainder === 0) {
+        this.pageCount = liaisonCount / pageSize;
+      } else {
+        this.pageCount = parseInt(liaisonCount / pageSize) + 1;
+      }
+    },
+
+    // refreshProjectItems() {
+    //   this.getProjectItems();
+    // },
     //按升序排列
     up(x, y) {
       return x.status - y.status;
     },
     async getProjectItems(query_organization_id, query_project_code, query_order_no) {
-      var resp = await getQaProjectGroup(query_organization_id, query_project_code, query_order_no);
+      this.loading = true
+      var resp = await getQaProjectGroup(query_organization_id, query_project_code, query_order_no, this.currentPage, this.pageSize);
       if (resp.status === 200) {
-        this.orderInfo = resp.data;
+        this.orderTotal = resp.data.count
+        this.calcPageTotal(this.orderTotal, this.pageSize);
+        this.orderInfo = resp.data.results;
         this.orderInfo.sort(this.up);
       } else {
         this.$message.error("项目明细获取失败");
+         this.loading = false
       }
+      this.loading = false
     },
   },
   mounted: function() {
-    this.getProjectItems("" ,"", "");
+    this.getProjectItems("" ,"", "", this.currentPage, this.pageSize);
   },
 };
 </script>

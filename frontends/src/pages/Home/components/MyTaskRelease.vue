@@ -227,7 +227,7 @@ export default {
         } else {
           this.$emit("refreshHome");
           this.$message({
-            message: statusInfo.fslipno + "发布成功",
+            message: command.row.fslipno + "发布成功",
             type: "success",
           });
           this.refreshLiaisons();

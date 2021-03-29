@@ -238,7 +238,7 @@
           required
           v-show="true ? form.fstatus != '1' : form.fstatus != '1'"
         >
-          <el-col :span="2">
+          <el-col :span="3">
             <el-form-item size="medium">
               <el-upload
                 class="upload-demo"
@@ -255,7 +255,7 @@
               </el-upload>
             </el-form-item>
           </el-col>
-          <el-col :span="14">
+          <el-col :span="3">
             <el-form-item size="medium">
               <el-link
                 :underline="false"
@@ -266,18 +266,29 @@
               >
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="9">
+            <el-form-item size="medium">
+              <el-input
+                :disabled="true ? form.fstatus != '2' : form.fstatus == '2'"
+                v-model="form.fplnmanpower"
+                style="width:80%"
+                placeholder="计划工时"
+              ></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="9">
             <el-form-item size="medium">
               <el-input
                 :disabled="true ? form.fstatus != '2' : form.fstatus == '2'"
                 v-model="form.factmanpower"
+                style="width:80%"
                 placeholder="实际工时"
               ></el-input>
             </el-form-item>
           </el-col>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="onSubmit('form')">更新</el-button>
+          <el-button type="primary" :disabled="true ? form.fstatus == '4' : form.fstatus != '4'" @click="onSubmit('form')">更新</el-button>
         </el-form-item>
       </el-form>
     </el-drawer>

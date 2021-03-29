@@ -5,7 +5,7 @@ export async function getProjectDetailView(order_no){
     return resp;
 }
 
-export async function getQaProjectGroup(organization_id, project_code, order_no){
-  var resp = axios.get("/api/qa_project_group/?forganization="+ organization_id +"&fprojectcd="+ project_code +"&fodrno=" + order_no)
+export async function getQaProjectGroup(organization_id, project_code, order_no, page, page_size){
+  var resp = axios.get("/api/qa_project_group/?forganization="+ organization_id +"&fprojectcd="+ project_code +"&fodrno=" + order_no + "&page="+ page +"&page_size="+page_size)
   return resp;
 }

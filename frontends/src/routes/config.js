@@ -107,6 +107,19 @@ export default {
         meta: { requiresAuth: true },
         component: () => import("@/pages/Project/Project"),
       },
+      // Master主表路由
+      {
+        path: "/master/p",
+        name: "ProjectMaster",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/Master/components/ProjectMaster"),
+      },
+      {
+        path: "/master/s",
+        name: "SystemMaster",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/Master/components/SystemMaster"),
+      },
       
     ],
     mode: "history",

@@ -21,6 +21,7 @@
                   :value="item.fsystemcd"
                 ></el-option>
               </el-select>
+              <el-button @click="systemCodeMaster" icon="el-icon-edit"></el-button>
             </el-form-item>
           </el-col>
           <el-col :span="14">
@@ -33,6 +34,7 @@
                   :value="item.fprojectcd"
                 ></el-option>
               </el-select>
+              <el-button @click="projectCodeMaster" icon="el-icon-edit"></el-button>
             </el-form-item>
           </el-col>
         </el-form-item>
@@ -308,6 +310,15 @@ export default {
     resetForm(formName) {
       this.$refs[formName].resetFields();
     },
+
+    projectCodeMaster(){
+      this.$router.push({name:'ProjectMaster'})
+    },
+
+    systemCodeMaster(){
+      this.$router.push({name:'SystemMaster'})
+    }
+
   },
   mounted: function() {
     var this_ = this;
@@ -325,7 +336,6 @@ export default {
         this_.loading = false;
         return;
       });
-      console.log(s_resp);
       var g_resp = await getGroupUsers().catch(() => {
         this.$message.error("分组用户主表数据获取异常");
         this_.loading = false;

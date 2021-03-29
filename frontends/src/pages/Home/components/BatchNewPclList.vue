@@ -36,6 +36,27 @@ export default {
     handleDialog(id) {
       this.dialogFormVisible = !this.dialogFormVisible;
       this.qaheadid = id;
+      document.addEventListener("paste", (event) => {
+        event.stopPropagation();
+        event.preventDefault(); //消除默认粘贴
+
+        this.qadetails = [];
+
+        var clipboardData = event.clipboardData || window.clipboardData;
+        var pastedData = clipboardData.getData("Text");
+
+        this.qadetails = pastedData
+          .split("\n")
+          .filter(function(item) {
+            //兼容Excel行末\n，防止出现多余空行
+            return item !== "";
+          })
+          .map(function(item) {
+            return item.split("\t");
+          });
+
+        document.getElementById("submitbtn").click();
+      });
     },
 
     async onBatchSubmit() {
@@ -96,29 +117,6 @@ export default {
       this.fullscreenLoading = false;
       this.qadetails = [];
     },
-  },
-  mounted: function() {
-    document.addEventListener("paste", (event) => {
-      event.stopPropagation();
-      event.preventDefault(); //消除默认粘贴
-
-      this.qadetails = [];
-
-      var clipboardData = event.clipboardData || window.clipboardData;
-      var pastedData = clipboardData.getData("Text");
-
-      this.qadetails = pastedData
-        .split("\n")
-        .filter(function(item) {
-          //兼容Excel行末\n，防止出现多余空行
-          return item !== "";
-        })
-        .map(function(item) {
-          return item.split("\t");
-        });
-
-      document.getElementById("submitbtn").click();
-    });
   },
 };
 </script>
