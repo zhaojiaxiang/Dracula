@@ -4,6 +4,8 @@ import uuid
 from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status, mixins, filters
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from sendfile import sendfile
@@ -126,6 +128,7 @@ class PCLCommitJudgment(APIView):
         return Response(data=data, status=status.HTTP_200_OK)
 
 
+@permission_classes((AllowAny, ))
 class RecoverFile(APIView):
     """
     富文本编辑器文件展示处理API

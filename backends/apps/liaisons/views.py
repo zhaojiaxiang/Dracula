@@ -82,6 +82,12 @@ class LiaisonUpdateStatusViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixi
     serializer_class = LiaisonUpdateStatusSerializer
 
 
+class QaProjectForGroupPagination(PageNumberPagination):
+    page_size = 1
+    page_size_query_param = 'page_size'
+    max_page_size = 1000
+
+
 class QaProjectForGroupViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     """
     本组项目明细ViewSet
@@ -93,6 +99,7 @@ class QaProjectForGroupViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin,
         return Liaisons.objects.values("fodrno", "forganization").filter(forganization__in=all_group_tuple).distinct()
 
     serializer_class = QaProjectSerializer
+    pagination_class = QaProjectForGroupPagination
 
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filter_class = QAProjectFilter

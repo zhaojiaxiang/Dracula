@@ -27,7 +27,7 @@ class ProjectsSerializer(serializers.ModelSerializer):
 
         projects = Projects.objects.create(**validated_data)
 
-        projects.organization = organization_id
+        projects.organization_id = organization_id
 
         projects.save()
 

@@ -184,23 +184,95 @@ class MyTaskBar(APIView):
 
         approval_sql = f"""
                        select count(*)
-                       from (
-                           select distinct qahf.id
-                           from qahf,
-                                qadf
-                           where qadf.qahf_id = qahf.id
-                           and qahf.fcreateusr in (select name from users where ammic_organization_id in {all_organization_tuple})
-                           and qadf.fapproval = 'N') a;
-                       """
+                            from (
+                                 select distinct qahf.id  qahf_id,
+                                     qahf.ftesttyp,
+                                     liaisonf.fodrno,
+                                     liaisonf.fslipno,
+                                     qahf.fobjectid,
+                                     qahf.fstatus,
+                                     qahf.fobjmodification,
+                                     (select codereview.id
+                                      from codereview
+                                      where codereview.fobjectid = qahf.fobjectid
+                                        and codereview.fslipno = qahf.fslipno) code_id,
+                                     (select codereview.id
+                                      from codereview
+                                      where codereview.fobjectid = 'Design Review'
+                                        and codereview.fslipno = qahf.fslipno) design_id
+                                 from liaisonf,
+                                      qahf,
+                                      qadf
+                                 where qadf.qahf_id = qahf.id
+                                   and (liaisonf.fslipno = qahf.fslipno or liaisonf.fodrno = qahf.fslipno)
+                                   and qahf.fcreateusr in (select name from users where ammic_organization_id 
+                                   in {all_organization_tuple})
+                                   and qadf.fapproval = 'N'
+                                   and qahf.ftesttyp = 'MCL'
+                                 union all
+                                 select distinct qahf.id,
+                                                 qahf.ftesttyp,
+                                                 qahf.fslipno,
+                                                 qahf.fslipno2 fslipno,
+                                                 qahf.fobjectid,
+                                                 qahf.fstatus,
+                                                 qahf.fnote,
+                                                 ''            code_id,
+                                                 ''            design_id
+                                 from qahf,
+                                      qadf,
+                                      liaisonf
+                                 where ftesttyp = 'PCL'
+                                   and qahf.id = qadf.qahf_id
+                                   and qadf.fapproval = 'N'
+                                   and liaisonf.fodrno = qahf.fslipno
+                                   and liaisonf.fleader like '%{user.name}%') a
+                            order by ftesttyp, fodrno, fslipno
+                      """
 
         approval_list = query_single_with_no_parameter(approval_sql, 'list')
         approval = approval_list[0]
 
         confirm_sql = f"""
                       select count(*)
-                          from qahf
-                          where fcreateusr in (select name from users where ammic_organization_id in {all_organization_tuple})
-                            and fstatus = '3'
+                        from (
+                                 select qahf.id                                   qahf_id,
+                                        qahf.ftesttyp,
+                                        liaisonf.fodrno,
+                                        liaisonf.fslipno,
+                                        qahf.fobjectid,
+                                        qahf.fstatus,
+                                        qahf.fobjmodification,
+                                        (select codereview.id
+                                         from codereview
+                                         where codereview.fobjectid = qahf.fobjectid
+                                           and codereview.fslipno = qahf.fslipno) code_id,
+                                        (select codereview.id
+                                         from codereview
+                                         where codereview.fobjectid = 'Design Review'
+                                           and codereview.fslipno = qahf.fslipno) design_id
+                                 from liaisonf,
+                                      qahf
+                                 where (liaisonf.fslipno = qahf.fslipno or liaisonf.fodrno = qahf.fslipno)
+                                   and qahf.fcreateusr in (select name from users where ammic_organization_id in {all_organization_tuple})
+                                   and qahf.fstatus = '3'
+                                   and qahf.ftesttyp = 'MCL'
+                                 union all
+                                 select distinct qahf.id,
+                                                 qahf.ftesttyp,
+                                                 qahf.fslipno,
+                                                 qahf.fslipno2 fslipno,
+                                                 qahf.fobjectid,
+                                                 qahf.fstatus,
+                                                 qahf.fnote,
+                                                 ''            code_id,
+                                                 ''            design_id
+                                 from qahf,
+                                      liaisonf
+                                 where qahf.ftesttyp = 'PCL'
+                                   and qahf.fstatus = '3'
+                                   and liaisonf.fodrno = qahf.fslipno
+                                   and liaisonf.fleader like '%{user.name}%') a
                       """
         confirm_list = query_single_with_no_parameter(confirm_sql, 'list')
         confirm = confirm_list[0]

@@ -140,6 +140,10 @@ class LiaisonUpdateStatusSerializer(serializers.ModelSerializer):
                     for pcl in pcl_objs:
                         if pcl.fstatus != "4":
                             raise serializers.ValidationError("该联络票下的PCL没有确认")
+
+                if instance.freleaserpt is None or len(instance.freleaserpt.strip()) == 0:
+                    raise serializers.ValidationError("请先上传变更报告书")
+
                 instance.freleasedt = current_date
         else:
             if new_status == "3":

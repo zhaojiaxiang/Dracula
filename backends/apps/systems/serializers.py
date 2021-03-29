@@ -27,7 +27,7 @@ class SystemsSerializer(serializers.ModelSerializer):
 
         systems = Systems.objects.create(**validated_data)
 
-        systems.organization = organization_id
+        systems.organization_id = organization_id
 
         systems.save()
 

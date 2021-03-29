@@ -62,6 +62,8 @@ router.register('accounts/system_setting', SystemSettingViewSet, basename='syste
 router.register('qa_project', QaProjectViewSet, basename='qa_project')
 router.register('qa_project_group', QaProjectForGroupViewSet, basename='qa_project_group')
 router.register('qa_project_mine', QaProjectForMineViewSet, basename='qa_project_mine')
+
+
 router.register('pb_file_checkout', CheckOutFilesViewSet, basename='pb_file_checkout')
 
 
