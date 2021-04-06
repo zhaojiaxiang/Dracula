@@ -1,12 +1,12 @@
 import datetime
 
 from django.db import transaction
-from django.db.models import Max, Q
+from django.db.models import Max, Q, Sum
 from math import ceil
 from rest_framework import serializers
 
 from liaisons.models import Liaisons
-from qa.models import QaHead, QaDetail
+from qa.models import QaHead, QaDetail, Qadfproof
 from reviews.models import CodeReview
 
 
@@ -214,7 +214,7 @@ class QaHeadModifyDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QaHead
-        fields = ('id', 'fttlcodelines', 'fmodifiedlines', 'fcomplexity', 'fselflevel')
+        fields = ('id', 'fttlcodelines', 'fmodifiedlines', 'fcomplexity', 'fselflevel', 'fstatus')
 
 
 class PCLQaClass1Serializer(serializers.ModelSerializer):
@@ -301,12 +301,15 @@ class QaHeadTargetAndActualSerializer(serializers.ModelSerializer):
     actual_regressions = serializers.SerializerMethodField()
     actual_total = serializers.SerializerMethodField()
     actual_ng = serializers.SerializerMethodField()
+    actual_ngok = serializers.SerializerMethodField()
+    actual_ng_rate = serializers.SerializerMethodField()
 
     class Meta:
         model = QaHead
         fields = (
             'id', 'fttlcodelines', 'fmodifiedlines', 'fcomplexity', 'fstatus', 'target_tests', 'target_regressions',
-            'target_total', 'target_ng', 'actual_tests', 'actual_regressions', 'actual_total', 'actual_ng')
+            'target_total', 'target_ng', 'actual_tests', 'actual_regressions', 'actual_total', 'actual_ng',
+            'actual_ngok', 'actual_ng_rate')
 
     def get_target_tests(self, obj):
         if obj.fmodifiedlines:
@@ -343,8 +346,33 @@ class QaHeadTargetAndActualSerializer(serializers.ModelSerializer):
                                        qahf_id__exact=obj.id).count()
 
     def get_actual_ng(self, obj):
-        return QaDetail.objects.filter(fresult__contains='NG',
-                                       qahf_id__exact=obj.id).count()
+        # 测试结果为NG的数量
+        result_ng_count = QaDetail.objects.filter(fresult__contains='NG',
+                                                  qahf_id__exact=obj.id).count()
+        approval_ng_count = QaDetail.objects.filter(fresult__contains='NG',
+                                                    qahf_id__exact=obj.id, fngcnt__gt=0).count()
+        approval_ng_sum_dict = QaDetail.objects.values('qahf_id').annotate(sum=Sum("fngcnt")).filter(
+            fresult__contains='NG', qahf_id__exact=obj.id, fngcnt__gt=0)
+
+        approval_ng_sum = 0
+        if approval_ng_sum_dict:
+            approval_ng_sum = approval_ng_sum_dict[0]['sum']
+
+        return result_ng_count + approval_ng_sum - approval_ng_count
+
+    def get_actual_ngok(self, obj):
+        result_ngok_count = QaDetail.objects.filter(fresult__exact='NGOK',
+                                                    qahf_id__exact=obj.id).count()
+        return result_ngok_count
+
+    def get_actual_ng_rate(self, obj):
+
+        total = self.get_actual_total(obj)
+        if total == 0:
+            total = 1
+        ng_rate = round(self.get_actual_ng(obj) / total, 2) * 100
+
+        return str(ng_rate) + "%"
 
 
 class QaDetailSerializer(serializers.ModelSerializer):
@@ -359,19 +387,29 @@ class QaDetailSerializer(serializers.ModelSerializer):
     fngcnt = serializers.IntegerField(read_only=True)
     fresult = serializers.CharField(read_only=True)
     fcontent_text = serializers.CharField(read_only=True)
+    test_tag = serializers.SerializerMethodField()
 
     class Meta:
         model = QaDetail
         fields = ('id', 'fclass1', 'fclass2', 'fregression', 'fcontent', 'fsortrule', 'fimpdte', 'fimpusr', 'ftestdte',
-                  'ftestusr', 'fapproval', 'fresult', 'fngcnt', 'qahf', 'fapproval', 'fcontent_text')
+                  'ftestusr', 'fapproval', 'fresult', 'fngcnt', 'qahf', 'fapproval', 'fcontent_text', 'test_tag')
 
-        # validators = [
-        #     UniqueTogetherValidator(
-        #         queryset=QaDetail.objects.all(),
-        #         fields=['fcontent', 'qahf'],
-        #         message="该测试项已经在该对象下存在"
-        #     )
-        # ]
+    def get_test_tag(self, obj):
+        context_text = obj.fcontent_text
+        ng_cnt = obj.fngcnt
+        last_submit = obj.flastsubmitid
+        last_approval = obj.flastapproveid
+
+        if context_text:
+            if ng_cnt == 0:
+                return "已贴图"
+            else:
+                if last_approval > last_submit:
+                    return f"已评论,{ng_cnt}"
+                else:
+                    return f"已贴图,{ng_cnt}"
+        else:
+            return "贴图"
 
     @transaction.atomic()
     def create(self, validated_data):
@@ -438,3 +476,126 @@ class QaDetailUpdateContentTextSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         return obj.qahf.fstatus
+
+    @transaction.atomic()
+    def update(self, instance, validated_data):
+        user = self.context['request'].user
+        fcontent_text = validated_data['fcontent_text']
+        qadf_id = instance.id
+        fentusr = user.name
+
+        proof_data = {"fcontent_text": fcontent_text, "fentusr": fentusr, "qadf_id": qadf_id}
+
+        proof_id = 0
+        if instance.flastapproveid is None:
+
+            if instance.flastsubmitid:
+                proof_id = instance.flastsubmitid
+                proof = Qadfproof.objects.get(pk=proof_id)
+                proof.fcontent_text = fcontent_text
+            else:
+                proof = Qadfproof.objects.create(**proof_data)
+                proof_id = proof.id
+            proof.save()
+        else:
+            if instance.flastsubmitid is None or instance.flastapproveid > instance.flastsubmitid:
+                proof = Qadfproof.objects.create(**proof_data)
+                proof_id = proof.id
+                proof.save()
+            else:
+                proof_id = instance.flastsubmitid
+                proof_data['id'] = proof_id
+                proof = Qadfproof.objects.get(pk=proof_id)
+                proof.fcontent_text = fcontent_text
+                proof.save()
+
+        instance.flastsubmitid = proof_id
+        instance.fcontent_text = fcontent_text
+        instance.ftestusr = user.name
+        instance.ftestdte = datetime.datetime.now().strftime('%Y-%m-%d')
+        instance.save()
+
+        return instance
+
+
+class QaDetailApprovalContentTextSerializer(serializers.ModelSerializer):
+    """
+    处理测试项评论
+    """
+    id = serializers.IntegerField(read_only=True)
+    status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = QaDetail
+        fields = ('id', 'status', 'fcontent', 'fcontent_text')
+
+    def get_status(self, obj):
+        return obj.qahf.fstatus
+
+    @transaction.atomic()
+    def update(self, instance, validated_data):
+        user = self.context['request'].user
+        fcontent_text = validated_data['fcontent_text']
+        qadf_id = instance.id
+        fentusr = user.name
+
+        proof_data = {"fcontent_text": fcontent_text, "fentusr": fentusr, "qadf_id": qadf_id}
+
+        proof_id = 0
+        ng_count = instance.fngcnt
+        result = instance.fresult
+        if instance.flastapproveid is None:
+            proof = Qadfproof.objects.create(**proof_data)
+            proof_id = proof.id
+            proof.save()
+            ng_count = ng_count + 1
+            result = "NG"
+        else:
+            if instance.flastsubmitid > instance.flastapproveid:
+                proof = Qadfproof.objects.create(**proof_data)
+                proof_id = proof.id
+                proof.save()
+                ng_count = ng_count + 1
+                result = "NG"
+            else:
+                proof_id = instance.flastapproveid
+                proof = Qadfproof.objects.get(pk=proof_id)
+                proof.fcontent_text = fcontent_text
+                proof.save()
+
+        instance.flastapproveid = proof_id
+        instance.fresult = result
+        instance.fngcnt = ng_count
+        instance.save()
+
+        return instance
+
+
+class QadfproofContentTextSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    user_date_tag = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Qadfproof
+        fields = ('id', 'qadf_id', 'fcontent_text', 'fentdt', 'fentusr', 'type', 'user_date_tag')
+
+    def get_user_date_tag(self, obj):
+        return obj.fentusr + " - " + str(obj.fentdt)
+
+    def get_type(self, obj):
+        qa_detail = QaDetail.objects.get(pk=obj.qadf_id)
+        last_approval = qa_detail.flastapproveid
+        last_submit = qa_detail.flastsubmitid
+
+        proof_type = "H"
+        """
+        H: 历史测试、评论数据
+        A: 最新的评论
+        T: 最新的测试数据
+        """
+        if last_approval == obj.id:
+            proof_type = "A"
+        if last_submit == obj.id:
+            proof_type = "T"
+
+        return proof_type

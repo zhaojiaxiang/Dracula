@@ -1,6 +1,6 @@
 import django_filters
 
-from qa.models import QaHead, QaDetail
+from qa.models import QaHead, QaDetail, Qadfproof
 
 
 class QaHeadFilter(django_filters.rest_framework.FilterSet):
@@ -21,3 +21,11 @@ class QaDetailFilter(django_filters.rest_framework.FilterSet):
     class Meta:
         model = QaDetail
         fields = ("qahf", 'class1', 'class2')
+
+
+class QaDetailProofFilter(django_filters.rest_framework.FilterSet):
+    qadf = django_filters.CharFilter(field_name='qadf_id', lookup_expr='exact')
+
+    class Meta:
+        model = Qadfproof
+        fields = ("qadf", )

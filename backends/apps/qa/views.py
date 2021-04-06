@@ -10,22 +10,25 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from sendfile import sendfile
 
-from qa.filters import QaHeadFilter, QaDetailFilter
-from qa.models import QaHead, QaDetail
+from qa.filters import QaHeadFilter, QaDetailFilter, QaDetailProofFilter
+from qa.models import QaHead, QaDetail, Qadfproof
 from qa.serializers import QaHeadSerializer, QaDetailSerializer, QaDetailUpdateResultSerializer, \
     QaDetailUpdateContentTextSerializer, QaHeadUpdateObjectSummarySerializer, QaHeadModifyDetailSerializer, \
-    QaHeadTargetAndActualSerializer, PCLQaClass1Serializer, PCLQaClass2Serializer
+    QaHeadTargetAndActualSerializer, PCLQaClass1Serializer, PCLQaClass2Serializer, \
+    QaDetailApprovalContentTextSerializer, QadfproofContentTextSerializer
 from utils.utils import create_folder
 
 
 class MCLQaHeadViewSet(viewsets.ModelViewSet):
+    """
+    MCL测试对象增删改查 API
+    包含：排序、过滤
+    """
     queryset = QaHead.objects.order_by('fstatus', '-fslipno2', '-fcreatedte')
     serializer_class = QaHeadSerializer
 
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filter_class = QaHeadFilter
-
-    # ordering_fields = ['fstatus', '-fcreatedte']
 
     @transaction.atomic()
     def destroy(self, request, *args, **kwargs):
@@ -56,48 +59,91 @@ class MCLQaHeadViewSet(viewsets.ModelViewSet):
 
 class QaHeadUpdateObjectSummaryViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                                        viewsets.GenericViewSet):
+    """
+    测试对象 概要 API
+    """
     queryset = QaHead.objects.filter(ftesttyp__exact='MCL')
     serializer_class = QaHeadUpdateObjectSummarySerializer
 
 
 class QaHeadModifyDetailViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                                 viewsets.GenericViewSet):
+    """
+    测试对象 修改明细 API
+    """
     queryset = QaHead.objects.filter(ftesttyp__exact='MCL')
     serializer_class = QaHeadModifyDetailSerializer
 
 
 class QaHeadTargetAndActualViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+    测试对象 测试目标 API
+    """
     queryset = QaHead.objects.all()
     serializer_class = QaHeadTargetAndActualSerializer
 
 
 class QaDetailViewSet(viewsets.ModelViewSet):
+    """
+    测试明细表 增删改查 API
+    """
     queryset = QaDetail.objects.all().order_by('fsortrule', 'fclass1', 'fclass2', 'fregression')
     serializer_class = QaDetailSerializer
 
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filter_class = QaDetailFilter
-    # ordering_fields = ['fsortrule']
 
 
 class QaDetailUpdateResultViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                                   viewsets.GenericViewSet):
+    """
+    测试项结果 更新修改查看 API
+    """
     queryset = QaDetail.objects.all()
     serializer_class = QaDetailUpdateResultSerializer
 
 
 class QaDetailUpdateContentTextViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                                        viewsets.GenericViewSet):
+    """
+    测试项贴图 更新修改查看 API
+    """
     queryset = QaDetail.objects.all()
     serializer_class = QaDetailUpdateContentTextSerializer
 
 
+class QaDetailApprovalContentTextViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+                                         viewsets.GenericViewSet):
+    """
+    测试项评论贴图，提交测试结果后，检查测试项时评论功能 更新修改查看 API
+    """
+    queryset = QaDetail.objects.all()
+    serializer_class = QaDetailApprovalContentTextSerializer
+
+
+class QadfProofContentTextViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+
+    """
+    queryset = Qadfproof.objects.all().order_by('-id')
+    serializer_class = QadfproofContentTextSerializer
+
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
+    filter_class = QaDetailProofFilter
+
+
 class PCLQaClass1ViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+    PCL 以分类1进行分组展示数据 API
+    """
     queryset = QaHead.objects.filter(ftesttyp__exact='PCL')
     serializer_class = PCLQaClass1Serializer
 
 
 class PCLQaClass2ViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+    PCL 以分类1 + 分类2进行分组展示数据 API
+    """
     serializer_class = PCLQaClass2Serializer
 
     def get_queryset(self):
@@ -128,7 +174,29 @@ class PCLCommitJudgment(APIView):
         return Response(data=data, status=status.HTTP_200_OK)
 
 
-@permission_classes((AllowAny, ))
+class TestResultDefaultOK(APIView):
+    """
+    MCL和PCL列表中，点击Default OK按钮，将该测试对象下所有未录入结果的测试项默认设置为 “OK”
+    """
+
+    def put(self, request):
+        data = {}
+        try:
+            qahf_id = request.data['qahf']
+            qa_details = QaDetail.objects.filter(qahf_id=qahf_id)
+            for detail in qa_details:
+                if detail.fresult is None:
+                    detail.fresult = 'OK'
+                    detail.save()
+        except Exception as e:
+            data = {
+                'code': '500',
+                'message': str(e)
+            }
+        return Response(data, status=status.HTTP_200_OK)
+
+
+@permission_classes((AllowAny,))
 class RecoverFile(APIView):
     """
     富文本编辑器文件展示处理API

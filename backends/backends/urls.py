@@ -30,7 +30,8 @@ from projects.views import ProjectsViewSet
 from qa.views import MCLQaHeadViewSet, QaDetailViewSet, QaDetailUpdateResultViewSet, \
     QaDetailUpdateContentTextViewSet, QaHeadUpdateObjectSummaryViewSet, QaHeadModifyDetailViewSet, \
     QaHeadTargetAndActualViewSet, CkEditorImageUpload, CkEditorFileUpload, RecoverFile, PCLQaClass1ViewSet, \
-    PCLQaClass2ViewSet, PCLCommitJudgment
+    PCLQaClass2ViewSet, PCLCommitJudgment, TestResultDefaultOK, QaDetailApprovalContentTextViewSet, \
+    QadfProofContentTextViewSet
 from rbac.views import WorkingOrganization, WorkingProject
 from reports.views import ReportListViewSet
 from reviews.views import DesignReviewViewSet, CodeReviewViewSet
@@ -55,6 +56,10 @@ router.register('qa/pcl_class2', PCLQaClass2ViewSet, basename='pcl_class2')
 router.register('qa/mcl_detail_update_result', QaDetailUpdateResultViewSet, basename='mcl_detail_update_result')
 router.register('qa/mcl_detail_update_content_text', QaDetailUpdateContentTextViewSet,
                 basename='mcl_detail_update_content_text')
+router.register('qa/mcl_detail_approval_content_text', QaDetailApprovalContentTextViewSet,
+                basename='mcl_detail_approval_content_text')
+router.register('qa/mcl_detail_proof_content_text', QadfProofContentTextViewSet,
+                basename='mcl_detail_proof_content_text')
 router.register('qa/design_review', DesignReviewViewSet, basename='design_review')
 router.register('qa/code_review', CodeReviewViewSet, basename='code_review')
 router.register('accounts/system_setting', SystemSettingViewSet, basename='system_setting')
@@ -89,6 +94,7 @@ urlpatterns = [
     path('api/qa_project_detail_view/', QaProjectDetailView.as_view()),
     path('api/working_organization/', WorkingOrganization.as_view()),
     path('api/working_project/', WorkingProject.as_view()),
+    path('api/default_ok/', TestResultDefaultOK.as_view()),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
               + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

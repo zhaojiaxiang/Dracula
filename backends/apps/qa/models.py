@@ -60,6 +60,8 @@ class QaDetail(models.Model):
     fapprovallot = models.IntegerField(verbose_name='审核批次', default=0)
     fresult = models.CharField(db_index=True, verbose_name='测试结果', max_length=10, null=True, blank=True)
     fngcnt = models.SmallIntegerField(verbose_name='NG次数', default=0)
+    flastapproveid = models.SmallIntegerField(verbose_name="最后一次审核ID", null=True, blank=True)
+    flastsubmitid = models.SmallIntegerField(verbose_name="最后一次提交ID", null=True, blank=True)
     qahf = models.ForeignKey(QaHead, related_name='qahf', on_delete=models.CASCADE)
     fentdt = models.DateField(verbose_name='登入日期', auto_now_add=True)
     fentusr = models.CharField(verbose_name='登录者', max_length=24, null=True, blank=True)
@@ -74,3 +76,20 @@ class QaDetail(models.Model):
 
     def __str__(self):
         return self.fcontent
+
+
+class Qadfproof(models.Model):
+    """
+    将保存测试截图字段分离出来，同时管理对测试结果的评论
+    有评论的测试结果将自动默认为 NG，且评论次数就是NG次数
+    """
+    fcontent_text = UEditorField(verbose_name='测试截图', imagePath="qa/images/%Y%m%D/", width=1000, height=300,
+                                 filePath="qa/files/%Y%m/", default='', null=True, blank=True)
+    fentdt = models.DateField(verbose_name='登入日期', auto_now_add=True)
+    fentusr = models.CharField(verbose_name='登录者', max_length=24, null=True, blank=True)
+    qadf = models.ForeignKey(QaDetail, related_name='qadf', on_delete=models.DO_NOTHING)
+
+    class Meta:
+        db_table = 'qadfproof'
+        verbose_name = '测试评论表'
+        verbose_name_plural = verbose_name
