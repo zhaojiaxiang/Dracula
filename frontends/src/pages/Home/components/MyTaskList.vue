@@ -1,18 +1,29 @@
 <template>
   <div class="goTop">
-    <el-breadcrumb
-      separator-class="el-icon-arrow-right"
-      style="font-size:16px;margin-top: 5px;"
-    >
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item
-        :to="{ path: '/task/', query: { type: this.paramtype } }"
-        >任务列表</el-breadcrumb-item
+    <el-row>
+      <el-col :span="10"
+        ><div>
+          <el-breadcrumb
+            separator-class="el-icon-arrow-right"
+            style="font-size:16px;margin-top: 5px;"
+          >
+            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item
+              :to="{ path: '/task/', query: { type: this.paramtype } }"
+              >任务列表</el-breadcrumb-item
+            >
+            <el-breadcrumb-item
+              >测试列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
+            >
+          </el-breadcrumb>
+        </div></el-col
       >
-      <el-breadcrumb-item
-        >测试列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
-      >
-    </el-breadcrumb>
+      <el-col :span="14">
+        <div>
+          <MCLTargetActual></MCLTargetActual>
+        </div>
+      </el-col>
+    </el-row>
 
     <el-row style="margin-top:20px">
       <el-col :span="24">
@@ -108,7 +119,7 @@
             style="margin-left:15px"
             v-show="scope.row.fcontent_text.length > 0"
             @click="handleContentText(scope.row.id)"
-            >已贴图</el-link
+            >{{ scope.row.test_tag }}</el-link
           >
         </template>
       </el-table-column>
@@ -129,16 +140,18 @@ import {
   updateQaHead,
 } from "./../../../services/qaService";
 import QaConfirm from "./QaConfirm";
+import MCLTargetActual from "./MCLTargetActual";
 export default {
   components: {
     QaConfirm,
+    MCLTargetActual,
   },
   data() {
     return {
       loading: false,
       paramtype: "",
       parentroute: "",
-      qaheadId:'',
+      qaheadId: "",
       qahead: {},
       qadetails: [],
     };
@@ -166,13 +179,13 @@ export default {
 
     isCanApproval() {
       if (this.paramtype === "approval") {
-        if(this.qahead.fstatus === "1"){
+        if (this.qahead.fstatus === "1") {
           return true;
-        }else{
-          for(var i in this.qadetails){
+        } else {
+          for (var i in this.qadetails) {
             console.log(this.qadetails[i].fapproval);
-            if(this.qadetails[i].fapproval === '未审核'){
-              return true
+            if (this.qadetails[i].fapproval === "未审核") {
+              return true;
             }
           }
         }
@@ -222,7 +235,10 @@ export default {
     },
 
     handleContentText(id) {
-      this.$router.push({ name: "QaContentText", query: { qadf_id: id } });
+      this.$router.push({
+        name: "QaContentText",
+        query: { type: "approval", qadf_id: id },
+      });
     },
 
     async resultApproval() {

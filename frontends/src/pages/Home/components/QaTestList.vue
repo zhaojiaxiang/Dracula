@@ -1,26 +1,37 @@
 <template>
   <div class="goTop">
-    <el-breadcrumb
-      separator-class="el-icon-arrow-right"
-      style="font-size:16px;margin-top: 5px;"
-    >
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item
-        v-show="paramtype !== 'mcl'"
-        :to="{ path: '/qa/', query: { slipno: this.qahead.fslipno } }"
-        >QA列表</el-breadcrumb-item
+    <el-row>
+      <el-col :span="10"
+        ><div>
+          <el-breadcrumb
+            separator-class="el-icon-arrow-right"
+            style="font-size:16px;margin-top: 5px;"
+          >
+            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item
+              v-show="paramtype !== 'mcl'"
+              :to="{ path: '/qa/', query: { slipno: this.qahead.fslipno } }"
+              >QA列表</el-breadcrumb-item
+            >
+            <el-breadcrumb-item
+              v-show="paramtype === 'mcl'"
+              :to="{ path: '/task/', query: { type: this.paramtype } }"
+              >任务列表</el-breadcrumb-item
+            >
+            <el-breadcrumb-item
+              >MCL列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
+            >
+          </el-breadcrumb>
+        </div></el-col
       >
-      <el-breadcrumb-item
-        v-show="paramtype === 'mcl'"
-        :to="{ path: '/task/', query: { type: this.paramtype } }"
-        >任务列表</el-breadcrumb-item
-      >
-      <el-breadcrumb-item
-        >MCL列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
-      >
-    </el-breadcrumb>
+      <el-col :span="14">
+        <div>
+          <MCLTargetActual ref="MCLTargetActual"></MCLTargetActual>
+        </div>
+      </el-col>
+    </el-row>
 
-    <el-row style="margin-top:20px">
+    <el-row style="margin-top:5px">
       <el-col :span="12">
         <div>
           <el-button
@@ -35,6 +46,7 @@
       <el-col :span="12">
         <div style="text-align:right;margin-right:40px">
           <el-button-group>
+            <el-button @click="defaultOK()">Default OK</el-button>
             <el-button @click="detailModify()">修改明细</el-button>
             <el-button v-show="isCanAdd()" @click="singleAdd()"
               >逐条添加</el-button
@@ -147,7 +159,7 @@
             style="margin-left:15px"
             @click="handleContentText(scope.row.id)"
             v-show="scope.row.fcontent_text.length > 0"
-            >已贴图</el-link
+            >{{ scope.row.test_tag }}</el-link
           >
           <el-link
             style="margin-left:20px"
@@ -192,7 +204,10 @@
       @refreshQaList="refreshQaList"
     ></BatchNewQaList>
 
-    <QaModifyDetail ref="QaModifyDetail"></QaModifyDetail>
+    <QaModifyDetail
+      ref="QaModifyDetail"
+      @refreshTargetActual="refreshTargetActual"
+    ></QaModifyDetail>
 
     <SingleModifyQaList
       ref="SingleModifyQaList"
@@ -212,21 +227,24 @@ import {
   deleteQaDetail,
   updateQaDetailResult,
   updateQaHead,
+  putDefaultOK,
 } from "./../../../services/qaService";
 import SingleNewQaList from "../components/SingleNewQaList";
 import BatchNewQaList from "../components/BatchNewQaList";
 import SingleModifyQaList from "../components/SingleModifyQaList";
 import QaModifyDetail from "../components/QaModifyDetail";
+import MCLTargetActual from "../components/MCLTargetActual";
 export default {
   components: {
     SingleNewQaList,
     SingleModifyQaList,
     BatchNewQaList,
     QaModifyDetail,
+    MCLTargetActual,
   },
   data() {
     return {
-      loading:false,
+      loading: false,
       paramtype: "",
       parentroute: "",
       fullscreenLoading: false,
@@ -318,8 +336,11 @@ export default {
       };
     },
 
-    handleContentText(id){
-      this.$router.push({name: "QaContentText",query:{qadf_id:id}})
+    handleContentText(id) {
+      this.$router.push({
+        name: "QaContentText",
+        query: { type: "test", qadf_id: id },
+      });
     },
 
     async batchDeleteQaDetail() {
@@ -420,6 +441,10 @@ export default {
       return row.fresult === value;
     },
 
+    refreshTargetActual() {
+      this.$refs.MCLTargetActual.refreshTargetActual();
+    },
+
     async refreshQaList() {
       var resp = await getQaDetailByQaHead(this.qahead.id).catch(() => {
         this.$message.error("测试项数据获取异常");
@@ -476,6 +501,17 @@ export default {
         });
       }
     },
+
+    async defaultOK() {
+      var resp = await putDefaultOK(this.qahead.id).catch(() => {
+        this.$message.error("Default OK数据异常");
+      });
+      if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
+        this.$message.error(resp.data.message);
+        return;
+      }
+      this.refreshQaList();
+    },
   },
   mounted: async function() {
     this.loading = true;
@@ -490,9 +526,9 @@ export default {
       this.refreshQaList();
     }
 
-    this.bus.$on('refreshList', function(){
-        this.refreshQaList();
-    })
+    this.bus.$on("refreshList", function() {
+      this.refreshQaList();
+    });
     this.loading = false;
   },
 };

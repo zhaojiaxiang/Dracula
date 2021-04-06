@@ -1,9 +1,19 @@
 <template>
   <div class="goTop">
-    <div style="margin:10px">
-      <el-page-header @back="goBack"> </el-page-header>
-    </div>
-    <el-row style="margin-top:20px">
+    <el-row>
+      <el-col :span="10"
+        ><div>
+          <div style="margin:10px">
+            <el-page-header @back="goBack"> </el-page-header>
+          </div></div
+      ></el-col>
+      <el-col :span="14">
+        <div>
+          <MCLTargetActual></MCLTargetActual>
+        </div>
+      </el-col>
+    </el-row>
+    <el-row style="margin-top:5px">
       <el-col :span="24">
         <div style="text-align:right;margin-right:40px">
           <el-button-group>
@@ -97,7 +107,7 @@
             style="margin-left:15px"
             v-show="scope.row.fcontent_text.length > 0"
             @click="handleContentText(scope.row.id)"
-            >已贴图</el-link
+            >{{ scope.row.test_tag }}</el-link
           >
         </template>
       </el-table-column>
@@ -118,9 +128,11 @@ import {
   updateQaHead,
 } from "./../../../services/qaService";
 import QaConfirm from "../../Home/components/QaConfirm";
+import MCLTargetActual from "../../Home/components/MCLTargetActual";
 export default {
   components: {
     QaConfirm,
+    MCLTargetActual,
   },
   data() {
     return {
@@ -175,7 +187,10 @@ export default {
     },
 
     handleContentText(id) {
-      this.$router.push({ name: "QaContentText", query: { qadf_id: id } });
+      this.$router.push({
+        name: "QaContentText",
+        query: { type: "approval", qadf_id: id },
+      });
     },
 
     async resultRollbackConfirm() {

@@ -1,44 +1,55 @@
 <template>
   <div class="goTop">
-    <el-breadcrumb
-      separator-class="el-icon-arrow-right"
-      style="font-size:16px;margin-top: 5px;"
-    >
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item
-        v-show="paramtype !== 'pcl'"
-        :to="{ path: '/qa/', query: { slipno: this.qahead.fslipno } }"
-        >QA列表</el-breadcrumb-item
+    <el-row>
+      <el-col :span="15"
+        ><div>
+          <el-breadcrumb
+            separator-class="el-icon-arrow-right"
+            style="font-size:16px;margin-top: 5px;"
+          >
+            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item
+              v-show="paramtype !== 'pcl'"
+              :to="{ path: '/qa/', query: { slipno: this.qahead.fslipno } }"
+              >QA列表</el-breadcrumb-item
+            >
+            <el-breadcrumb-item
+              v-show="paramtype === 'pcl'"
+              :to="{ path: '/task/', query: { type: this.paramtype } }"
+              >任务列表</el-breadcrumb-item
+            >
+            <el-breadcrumb-item
+              v-show="paramtype === 'pcl'"
+              :to="{
+                name: 'QaPclClass1',
+                query: { qahf_id: this.qahead.id, type: this.paramtype },
+              }"
+              >PCL列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
+            >
+            <el-breadcrumb-item
+              v-show="paramtype === 'pcl'"
+              :to="{
+                name: 'QaPclClass2',
+                query: {
+                  qahf_id: this.qahead.id,
+                  type: this.paramtype,
+                  class1: this.class1,
+                },
+              }"
+              >{{ this.class1 }}</el-breadcrumb-item
+            >
+            <el-breadcrumb-item>{{ this.class2 }}</el-breadcrumb-item>
+          </el-breadcrumb>
+        </div></el-col
       >
-      <el-breadcrumb-item
-        v-show="paramtype === 'pcl'"
-        :to="{ path: '/task/', query: { type: this.paramtype } }"
-        >任务列表</el-breadcrumb-item
-      >
-      <el-breadcrumb-item
-        v-show="paramtype === 'pcl'"
-        :to="{
-          name: 'QaPclClass1',
-          query: { qahf_id: this.qahead.id, type: this.paramtype },
-        }"
-        >PCL列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
-      >
-      <el-breadcrumb-item
-        v-show="paramtype === 'pcl'"
-        :to="{
-          name: 'QaPclClass2',
-          query: {
-            qahf_id: this.qahead.id,
-            type: this.paramtype,
-            class1: this.class1,
-          },
-        }"
-        >{{ this.class1 }}</el-breadcrumb-item
-      >
-      <el-breadcrumb-item>{{ this.class2 }}</el-breadcrumb-item>
-    </el-breadcrumb>
+      <el-col :span="9">
+        <div>
+          <PCLTargetActual></PCLTargetActual>
+        </div>
+      </el-col>
+    </el-row>
 
-    <el-row style="margin-top:20px">
+    <el-row style="margin-top:5px">
       <el-col :span="12">
         <div>
           <el-button
@@ -218,11 +229,13 @@ import {
 import SingleNewQaListforPCL from "../components/SingleNewQaListforPCL";
 import BatchNewPclList from "../components/BatchNewPclList";
 import SingleModifyQaListforPCL from "../components/SingleModifyQaListforPCL";
+import PCLTargetActual from "../components/PCLTargetActual";
 export default {
   components: {
     SingleNewQaListforPCL,
     SingleModifyQaListforPCL,
     BatchNewPclList,
+    PCLTargetActual,
   },
   data() {
     return {

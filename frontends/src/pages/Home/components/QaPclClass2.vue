@@ -1,36 +1,47 @@
 <template>
   <div class="goTop">
-    <el-breadcrumb
-      separator-class="el-icon-arrow-right"
-      style="font-size:16px;margin-top: 5px;"
-    >
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item
-        v-show="paramtype !== 'pcl'"
-        :to="{ path: '/qa/', query: { slipno: this.qahead.fslipno } }"
-        >QA列表</el-breadcrumb-item
+    <el-row>
+      <el-col :span="15"
+        ><div>
+          <el-breadcrumb
+            separator-class="el-icon-arrow-right"
+            style="font-size:16px;margin-top: 5px;"
+          >
+            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item
+              v-show="paramtype !== 'pcl'"
+              :to="{ path: '/qa/', query: { slipno: this.qahead.fslipno } }"
+              >QA列表</el-breadcrumb-item
+            >
+            <el-breadcrumb-item
+              v-show="paramtype === 'pcl'"
+              :to="{ path: '/task/', query: { type: this.paramtype } }"
+              >任务列表</el-breadcrumb-item
+            >
+            <el-breadcrumb-item
+              v-show="paramtype === 'pcl'"
+              :to="{
+                name: 'QaPclClass1',
+                query: {
+                  qahf_id: this.qahead.id,
+                  type: this.paramtype,
+                  class1: class1,
+                },
+              }"
+              >PCL列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
+            >
+            <el-breadcrumb-item>{{ this.class1 }}</el-breadcrumb-item>
+          </el-breadcrumb>
+        </div></el-col
       >
-      <el-breadcrumb-item
-        v-show="paramtype === 'pcl'"
-        :to="{ path: '/task/', query: { type: this.paramtype } }"
-        >任务列表</el-breadcrumb-item
-      >
-      <el-breadcrumb-item
-        v-show="paramtype === 'pcl'"
-        :to="{
-          name: 'QaPclClass1',
-          query: {
-            qahf_id: this.qahead.id,
-            type: this.paramtype,
-            class1: class1,
-          },
-        }"
-        >PCL列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
-      >
-      <el-breadcrumb-item>{{ this.class1 }}</el-breadcrumb-item>
-    </el-breadcrumb>
+      <el-col :span="9">
+        <div>
+          <PCLTargetActual></PCLTargetActual>
+        </div>
+      </el-col>
+    </el-row>
 
-    <el-row style="margin-top:20px"> </el-row>
+    <el-row style="margin-top:5px"> </el-row>
     <el-table
       ref="multipleTable"
       :data="qadetails"
@@ -74,7 +85,11 @@
 
 <script>
 import { getQaHead, getPclQaClass2 } from "./../../../services/qaService";
+import PCLTargetActual from "../components/PCLTargetActual";
 export default {
+  components: {
+    PCLTargetActual,
+  },
   data() {
     return {
       loading: false,

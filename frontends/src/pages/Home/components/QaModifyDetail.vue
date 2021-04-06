@@ -51,7 +51,7 @@
       <el-button @click="resetForm('form')">重 置</el-button>
       <el-button @click="dialogFormVisible = false">取 消</el-button>
     </div>
-    <el-table
+    <!-- <el-table
       :data="testplan"
       border
       ref="testplan"
@@ -87,7 +87,7 @@
         width="100"
       >
       </el-table-column>
-    </el-table>
+    </el-table> -->
   </el-dialog>
 </template>
 
@@ -95,7 +95,7 @@
 import {
   updateQaHeadModifyDetail,
   getQaHeadModifyDetail,
-  getQaHeadPlanActual,
+  // getQaHeadPlanActual,
 } from "./../../../services/qaService";
 export default {
   data() {
@@ -124,39 +124,39 @@ export default {
     };
   },
   methods: {
-    tableCellClassName({row, columnIndex}) {
-      var target_ng = row.target_ng
-      var target_regressions = row.target_regressions
-      var target_tests = row.target_tests
-      var target_total = row.target_total
-      var actual_ng = row.actual_ng
-      var actual_regressions = row.actual_regressions
-      var actual_tests = row.actual_tests
-      var actual_total = row.actual_total
-      if (columnIndex === 4) {
-        if(actual_tests < target_tests ){
-          return "table-cell-warning";
-        }
-        return ''
-      } else if(columnIndex === 5){
-        if(actual_regressions < target_regressions ){
-          return "table-cell-warning";
-        }
-        return ''
-      }else if(columnIndex === 6){
-        if(actual_total < target_total ){
-          return "table-cell-warning";
-        }
-        return ''
-      }else if(columnIndex === 7){
-        if(actual_ng < target_ng ){
-          return "table-cell-warning";
-        }else if( actual_ng  > target_ng * 1.2 ){
-          return "table-cell-danger";
-        }
-        return ''
-      }
-    },
+    // tableCellClassName({row, columnIndex}) {
+    //   var target_ng = row.target_ng
+    //   var target_regressions = row.target_regressions
+    //   var target_tests = row.target_tests
+    //   var target_total = row.target_total
+    //   var actual_ng = row.actual_ng
+    //   var actual_regressions = row.actual_regressions
+    //   var actual_tests = row.actual_tests
+    //   var actual_total = row.actual_total
+    //   if (columnIndex === 4) {
+    //     if(actual_tests < target_tests ){
+    //       return "table-cell-warning";
+    //     }
+    //     return ''
+    //   } else if(columnIndex === 5){
+    //     if(actual_regressions < target_regressions ){
+    //       return "table-cell-warning";
+    //     }
+    //     return ''
+    //   }else if(columnIndex === 6){
+    //     if(actual_total < target_total ){
+    //       return "table-cell-warning";
+    //     }
+    //     return ''
+    //   }else if(columnIndex === 7){
+    //     if(actual_ng < target_ng ){
+    //       return "table-cell-warning";
+    //     }else if( actual_ng  > target_ng * 1.2 ){
+    //       return "table-cell-danger";
+    //     }
+    //     return ''
+    //   }
+    // },
 
     async handleDialog(id) {
       this.testplan = [];
@@ -166,12 +166,13 @@ export default {
       });
 
       this.form = resp.data;
+      this.qahead_status = resp.data.fstatus;
 
-      var plan_resp = await getQaHeadPlanActual(id).catch(() => {
-        this.$message.error("生成测试计划实绩数据异常");
-      });
-      this.qahead_status = plan_resp.data.fstatus;
-      this.testplan.push(plan_resp.data);
+      // var plan_resp = await getQaHeadPlanActual(id).catch(() => {
+      //   this.$message.error("生成测试计划实绩数据异常");
+      // });
+      // this.qahead_status = plan_resp.data.fstatus;
+      // this.testplan.push(plan_resp.data);
     },
     async onSubmit(formName) {
       this.$refs[formName].validate(async (valid) => {
@@ -183,7 +184,7 @@ export default {
             this.$message.error("测试对象修改明细更新异常");
           });
           if (resp.status === 200) {
-            this.$emit("refreshQaList");
+            this.$emit("refreshTargetActual");
             this.dialogFormVisible = false;
             this.resetForm("form");
             this.$message({

@@ -76,6 +76,21 @@ export async function updateQaDetailContentText(id, form) {
   return resp;
 }
 
+export async function approvalQaDetailContentText(id, form) {
+  var resp = await axios.put(
+    "/api/qa/mcl_detail_approval_content_text/" + id + "/",
+    form
+  );
+  return resp;
+}
+
+export async function getQadetailProofContentText(qadf_id){
+  var resp = await axios.get(
+    "/api/qa/mcl_detail_proof_content_text/?qadf=" + qadf_id
+  )
+  return resp;
+}
+
 export async function updateQaDetail(id, qaDetailInfo) {
   var resp = await axios.put("/api/qa/mcl_detail/" + id + "/", qaDetailInfo);
   return resp;
@@ -169,5 +184,12 @@ export async function getPclQaClass2(qahf_id, class1) {
 
 export async function getPCLCommitJudgment(qahf_id) {
   var resp = await axios.get("/api/pcl_commit_judgment/?qahf=" + qahf_id);
+  return resp;
+}
+
+
+export async function putDefaultOK(qahf_id){
+  var qahf_form = {"qahf":qahf_id}
+  var resp = await axios.put("/api/default_ok/", qahf_form)
   return resp;
 }

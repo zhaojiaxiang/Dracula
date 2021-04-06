@@ -123,8 +123,8 @@
         </template>
       </el-table-column>
     </el-table>
-    <QaDesignReview ref="QaDesignReview" :isdisable="isdisable"></QaDesignReview>
-    <QaCodeReview ref="QaCodeReview" :isdisable="isdisable"></QaCodeReview>
+    <QaDesignReview ref="QaDesignReview" :isdisable="true"></QaDesignReview>
+    <QaCodeReview ref="QaCodeReview" :isdisable="true"></QaCodeReview>
   </div>
 </template>
 

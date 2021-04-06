@@ -1,21 +1,45 @@
 <template>
   <div class="goTop">
-    <el-breadcrumb
-      separator-class="el-icon-arrow-right"
-      style="font-size:16px;margin-top: 5px;"
-    >
-      <el-breadcrumb-item :to="{ name: 'ProjectOverview', query:{order_no: this.qahead.fslipno} }">订单概览</el-breadcrumb-item>
-      <el-breadcrumb-item
-        :to="{ name: 'ProjectPclClass1', query: { qahf_id: this.qahead.id } }"
-        >PCL列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
+    <el-row>
+      <el-col :span="15"
+        ><div>
+          <el-breadcrumb
+            separator-class="el-icon-arrow-right"
+            style="font-size:16px;margin-top: 5px;"
+          >
+            <el-breadcrumb-item
+              :to="{
+                name: 'ProjectOverview',
+                query: { order_no: this.qahead.fslipno },
+              }"
+              >订单概览</el-breadcrumb-item
+            >
+            <el-breadcrumb-item
+              :to="{
+                name: 'ProjectPclClass1',
+                query: { qahf_id: this.qahead.id },
+              }"
+              >PCL列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
+            >
+            <el-breadcrumb-item
+              :to="{
+                name: 'ProjectPclClass2',
+                query: { qahf_id: this.qahead.id, class1: this.class1 },
+              }"
+              >{{ this.class1 }}</el-breadcrumb-item
+            >
+            <el-breadcrumb-item>{{ this.class2 }}</el-breadcrumb-item>
+          </el-breadcrumb>
+        </div></el-col
       >
-      <el-breadcrumb-item :to="{ name: 'ProjectPclClass2', query:{qahf_id: this.qahead.id,  class1: this.class1} }"
-        >{{this.class1}}</el-breadcrumb-item
-      >
-      <el-breadcrumb-item>{{ this.class2 }}</el-breadcrumb-item>
-    </el-breadcrumb>
+      <el-col :span="9">
+        <div>
+          <PCLTargetActual></PCLTargetActual>
+        </div>
+      </el-col>
+    </el-row>
 
-    <el-row style="margin-top:20px">
+    <el-row style="margin-top:5px">
       <el-col :span="12">
         <div>
           <el-button
@@ -127,7 +151,7 @@
             style="margin-left:15px"
             @click="handleContentText(scope.row.id)"
             v-show="scope.row.fcontent_text.length > 0"
-            >已贴图</el-link
+            >{{ scope.row.test_tag }}</el-link
           >
           <el-link
             style="margin-left:20px"
@@ -195,11 +219,13 @@ import {
 import SingleNewQaListforPCL from "../../Home/components/SingleNewQaListforPCL";
 import BatchNewPclList from "../../Home/components/BatchNewPclList";
 import SingleModifyQaListforPCL from "../../Home/components/SingleModifyQaListforPCL";
+import PCLTargetActual from "../../Home/components/PCLTargetActual";
 export default {
   components: {
     SingleNewQaListforPCL,
     SingleModifyQaListforPCL,
     BatchNewPclList,
+    PCLTargetActual,
   },
   data() {
     return {
@@ -270,7 +296,10 @@ export default {
     },
 
     handleContentText(id) {
-      this.$router.push({ name: "QaContentText", query: { qadf_id: id } });
+      this.$router.push({
+        name: "QaContentText",
+        query: { type: "test", qadf_id: id },
+      });
     },
 
     async batchDeleteQaDetail() {

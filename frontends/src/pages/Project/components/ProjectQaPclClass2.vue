@@ -1,24 +1,38 @@
 <template>
   <div class="goTop">
-    <el-breadcrumb
-      separator-class="el-icon-arrow-right"
-      style="font-size:16px;margin-top: 5px;"
-    >
-      <el-breadcrumb-item
-        :to="{
-          name: 'ProjectOverview',
-          query: { order_no: this.qahead.fslipno },
-        }"
-        >订单概览</el-breadcrumb-item
+    <el-row>
+      <el-col :span="15"
+        ><div>
+          <el-breadcrumb
+            separator-class="el-icon-arrow-right"
+            style="font-size:16px;margin-top: 5px;"
+          >
+            <el-breadcrumb-item
+              :to="{
+                name: 'ProjectOverview',
+                query: { order_no: this.qahead.fslipno },
+              }"
+              >订单概览</el-breadcrumb-item
+            >
+            <el-breadcrumb-item
+              :to="{
+                name: 'ProjectPclClass1',
+                query: { qahf_id: this.qahead.id },
+              }"
+              >PCL列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
+            >
+            <el-breadcrumb-item>{{ class1 }}</el-breadcrumb-item>
+          </el-breadcrumb>
+        </div></el-col
       >
-      <el-breadcrumb-item
-        :to="{ name: 'ProjectPclClass1', query: { qahf_id: this.qahead.id } }"
-        >PCL列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
-      >
-      <el-breadcrumb-item>{{class1}}</el-breadcrumb-item>
-    </el-breadcrumb>
+      <el-col :span="9">
+        <div>
+          <PCLTargetActual></PCLTargetActual>
+        </div>
+      </el-col>
+    </el-row>
 
-    <el-row style="margin-top:20px"> </el-row>
+    <el-row style="margin-top:5px"> </el-row>
     <el-table
       ref="multipleTable"
       :data="qadetails"
@@ -62,7 +76,11 @@
 
 <script>
 import { getQaHead, getPclQaClass2 } from "./../../../services/qaService";
+import PCLTargetActual from "../../Home/components/PCLTargetActual";
 export default {
+  components: {
+    PCLTargetActual,
+  },
   data() {
     return {
       loading: false,

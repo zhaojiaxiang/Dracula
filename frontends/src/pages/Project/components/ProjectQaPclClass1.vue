@@ -1,15 +1,33 @@
 <template>
   <div class="goTop">
-    <el-breadcrumb
-      separator-class="el-icon-arrow-right"
-      style="font-size:16px;margin-top: 5px;"
-    >
-      <el-breadcrumb-item :to="{ name: 'ProjectOverview', query:{order_no: this.qahead.fslipno} }">订单概览</el-breadcrumb-item>
-      <el-breadcrumb-item>PCL列表 -- {{this.qahead.fobjectid}}</el-breadcrumb-item>
-      
-    </el-breadcrumb>
+    <el-row>
+      <el-col :span="15"
+        ><div>
+          <el-breadcrumb
+            separator-class="el-icon-arrow-right"
+            style="font-size:16px;margin-top: 5px;"
+          >
+            <el-breadcrumb-item
+              :to="{
+                name: 'ProjectOverview',
+                query: { order_no: this.qahead.fslipno },
+              }"
+              >订单概览</el-breadcrumb-item
+            >
+            <el-breadcrumb-item
+              >PCL列表 -- {{ this.qahead.fobjectid }}</el-breadcrumb-item
+            >
+          </el-breadcrumb>
+        </div></el-col
+      >
+      <el-col :span="9">
+        <div>
+          <PCLTargetActual></PCLTargetActual>
+        </div>
+      </el-col>
+    </el-row>
 
-    <el-row style="margin-top:20px">
+    <el-row style="margin-top:5px">
       <el-col :span="12">
         <div>
           <el-button
@@ -113,11 +131,13 @@ import {
 import SingleNewQaListforPCL from "../../Home/components/SingleNewQaListforPCL";
 import BatchNewPclList from "../../Home/components/BatchNewPclList";
 import SingleModifyQaListforPCL from "../../Home/components/SingleModifyQaListforPCL";
+import PCLTargetActual from "../../Home/components/PCLTargetActual";
 export default {
   components: {
     SingleNewQaListforPCL,
     SingleModifyQaListforPCL,
     BatchNewPclList,
+    PCLTargetActual,
   },
   data() {
     return {
@@ -157,7 +177,10 @@ export default {
                 });
 
                 if (
-                  Object.prototype.hasOwnProperty.call(resp_head.data, "message")
+                  Object.prototype.hasOwnProperty.call(
+                    resp_head.data,
+                    "message"
+                  )
                 ) {
                   this.$message.error(resp.data.message);
                 }
