@@ -17,12 +17,11 @@ class LiaisonsFilter(django_filters.rest_framework.FilterSet):
     fhelper = django_filters.CharFilter(field_name='fhelper',  lookup_expr='contains')
     fassignedto = django_filters.CharFilter(field_name='fassignedto',  lookup_expr='contains')
     fsirno = django_filters.CharFilter(field_name='fsirno',  lookup_expr='contains')
-    fgroups = django_filters.CharFilter(field_name='fgroups',lookup_expr='contains')
 
     class Meta:
         model = Liaisons
         fields = ['fsystemcd', 'fprojectcd', 'fslipno', 'ftype', 'fstatus', 'fodrno', 'fleader', 'fhelper',
-                  'fassignedto', 'fsirno', 'fgroups']
+                  'fassignedto', 'fsirno']
 
 
 class QAProjectFilter(django_filters.rest_framework.FilterSet):

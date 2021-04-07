@@ -16,7 +16,7 @@ class CheckOutFiles(models.Model):
     fchkstatus = models.CharField(verbose_name='状态', max_length=20)
     fchkoutperson = models.CharField(verbose_name='迁出者', max_length=20, null=True, blank=True)
     fchkoutdte = models.DateField(verbose_name='迁出日期', null=True, blank=True)
-    fchkoutfile = models.CharField(verbose_name='PBL名称', max_length=40, null=True, blank=True)
+    fchkoutfile = models.CharField(verbose_name='PBL名称', max_length=80, null=True, blank=True)
     fchkinperson = models.CharField(verbose_name='迁入者', max_length=20, null=True, blank=True)
     fchkindte = models.DateField(verbose_name='迁入日期', null=True, blank=True)
     applicant = models.ForeignKey(User, null=True, blank=True, on_delete=models.DO_NOTHING)
