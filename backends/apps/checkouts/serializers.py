@@ -8,10 +8,17 @@ from checkouts.models import CheckOutFiles
 
 class CheckOutFilesSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
+    fregisterdte = serializers.DateField(read_only=True)
+    fapplicant = serializers.CharField(read_only=True)
+    fchkoutperson = serializers.CharField(read_only=True)
+    fchkoutdte = serializers.DateField(read_only=True)
+    fchkinperson = serializers.CharField(read_only=True)
+    fchkindte = serializers.DateField(read_only=True)
 
     class Meta:
         model = CheckOutFiles
-        fields = ('id', 'fsystem', 'fcomment', 'fslipno', 'fchkoutobj', 'fchkoutfile', 'fchkstatus')
+        fields = ('id', 'fsystem', 'fcomment', 'fslipno', 'fchkoutobj', 'fchkoutfile', 'fchkstatus', 'fregisterdte',
+                  'fapplicant', 'fchkoutperson', 'fchkoutdte', 'fchkinperson', 'fchkindte')
 
     @transaction.atomic()
     def create(self, validated_data):
