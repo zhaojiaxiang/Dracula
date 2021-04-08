@@ -25,7 +25,7 @@ from accounts.views import UserViewSet, SystemSettingViewSet, MyGroupUserViewSet
 from backends import settings
 from checkouts.views import CheckOutFilesViewSet
 from liaisons.views import LiaisonsViewSet, LiaisonUpdateStatusViewSet, QaProjectViewSet, QaProjectForMineViewSet, \
-    QaProjectForGroupViewSet, LiaisonFileUpload, QaProjectDetailView
+    QaProjectForGroupViewSet, LiaisonFileUpload, QaProjectDetailView, SyncLiaisonBySirNo
 from projects.views import ProjectsViewSet
 from qa.views import MCLQaHeadViewSet, QaDetailViewSet, QaDetailUpdateResultViewSet, \
     QaDetailUpdateContentTextViewSet, QaHeadUpdateObjectSummaryViewSet, QaHeadModifyDetailViewSet, \
@@ -95,6 +95,7 @@ urlpatterns = [
     path('api/working_organization/', WorkingOrganization.as_view()),
     path('api/working_project/', WorkingProject.as_view()),
     path('api/default_ok/', TestResultDefaultOK.as_view()),
+    path('api/sync_sir/', SyncLiaisonBySirNo.as_view()),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
               + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -7,6 +7,7 @@ from liaisons.models import Liaisons
 from qa.models import QaHead
 from rbac.models import Organizations
 from utils.db_connection import man_power_connection_execute, db_connection_execute, query_single_with_no_parameter
+from utils.slims import SLIMSExchange
 
 
 class LiaisonsSerializer(serializers.ModelSerializer):
@@ -46,64 +47,89 @@ class LiaisonsSerializer(serializers.ModelSerializer):
 
     @transaction.atomic()
     def create(self, validated_data):
+        try:
+            new_slipno = validated_data['fslipno']
+            new_sirno = validated_data['fsirno']
+            fcreateusr = validated_data['fassignedto']
+            fcreatedte = validated_data['fplnstart']
 
-        new_slipno = validated_data['fslipno']
-
-        is_exist = Liaisons.objects.filter(fslipno__exact=new_slipno)
-        if is_exist.count() > 0:
-            raise serializers.ValidationError("联络票已经存在")
-
-        user = self.context['request'].user
-
-        organization_id = user.ammic_organization.id
-        if not user.ammic_organization.isgroup:
-            organization_id = user.ammic_organization.parent.id
-
-        liaison = Liaisons.objects.create(**validated_data)
-        liaison.forganization = organization_id
-        liaison.fstatus = '1'
-        liaison.fcreateusr = user.name
-        liaison.fentusr = user.name
-        liaison.fupdteprg = "Liaison No New"
-        liaison.save()
-
-        liaison_type = liaison.ftype
-        liaison_order_no = liaison.fodrno
-        if liaison_type == '追加开发':
-            qahf = QaHead.objects.filter(fslipno__exact=liaison_order_no)
-            if not qahf:
-                sql_str = f"select fnote from odrrlsf where fodrno = '{liaison_order_no}' "
-                note_list = man_power_connection_execute(sql_str)
-                fnote = note_list[0][0] if note_list else "******"
-
-                qahf = QaHead.objects.create()
-                qahf.ftesttyp = 'PCL'
-                qahf.fsystemcd = liaison.fsystemcd
-                qahf.fprojectcd = liaison.fprojectcd
-                qahf.fslipno = liaison_order_no
-                qahf.fobjectid = liaison_order_no + "(QA)"
-                qahf.fobjectnm = liaison_order_no + "(QA)"
-                qahf.fstatus = "1"
-                qahf.fnote = fnote if fnote else "******"
-                qahf.fentusr = user.name
-                qahf.fcreateusr = user.name
-                qahf.fupdteprg = "Liaison No New"
-                qahf.save()
-
-        return liaison
-
-    @transaction.atomic()
-    def update(self, instance, validated_data):
-
-        if instance.fslipno != validated_data['fslipno']:
-            is_exist = Liaisons.objects.filter(fslipno__exact=validated_data['fslipno'])
+            is_exist = Liaisons.objects.filter(fslipno__exact=new_slipno)
             if is_exist.count() > 0:
                 raise serializers.ValidationError("联络票已经存在")
 
-        user = self.context['request'].user
-        instance.fupdteusr = user.name
-        instance.fupdteprg = "Liaison No Modify"
-        instance.save()
+            user = self.context['request'].user
+
+            organization_id = user.ammic_organization.id
+            if not user.ammic_organization.isgroup:
+                organization_id = user.ammic_organization.parent.id
+
+            liaison = Liaisons.objects.create(**validated_data)
+
+            if new_sirno or len(new_sirno) > 0:
+                liaison.fstatus = '2'
+                liaison.fsirno = new_sirno
+                liaison.fcreateusr = fcreateusr
+                liaison.fcreatedte = fcreatedte
+                liaison.factstart = fcreatedte
+            else:
+                liaison.fstatus = '1'
+                liaison.fcreateusr = user.name
+            liaison.forganization = organization_id
+            liaison.fentusr = user.name
+            liaison.fupdteprg = "Liaison No New"
+            liaison.save()
+
+            liaison_type = liaison.ftype
+            liaison_order_no = liaison.fodrno
+            if liaison_type == '追加开发':
+                qahf = QaHead.objects.filter(fslipno__exact=liaison_order_no)
+                if not qahf:
+                    sql_str = f"select fnote from odrrlsf where fodrno = '{liaison_order_no}' "
+                    note_list = man_power_connection_execute(sql_str)
+                    fnote = note_list[0][0] if note_list else "******"
+
+                    qahf = QaHead.objects.create()
+                    qahf.ftesttyp = 'PCL'
+                    qahf.fsystemcd = liaison.fsystemcd
+                    qahf.fprojectcd = liaison.fprojectcd
+                    qahf.fslipno = liaison_order_no
+                    qahf.fobjectid = liaison_order_no + "(QA)"
+                    qahf.fobjectnm = liaison_order_no + "(QA)"
+                    qahf.fstatus = "1"
+                    qahf.fnote = fnote if fnote else "******"
+                    qahf.fentusr = user.name
+                    qahf.fcreateusr = user.name
+                    qahf.fupdteprg = "Liaison No New"
+                    qahf.save()
+
+            return liaison
+        except Exception as ex:
+            raise serializers.ValidationError(ex.args[0])
+
+    @transaction.atomic()
+    def update(self, instance, validated_data):
+        try:
+            if instance.fslipno != validated_data['fslipno']:
+                is_exist = Liaisons.objects.filter(fslipno__exact=validated_data['fslipno'])
+                if is_exist.count() > 0:
+                    raise serializers.ValidationError("联络票已经存在")
+            # 更新SLIMS
+            slip_status = instance.fstatus
+            if slip_status == "2" or slip_status == "3":
+                sir_no = validated_data['fsirno']
+                if sir_no or len(sir_no) > 0:
+                    slims = SLIMSExchange(self.context['request'])
+                    ret = slims.update_slims_overload(validated_data)
+
+                    if ret < 1:
+                        raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to fix MCL!")
+
+            user = self.context['request'].user
+            instance.fupdteusr = user.name
+            instance.fupdteprg = "Liaison No Modify"
+            instance.save()
+        except Exception as ex:
+            raise serializers.ValidationError(ex.args[0])
         return super().update(instance, validated_data)
 
 
@@ -117,53 +143,116 @@ class LiaisonUpdateStatusSerializer(serializers.ModelSerializer):
 
     @transaction.atomic()
     def update(self, instance, validated_data):
-        user = self.context['request'].user
-        orig_status = instance.fstatus
-        new_status = validated_data["fstatus"]
-        current_date = date.today()
-        status_diff = abs(int(orig_status) - int(new_status))
-        if status_diff > 1:
-            raise serializers.ValidationError("联络票状态不可跨级修改！")
-        if int(orig_status) < int(new_status):
-            if new_status == "2":
-                instance.factstart = current_date
-            elif new_status == "3":
-                instance.factend = current_date
-            elif new_status == "4":
-                all_obj = QaHead.objects.filter(fslipno__exact=instance.fslipno)
-                confirmed_obj = QaHead.objects.filter(fslipno__exact=instance.fslipno, fstatus__exact="4")
-                if all_obj.count() != confirmed_obj.count():
-                    raise serializers.ValidationError("该联络票下存在未确认的测试项")
+        try:
+            user = self.context['request'].user
+            orig_status = instance.fstatus
+            new_status = validated_data["fstatus"]
+            sir_no = instance.fsirno
+            slip_no = instance.fslipno
+            current_date = date.today()
+            status_diff = abs(int(orig_status) - int(new_status))
+            slims = SLIMSExchange(self.context['request'])
+            if status_diff > 1:
+                raise serializers.ValidationError("联络票状态不可跨级修改！")
+            if int(orig_status) < int(new_status):
+                if new_status == "2":
+                    new_sir_no = ""
+                    if sir_no is None or len(sir_no) == 0:
+                        # 联络开始时，生成Sir No，并更新到本系统中
+                        new_sir_no = slims.insert_slims_overload(instance)
 
-                pcl_objs = QaHead.objects.filter(fslipno__exact=instance.fodrno)
-                if pcl_objs:
-                    for pcl in pcl_objs:
-                        if pcl.fstatus != "4":
-                            raise serializers.ValidationError("该联络票下的PCL没有确认")
+                        if new_sir_no is None or len(new_sir_no) == 0:
+                            raise serializers.ValidationError(
+                                "AMMIC2SLMS Service exception--Unable to generate Sir No!!")
 
-                if instance.freleaserpt is None or len(instance.freleaserpt.strip()) == 0:
-                    raise serializers.ValidationError("请先上传变更报告书")
+                    instance.factstart = current_date
+                    instance.fsirno = new_sir_no
+                elif new_status == "3":
+                    if sir_no is None:
+                        raise serializers.ValidationError("无法结束该联络票--Sir No为空!")
 
-                instance.freleasedt = current_date
-        else:
-            if new_status == "3":
-                instance.freleasedt = None
-            elif new_status == "2":
-                is_exist = QaHead.objects.filter(fslipno__exact=instance.fslipno, fstatus__exact="4")
-                if is_exist.count() > 0:
-                    raise serializers.ValidationError("该联络票下存在已确认的测试对象，不可回滚到开始状态")
-                instance.factend = None
-                instance.factmanpower = 0
-            elif new_status == "1":
-                is_exist = QaHead.objects.filter(fslipno__exact=instance.fslipno)
-                if is_exist.count() > 0:
-                    raise serializers.ValidationError("已经录入测试对象，不可回滚到初始状态")
-                instance.factstart = None
+                    qa_count_close = QaHead.objects.filter(fstatus__in=('3', '4'), fslipno__exact=slip_no).count()
+                    qa_count = QaHead.objects.filter(fslipno__exact=slip_no).count()
 
-        instance.fupdteusr = user.name
-        instance.fupdteprg = "Liaison No Modify"
-        instance.save()
-        return super().update(instance, validated_data)
+                    if not (qa_count_close > 0 and qa_count_close == qa_count):
+                        raise serializers.ValidationError("当前联络票不满足完成条件，QA没有结束")
+
+                    # 联络票结束时，第一次更新MCL测试数据到SLIMS系统中
+                    ret = slims.fix_slims_overload(sir_no, slip_no)
+
+                    if ret < 0:
+                        raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to fix MCL!")
+
+                    instance.factend = current_date
+                elif new_status == "4":
+                    all_obj = QaHead.objects.filter(fslipno__exact=instance.fslipno)
+                    confirmed_obj = QaHead.objects.filter(fslipno__exact=instance.fslipno, fstatus__exact="4")
+                    if all_obj.count() != confirmed_obj.count():
+                        raise serializers.ValidationError("该联络票下存在未确认的测试项")
+
+                    pcl_objs = QaHead.objects.filter(fslipno__exact=instance.fodrno)
+                    if pcl_objs:
+                        for pcl in pcl_objs:
+                            if pcl.fstatus != "4":
+                                raise serializers.ValidationError("该联络票下的PCL没有确认")
+
+                    if instance.freleaserpt is None or len(instance.freleaserpt.strip()) == 0:
+                        raise serializers.ValidationError("请先上传变更报告书")
+
+                    if sir_no is None or len(sir_no) == 0:
+                        raise serializers.ValidationError("无法发布该联络票--Sir No为空!")
+
+                    # 联络票发布时，第二次更新MCL测试数据到SLIMS系统中，先删除原始的MCL数据，在重新生成一遍
+                    ret = slims.delete_mcl(sir_no, slip_no)
+
+                    if ret < 0:
+                        raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to delete MCL!")
+
+                    ret = slims.fix_slims_overload(sir_no, slip_no)
+
+                    if ret < 0:
+                        raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to fix MCL!")
+
+                    ret = slims.close_slims(sir_no)
+                    if ret < 0:
+                        raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to close Sir No!")
+
+                    instance.freleasedt = current_date
+            else:
+                if new_status == "3":
+                    instance.freleasedt = None
+                elif new_status == "2":
+                    is_exist = QaHead.objects.filter(fslipno__exact=instance.fslipno, fstatus__exact="4")
+                    if is_exist.count() > 0:
+                        raise serializers.ValidationError("该联络票下存在已确认的测试对象，不可回滚到开始状态")
+
+                    # 状态回滚到进行中时，删除SLIMS系统中的MCL数据
+                    ret = slims.delete_mcl(sir_no, slip_no)
+
+                    if ret < 0:
+                        raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to delete MCL!")
+
+                    instance.factend = None
+                    instance.factmanpower = 0
+                elif new_status == "1":
+                    is_exist = QaHead.objects.filter(fslipno__exact=instance.fslipno)
+                    if is_exist.count() > 0:
+                        raise serializers.ValidationError("已经录入测试对象，不可回滚到初始状态")
+
+                    # 状态回滚到初始时，将SLIMS中的Sir No失效
+                    ret = slims.delete_slims(sir_no)
+                    if ret < 1:
+                        raise serializers.ValidationError(
+                            "AMMIC2SLMS Service exception--Unable to fail Sir No!")
+                    instance.factstart = None
+                    instance.fsirno = None
+
+            instance.fupdteusr = user.name
+            instance.fupdteprg = "Liaison No Modify"
+            instance.save()
+            return super().update(instance, validated_data)
+        except Exception as ex:
+            raise serializers.ValidationError(ex.args[0])
 
 
 class QaProjectSerializer(serializers.ModelSerializer):
@@ -243,7 +332,7 @@ class QaProjectSerializer(serializers.ModelSerializer):
 
     def get_objectcount(self, obj):
         test_object_sql = f"select count(*) from qahf where fslipno in (select fslipno from liaisonf " \
-            f"where fodrno = '{obj['fodrno']}')"
+                          f"where fodrno = '{obj['fodrno']}')"
         test_object_list = query_single_with_no_parameter(test_object_sql, "list")
         test_object = test_object_list[0]
         return test_object

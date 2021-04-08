@@ -1,3 +1,4 @@
+import datetime
 import os
 import uuid
 
@@ -41,13 +42,23 @@ class MCLQaHeadViewSet(viewsets.ModelViewSet):
                     'message': '只有初始状态下才可以删除'
                 }
                 return Response(data, status=status.HTTP_200_OK)
-            elif qa_detail:
-                data = {
-                    'code': '400',
-                    'message': '已经存在测试项不可删除'
-                }
-                return Response(data, status=status.HTTP_200_OK)
-            instance.delete()
+            else:
+                if qa_detail:
+                    data = {
+                        'code': '400',
+                        'message': '已经存在测试项不可删除'
+                    }
+                    return Response(data, status=status.HTTP_200_OK)
+                else:
+                    if instance.ftesttyp == "PCL":
+                        qa_count = QaHead.objects.filter(fslipno__exact=instance.fslipno).count()
+                        if qa_count == 1:
+                            data = {
+                                'code': '400',
+                                'message': '至少要存在一条PCL数据'
+                            }
+                            return Response(data, status=status.HTTP_200_OK)
+                instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             data = {
@@ -181,12 +192,15 @@ class TestResultDefaultOK(APIView):
 
     def put(self, request):
         data = {}
+        user = request.user
         try:
             qahf_id = request.data['qahf']
             qa_details = QaDetail.objects.filter(qahf_id=qahf_id)
             for detail in qa_details:
                 if detail.fresult is None:
                     detail.fresult = 'OK'
+                    detail.ftestusr = user.name
+                    detail.ftestdte = datetime.datetime.now().strftime('%Y-%m-%d')
                     detail.save()
         except Exception as e:
             data = {

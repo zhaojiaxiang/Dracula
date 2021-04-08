@@ -346,7 +346,7 @@ class QaHeadTargetAndActualSerializer(serializers.ModelSerializer):
                                        qahf_id__exact=obj.id).count()
 
     def get_actual_ng(self, obj):
-        # 测试结果为NG的数量
+        # 测试结果为NG的数量, 可以参考slims.py文件中的fix_slims_overload方法
         result_ng_count = QaDetail.objects.filter(fresult__contains='NG',
                                                   qahf_id__exact=obj.id).count()
         approval_ng_count = QaDetail.objects.filter(fresult__contains='NG',

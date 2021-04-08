@@ -10,11 +10,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
+from accounts.models import User
 from liaisons.filters import LiaisonsFilter, QAProjectFilter
 from liaisons.models import Liaisons
 from liaisons.serializers import LiaisonsSerializer, LiaisonUpdateStatusSerializer, QaProjectSerializer
 from qa.models import QaHead, QaDetail
 from utils.db_connection import query_single_with_no_parameter, db_connection_execute
+from utils.slims import SLIMSExchange
 from utils.utils import create_folder, get_all_organization_group_belong_me
 
 
@@ -196,3 +198,99 @@ class LiaisonFileUpload(APIView):
             liaison.save()
 
         return Response(status=status.HTTP_200_OK)
+
+
+class SyncLiaisonBySirNo(APIView):
+
+    def get(self, request):
+        try:
+            sir_no = request.GET.get('sync_sirno')
+
+            liasons = Liaisons.objects.filter(fsirno__exact=sir_no)
+
+            if liasons:
+                data = {
+                    'code': '400',
+                    'message': f"Sir No:{sir_no}已经绑定联络票号，不可同步！"
+                }
+                return Response(data, status.HTTP_200_OK)
+
+            slims = SLIMSExchange(request)
+            results = slims.sync_slims(sir_no)
+
+            if results:
+                sir_no_list = results[0]
+
+                sir_status = sir_no_list[0]
+                sir_dateopened = sir_no_list[1]
+                sir_openedby = sir_no_list[2]
+                sir_assignedto = sir_no_list[3]
+                sir_odrno = sir_no_list[10]
+                sir_prjno = sir_no_list[11]
+                sir_category = sir_no_list[12]
+                sir_productid = sir_no_list[13]
+                sir_jpmodules = sir_no_list[14]
+                sir_jpdescription = sir_no_list[15]
+
+                if sir_jpdescription:
+                    sir_jpdescription = sir_jpdescription.strip()
+                if sir_jpmodules:
+                    sir_jpmodules = sir_jpmodules.strip()
+
+                sir_status = sir_status.strip()
+                sir_category = sir_category.strip()
+                if sir_status == 'O':
+                    ...
+                elif sir_status == 'R':
+                    ...
+                elif sir_status == 'F':
+                    data = {
+                        'code': '400',
+                        'message': f"Sir No:{sir_no}已完成，不可同步！"
+                    }
+                    return Response(data, status.HTTP_200_OK)
+                elif sir_status == 'C':
+                    data = {
+                        'code': '400',
+                        'message': f"Sir No:{sir_no}已关闭，不可同步！"
+                    }
+                    return Response(data, status.HTTP_200_OK)
+                else:
+                    data = {
+                        'code': '400',
+                        'message': f"Sir No:{sir_no}状态异常！"
+                    }
+                    return Response(data, status.HTTP_200_OK)
+
+                ftype = ""
+                if sir_category == "REQ":
+                    ftype = "追加开发"
+                elif sir_category == "EHM":
+                    ftype = "改善需求"
+                elif sir_category == "BUG":
+                    ftype = "维护阶段障碍"
+
+                openedby = User.objects.get(slmsname__exact=sir_openedby)
+                fcreateusr = openedby.name
+                assignedto = User.objects.get(slmsname__exact=sir_assignedto)
+                fassignedto = assignedto.name
+
+                data = {'ftype': ftype, 'fcreateusr': fcreateusr, 'fcreatedte': sir_dateopened,
+                        "fplnstart": sir_dateopened, 'fassignedto': fassignedto, 'fsystemcd': sir_productid.strip(),
+                        'fprojectcd': sir_prjno.strip(), 'fodrno': sir_odrno.strip(), 'fbrief': sir_jpmodules,
+                        'fcontent': sir_jpdescription, 'fsirno': sir_no}
+
+                return Response(data, status.HTTP_200_OK)
+            else:
+                data = {
+                    'code': '400',
+                    'message': "无法同步数据，请输入正确的Sir No!"
+                }
+                return Response(data=data, status=status.HTTP_200_OK)
+
+        except Exception as ex:
+            data = {
+                'code': '400',
+                'message': str(ex)
+            }
+            return Response(data=data, status=status.HTTP_200_OK)

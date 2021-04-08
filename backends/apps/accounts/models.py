@@ -16,6 +16,10 @@ class User(AbstractUser):
                               error_messages={
                                   'unique': '邮箱已经在系统中存在'
                               })
+    slmsname = models.CharField(verbose_name="SLIMS系统对应名称", max_length=10, blank=True, null=True)
+    redmine_id = models.SmallIntegerField(verbose_name="Red Mine中用户ID", blank=True, null=True)
+    frsccd = models.CharField(verbose_name="Man Power中用户ID", max_length=12, blank=True, null=True)
+    fmaildays = models.CharField(verbose_name="邮件发送日期（周几）", max_length=150, blank=True, null=True)
     avatar = models.ImageField(verbose_name='用户头像', upload_to='avatar/', null=True, blank=True)
     ammic_group = models.ForeignKey(Group, verbose_name="开发组", related_name='ammic_group', null=True,
                                     blank=True, on_delete=models.DO_NOTHING)
