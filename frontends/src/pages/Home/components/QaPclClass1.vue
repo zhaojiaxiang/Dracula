@@ -171,7 +171,6 @@ export default {
           if (action === "confirm") {
             this.fullscreenLoading = true;
             var selectData = this.$refs.multipleTable.selection;
-            console.log(selectData);
             if (selectData.length > 0) {
               for (var i in selectData) {
                 var resp_head = await getQaDetailByQaHeadandClass1(
@@ -179,6 +178,7 @@ export default {
                   selectData[i].fclass1
                 ).catch(() => {
                   this.$message.error("测试项获取异常");
+                  this.fullscreenLoading = false;
                 });
 
                 if (
@@ -188,27 +188,30 @@ export default {
                   )
                 ) {
                   this.$message.error(resp.data.message);
+                  this.fullscreenLoading = false;
                 }
 
                 for (var j in resp_head.data) {
                   var qadf = resp_head.data[j].id;
                   var resp = await deleteQaDetail(qadf).catch(() => {
                     this.$message.error("测试项删除异常");
+                    this.fullscreenLoading = false;
                   });
                   if (
                     Object.prototype.hasOwnProperty.call(resp.data, "message")
                   ) {
                     this.$message.error(resp.data.message);
+                    this.fullscreenLoading = false;
                   }
                 }
               }
               this.refreshQaList();
-              this.fullscreenLoading = false;
               this.$message({
                 message: "批量删除成功！",
                 type: "success",
               });
             }
+            this.fullscreenLoading = false;
           }
         })
         .catch(() => {
@@ -313,7 +316,7 @@ export default {
         } else {
           this.isCanRollback = false;
         }
-        if (pcl.status === "1") {
+        if (pcl.status === "1" & this.qadetails.length > 0) {
           this.isCanDelete = false;
         } else {
           this.isCanDelete = true;

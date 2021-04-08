@@ -42,7 +42,7 @@ export default {
         ftesttyp: "PCL",
         fslipno: "",
         fobjectid: "",
-        fstatus:"1",
+        fstatus: "1",
       },
       rules: {
         fobjectid: [

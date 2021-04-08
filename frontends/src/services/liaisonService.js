@@ -79,3 +79,8 @@ export async function liaisonfileUpdate(form){
   var resp = await axios.post("/api/liaison_file_upload/", form)
   return resp
 }
+
+export async function syncLiaisonbySirNo(sync_sirno){
+  var resp = await axios.get("/api/sync_sir/?sync_sirno="+sync_sirno)
+  return resp
+}

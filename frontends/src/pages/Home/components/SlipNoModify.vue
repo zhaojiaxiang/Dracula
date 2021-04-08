@@ -88,7 +88,12 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item prop="fleader" size="medium" class="width-sytle" required>
+            <el-form-item
+              prop="fleader"
+              size="medium"
+              class="width-sytle"
+              required
+            >
               <el-select
                 v-model="form.fleader"
                 multiple
@@ -288,7 +293,12 @@
           </el-col>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :disabled="true ? form.fstatus == '4' : form.fstatus != '4'" @click="onSubmit('form')">更新</el-button>
+          <el-button
+            type="primary"
+            :disabled="true ? form.fstatus == '4' : form.fstatus != '4'"
+            @click="onSubmit('form')"
+            >更新</el-button
+          >
         </el-form-item>
       </el-form>
     </el-drawer>
@@ -313,10 +323,12 @@ export default {
     return {
       loading:false,
       drawer: false,
+      iscanupdate:false,
       projects: {},
       systems: {},
       groupusers: {},
       allusers: [],
+      ori_form:{},
       form: {
         id: "",
         fsystemcd: "",

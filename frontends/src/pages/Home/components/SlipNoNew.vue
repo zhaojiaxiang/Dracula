@@ -1,19 +1,39 @@
 <template>
   <div>
-    <el-drawer class="drawer-height" :visible.sync="drawer" size="55%">
+    <el-drawer class="drawer-height" :visible.sync="drawer" :with-header="false" size="55%">
       <el-form
         ref="form"
         :model="form"
         :rules="rules"
         label-width="30%"
         size="medium"
-        style="width: 95%;"
-        v-loading="loading"
+        style="width: 95%; margin-top:10px"
       >
+        <el-form-item label="" size="medium">
+          <el-col :span="8">
+            <el-switch
+              v-model="switch_value"
+              inactive-text="Normal"
+              active-text="Sir No"
+            >
+            </el-switch>
+          </el-col>
+          <el-col :span="7">
+            <el-input
+              v-show="is_sirno"
+              v-model="sync_sirno"
+              placeholder="请输入Sir No"
+            ></el-input>
+          </el-col>
+          <el-col :span="4">
+            <el-button v-show="is_sirno" @click="syncSirNo">同步</el-button>
+          </el-col>
+        </el-form-item>
+
         <el-form-item label="系统名称" size="medium" required>
           <el-col :span="10">
             <el-form-item prop="fsystemcd" size="medium">
-              <el-select v-model="form.fsystemcd" placeholder="请选择系统名称">
+              <el-select v-model="form.fsystemcd" :disabled="isCanModify" placeholder="请选择系统名称">
                 <el-option
                   v-for="(item, i) in systems"
                   :key="i"
@@ -21,12 +41,15 @@
                   :value="item.fsystemcd"
                 ></el-option>
               </el-select>
-              <el-button @click="systemCodeMaster" icon="el-icon-edit"></el-button>
+              <el-button
+                @click="systemCodeMaster"
+                icon="el-icon-edit"
+              ></el-button>
             </el-form-item>
           </el-col>
           <el-col :span="14">
             <el-form-item label="项目名称" prop="fprojectcd" size="medium">
-              <el-select v-model="form.fprojectcd" placeholder="请选择项目名称">
+              <el-select v-model="form.fprojectcd" :disabled="isCanModify" placeholder="请选择项目名称">
                 <el-option
                   v-for="(item, i) in projects"
                   :key="i"
@@ -34,7 +57,10 @@
                   :value="item.fprojectcd"
                 ></el-option>
               </el-select>
-              <el-button @click="projectCodeMaster" icon="el-icon-edit"></el-button>
+              <el-button
+                @click="projectCodeMaster"
+                icon="el-icon-edit"
+              ></el-button>
             </el-form-item>
           </el-col>
         </el-form-item>
@@ -42,7 +68,7 @@
         <el-form-item label="开发类型" size="medium" required>
           <el-col :span="10">
             <el-form-item prop="ftype" size="medium">
-              <el-select v-model="form.ftype" placeholder="请选择开发类型">
+              <el-select v-model="form.ftype" :disabled="isCanModify" placeholder="请选择开发类型">
                 <el-option label="追加开发" value="追加开发"></el-option>
                 <el-option label="改善需求" value="改善需求"></el-option>
                 <el-option
@@ -54,7 +80,7 @@
           </el-col>
           <el-col :span="14">
             <el-form-item label="对应者" prop="fassignedto" size="medium">
-              <el-select v-model="form.fassignedto" placeholder="请选择对应者">
+              <el-select v-model="form.fassignedto" :disabled="isCanModify" placeholder="请选择对应者">
                 <el-option
                   v-for="(item, i) in groupusers"
                   :key="i"
@@ -80,6 +106,7 @@
             <el-form-item label="订单号" prop="fodrno" size="medium">
               <el-input
                 v-model="form.fodrno"
+                :disabled="isCanModify"
                 placeholder="请输入订单号"
               ></el-input>
             </el-form-item>
@@ -135,15 +162,16 @@
           </el-col>
         </el-form-item>
         <el-form-item label="开发概要" prop="fbrief" size="medium">
-          <el-input type="textarea" v-model="form.fbrief"></el-input>
+          <el-input type="textarea" v-model="form.fbrief" :disabled="isCanModify"></el-input>
         </el-form-item>
         <el-form-item label="问题描述" prop="fcontent" size="medium">
-          <el-input type="textarea" v-model="form.fcontent"></el-input>
+          <el-input type="textarea" v-model="form.fcontent" :disabled="isCanModify"></el-input>
         </el-form-item>
         <el-form-item label="计划开始" required>
           <el-col :span="7">
             <el-form-item prop="fplnstart">
               <el-date-picker
+                :disabled="isCanModify"
                 type="date"
                 size="medium"
                 value-format="yyyy-MM-dd"
@@ -175,7 +203,10 @@
           </el-col>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="onSubmit('form')"
+          <el-button
+            type="primary"
+            v-loading.fullscreen.lock="loading"
+            @click="onSubmit('form')"
             >立即创建</el-button
           >
           <el-button @click="resetForm('form')">重置</el-button>
@@ -186,17 +217,21 @@
 </template>
 
 <script>
-import { newLiaison } from "../../../services/liaisonService";
+import { newLiaison, syncLiaisonbySirNo } from "../../../services/liaisonService";
 import {
   getProjects,
   getSystems,
   getAllUsers,
   getGroupUsers,
 } from "../../../services/commonService";
-import { handleAllUser } from "../../../static/js/commonJs";
+import { handleAllUser, formatDate } from "../../../static/js/commonJs";
 export default {
   data() {
     return {
+      isCanModify:false,
+      sync_sirno: "",
+      switch_value: false,
+      is_sirno: false,
       loading: false,
       drawer: false,
       projects: {},
@@ -216,13 +251,15 @@ export default {
         fcontent: "",
         fplnstart: "",
         fplnend: "",
+        fcreateusr :"",
+        fcreatedte: "",
         factstart: null,
         factend: null,
         freleasedt: null,
         fplnmanpower: null,
         factmanpower: null,
         freleaserpt: null,
-        fsirno: ""
+        fsirno: "",
       },
       rules: {
         fsystemcd: [
@@ -271,8 +308,20 @@ export default {
       },
     };
   },
+  watch: {
+    switch_value(newval) {
+      //监控界面开关
+      this.sync_sirno = ""
+      if (newval) {
+        this.is_sirno = true;
+      } else {
+        this.is_sirno = false;
+      }
+    },
+  },
   methods: {
     onSubmit(formName) {
+      this.loading = true;
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
           if (this.form.fleader.length === 0) {
@@ -286,8 +335,9 @@ export default {
           } else {
             this.form.fhelper = this.form.fhelper.join(",");
           }
-          this.loading = true;
+          
           var resp = await newLiaison(this.form).catch(() => {
+            this.loading = false;
             this.$message.error("联络票创建异常！");
           });
 
@@ -311,14 +361,41 @@ export default {
       this.$refs[formName].resetFields();
     },
 
-    projectCodeMaster(){
-      this.$router.push({name:'ProjectMaster'})
+    projectCodeMaster() {
+      this.$router.push({ name: "ProjectMaster" });
     },
 
-    systemCodeMaster(){
-      this.$router.push({name:'SystemMaster'})
-    }
+    systemCodeMaster() {
+      this.$router.push({ name: "SystemMaster" });
+    },
 
+    async syncSirNo(){
+      var resp = await syncLiaisonbySirNo(this.sync_sirno).catch(()=>{
+        this.$message.error("联络票同步异常")
+      })
+      if(!Object.prototype.hasOwnProperty.call(resp.data, "message")){
+        
+        var sir_json = resp.data
+
+        this.form.ftype = sir_json.ftype
+        this.form.fcreateusr = sir_json.fcreateusr
+        this.form.fcreatedte = formatDate(sir_json.fcreatedte)
+        this.form.fplnstart = formatDate(sir_json.fplnstart)
+        this.form.fassignedto = sir_json.fassignedto
+        this.form.fsystemcd = sir_json.fsystemcd
+        this.form.fprojectcd = sir_json.fprojectcd
+        this.form.fodrno = sir_json.fodrno
+        this.form.fbrief = sir_json.fbrief
+        this.form.fcontent = sir_json.fcontent
+        this.form.fsirno = sir_json.fsirno
+
+        this.isCanModify = true
+      }else{
+        this.$message.error(resp.data.message)
+        return
+      }
+      
+    }
   },
   mounted: function() {
     var this_ = this;

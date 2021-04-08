@@ -290,7 +290,7 @@ export default {
     },
 
     isCanBatchDelete() {
-      if (this.qahead.fstatus === "1") {
+      if (this.qahead.fstatus === "1" & this.qadetails.length > 0) {
         return false;
       }
       return true;
@@ -357,20 +357,22 @@ export default {
               for (var i in selectData) {
                 var resp = await deleteQaDetail(selectData[i].id).catch(() => {
                   this.$message.error("测试项删除异常");
+                  this.fullscreenLoading = false;
                 });
                 if (
                   Object.prototype.hasOwnProperty.call(resp.data, "message")
                 ) {
                   this.$message.error(resp.data.message);
+                  this.fullscreenLoading = false;
                 }
               }
               this.refreshQaList();
-              this.fullscreenLoading = false;
               this.$message({
                 message: "批量删除成功！",
                 type: "success",
               });
             }
+            this.fullscreenLoading = false;
           }
         })
         .catch(() => {

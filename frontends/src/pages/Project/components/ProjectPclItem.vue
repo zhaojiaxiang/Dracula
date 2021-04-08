@@ -13,7 +13,7 @@
 
       <el-col :span="12">
         <div style="text-align:right;">
-          <el-button @click="openPCLNew">新建结合测试</el-button>
+          <el-button v-show="isCanAddPCL" @click="openPCLNew">新建结合测试</el-button>
         </div>
       </el-col>
     </el-row>
@@ -102,6 +102,7 @@
 
 <script>
 import { getQaHeadBySlipNo, deleteQaHead } from "./../../../services/qaService";
+import { getQaProjectGroup } from "../../../services/projectService";
 import ProjectPclNew from "./ProjectPclNew";
 import ProjectPclModify from "./ProjectPclModify";
 import Guide from "./../../Home/components/Guide";
@@ -116,6 +117,7 @@ export default {
       loading: false,
       order_no: "",
       any_qahf_id: "",
+      order_info:{},
       pcltable: [],
     };
   },
@@ -135,6 +137,13 @@ export default {
       this.$refs.ProjectPclNew.handleDialog(this.any_qahf_id);
     },
 
+    isCanAddPCL(){
+      if(this.order_info.status == 4){
+        return false
+      }
+      return true
+    },
+
     deleteQaHead(id, fobjectid) {
       this.$confirm("此操作将永久删除" + fobjectid + ", 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -151,7 +160,7 @@ export default {
                 type: "success",
               });
             } else {
-              this.$message.error(fobjectid + "删除失败");
+              this.$message.error(resp.data.message);
             }
           }
         })
@@ -174,6 +183,11 @@ export default {
 
     async refreshPCL() {
       this.order_no = this.$route.query.order_no;
+
+      var resp_order = await getQaProjectGroup("", "", this.order_no, 1, 1).catch(() => {
+        this.$message.error("订单数据获取异常");
+      });
+      this.order_info = resp_order.data.results[0];
 
       var resp = await getQaHeadBySlipNo(this.order_no).catch(() => {
         this.$message.error("PCL信息获取异常");
