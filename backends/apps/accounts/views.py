@@ -232,6 +232,7 @@ class MyTaskBar(APIView):
                                    in {all_organization_tuple})
                                    and qadf.fapproval = 'N'
                                    and qahf.ftesttyp = 'MCL'
+                                   and qahf.fstatus in ('1', '2')
                                  union all
                                  select distinct qahf.id,
                                                  qahf.ftesttyp,
@@ -248,8 +249,10 @@ class MyTaskBar(APIView):
                                  where ftesttyp = 'PCL'
                                    and qahf.id = qadf.qahf_id
                                    and qadf.fapproval = 'N'
+                                   and qahf.fstatus in ('1', '2')
                                    and liaisonf.fodrno = qahf.fslipno
-                                   and liaisonf.fleader like '%{user.name}%') a
+                                   and (liaisonf.fleader like '%{user.name}%' or liaisonf.fassignedto in 
+                                   (select name from users where ammic_organization_id in {all_organization_tuple}))) a
                             order by ftesttyp, fodrno, fslipno
                       """
 
@@ -462,9 +465,11 @@ class MyApproval(APIView):
                                       qadf
                                  where qadf.qahf_id = qahf.id
                                    and (liaisonf.fslipno = qahf.fslipno or liaisonf.fodrno = qahf.fslipno)
-                                   and qahf.fcreateusr in (select name from users where ammic_organization_id in {all_organization_tuple})
+                                   and qahf.fcreateusr in (select name from users where ammic_organization_id 
+                                   in {all_organization_tuple})
                                    and qadf.fapproval = 'N'
                                    and qahf.ftesttyp = 'MCL'
+                                   and qahf.fstatus in ('1', '2')
                                  union all
                                  select distinct qahf.id,
                                                  qahf.ftesttyp,
@@ -481,8 +486,10 @@ class MyApproval(APIView):
                                  where ftesttyp = 'PCL'
                                    and qahf.id = qadf.qahf_id
                                    and qadf.fapproval = 'N'
+                                   and qahf.fstatus in ('1', '2')
                                    and liaisonf.fodrno = qahf.fslipno
-                                   and liaisonf.fleader like '%{user.name}%') a
+                                   and (liaisonf.fleader like '%{user.name}%' or liaisonf.fassignedto in 
+                                   (select name from users where ammic_organization_id in {all_organization_tuple}))) a
                             order by ftesttyp, fodrno, fslipno
                       """
 
@@ -535,7 +542,8 @@ class MyConfirm(APIView):
                         where qahf.ftesttyp = 'PCL'
                           and qahf.fstatus = '3'
                           and liaisonf.fodrno = qahf.fslipno
-                          and liaisonf.fleader like '%{user.name}%'
+                          and (liaisonf.fleader like '%{user.name}%' or liaisonf.fassignedto in
+                                   (select name from users where ammic_organization_id in {all_organization_tuple}))
                       """
 
         confirm_dict = db_connection_execute(confirm_sql, 'dict')
