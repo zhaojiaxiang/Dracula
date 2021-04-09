@@ -1,17 +1,40 @@
 from django.contrib.auth import get_user_model
 from rest_framework import mixins, viewsets
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
 from accounts.models import SystemSetting
-from accounts.serializers import UserSerializer, SystemSettingSerializer, MyGroupUserSerializer
+from accounts.serializers import UserSerializer, SystemSettingSerializer, MyGroupUserSerializer, LoginSerializer
 from liaisons.models import Liaisons
 from qa.models import QaHead
 from utils.db_connection import db_connection_execute, query_single_with_no_parameter
 from utils.utils import get_all_organization_belong_me, get_all_organization_group_belong_me
 
 User = get_user_model()
+
+
+@permission_classes((AllowAny,))
+class LoginView(APIView):
+    """
+    自定义用户登录
+    """
+    def post(self, request):
+        # 实例化得到一个序列化类的对象
+        serializer = LoginSerializer(data=request.data,)
+        # 序列化类的对象的校验方法
+        serializer.is_valid(raise_exception=True)
+        token = serializer.context.get('token')
+        user = serializer.context.get('user')
+        # 如果通过,表示登录成功,返回手动签发的token
+        # 如果失败,抛异常,就不用管了
+        data = {
+            'token': token,
+            'user': UserSerializer(user, context={'request': request}).data
+        }
+        return Response(data, status.HTTP_200_OK)
 
 
 def jwt_response_payload_handler(token, user=None, request=None):

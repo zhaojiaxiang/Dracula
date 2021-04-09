@@ -21,7 +21,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_jwt.views import obtain_jwt_token
 
 from accounts.views import UserViewSet, SystemSettingViewSet, MyGroupUserViewSet, UserDevelopmentDetail, MyTaskBar, \
-    MyMcl, MyRelease, MyConfirm, MyApproval, MyPcl
+    MyMcl, MyRelease, MyConfirm, MyApproval, MyPcl, LoginView
 from backends import settings
 from checkouts.views import CheckOutFilesViewSet
 from liaisons.views import LiaisonsViewSet, LiaisonUpdateStatusViewSet, QaProjectViewSet, QaProjectForMineViewSet, \
@@ -67,8 +67,6 @@ router.register('accounts/system_setting', SystemSettingViewSet, basename='syste
 router.register('qa_project', QaProjectViewSet, basename='qa_project')
 router.register('qa_project_group', QaProjectForGroupViewSet, basename='qa_project_group')
 router.register('qa_project_mine', QaProjectForMineViewSet, basename='qa_project_mine')
-
-
 router.register('pb_file_checkout', CheckOutFilesViewSet, basename='pb_file_checkout')
 
 
@@ -77,8 +75,9 @@ urlpatterns = [
     path('api/api-auth/', include('rest_framework.urls')),
     path('api/docs/', include_docs_urls(title="drf docs")),
     path('api/', include(router.urls)),
-    path('api/login/', obtain_jwt_token),
-    #
+    # path('api/login/', obtain_jwt_token),  # REST framework JWT默认用户登录接口
+    path('api/login/', LoginView.as_view()),
+
     path('api/mine_order_info/', UserDevelopmentDetail.as_view()),
     path('api/mine_task_bar/', MyTaskBar.as_view()),
     path('api/mine_task_mcl/', MyMcl.as_view()),
