@@ -70,12 +70,14 @@ export default {
         if (valid) {
           await login(JSON.stringify(this.form))
             .then((resp) => {
-              if (resp.status) {
+              if (Object.prototype.hasOwnProperty.call(resp.data, 'message')) {
+                this.$message.error(resp.data.message);
+              }else{
                 this.$router.push({ path: "/" });
               }
             })
             .catch(() => {
-              this.$message.error("用户不存在或者密码错误");
+              this.$message.error("登录异常");
             });
         }
       });
