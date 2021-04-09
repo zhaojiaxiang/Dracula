@@ -22,4 +22,4 @@ class CheckOutFilesViewSet(viewsets.ModelViewSet):
     filter_class = CheckOutFilesFilter
 
     def get_queryset(self):
-        return CheckOutFiles.objects.all()
+        return CheckOutFiles.objects.all().order_by('fchkstatus', 'fslipno', '-fregisterdte')
