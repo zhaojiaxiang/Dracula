@@ -92,10 +92,10 @@ export default {
 
         var form = {};
         form["fregression"] = "N"
-        form["fclass1"] = this.qadetails[i][0];
-        form["fclass2"] = this.qadetails[i][1];
-        form["fcontent"] = this.qadetails[i][2];
-        form["fsortrule"] = this.qadetails[i][3];
+        form["fclass1"] = this.qadetails[i][0].replace(/\r\n/g,"");
+        form["fclass2"] = this.qadetails[i][1].replace(/\r\n/g,"");
+        form["fcontent"] = this.qadetails[i][2].replace(/\r\n/g,"");
+        form["fsortrule"] = this.qadetails[i][3].replace(/\r\n/g,"");
         form["qahf"] = this.qaheadid;
 
         var resp = await newQaDetail(form).catch(() => {

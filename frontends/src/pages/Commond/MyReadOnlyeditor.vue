@@ -13,7 +13,7 @@
                 id="editor"
                 @ready="onReady"
                 :editor="editor"
-                v-model="item.fcontent_text"
+                :value="item.fcontent_text"
                 :config="editorConfig"
               ></ckeditor>
             </el-collapse-item>

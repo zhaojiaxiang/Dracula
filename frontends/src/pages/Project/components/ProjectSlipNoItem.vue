@@ -1,6 +1,13 @@
 <template>
   <div class="div-style">
-    <el-table border :data="tableData" style="width: 100%" size="medium">
+    <el-table
+      border
+      :data="tableData"
+      style="width: 100%"
+      :height="tableHeight"
+      :span-method="arraySpanMethod"
+      size="medium"
+    >
       <el-table-column
         prop="slip_status"
         label="状态"
@@ -12,7 +19,7 @@
           { text: '已完成', value: '已完成' },
           { text: '已发布', value: '已发布' },
         ]"
-        :filter-method="filterStatus"
+        :filter-method="filterSlipStatus"
         filter-placement="bottom-end"
       >
         <template slot-scope="scope">
@@ -21,14 +28,9 @@
           }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column
-        fixed
-        prop="slip_slip"
-        label="联络票号"
-        min-width="140"
-      >
+      <el-table-column fixed prop="slip_slip" label="联络票号" min-width="150">
       </el-table-column>
-      <el-table-column prop="slip_assignedto" label="对应者" min-width="60">
+      <el-table-column prop="slip_assignedto" label="对应者" min-width="70">
       </el-table-column>
       <el-table-column
         prop="slip_brief"
@@ -57,7 +59,7 @@
       <el-table-column
         prop="qa_object"
         label="测试对象"
-        min-width="110"
+        min-width="150"
         show-overflow-tooltip
       >
       </el-table-column>
@@ -71,7 +73,7 @@
           { text: '已提交', value: '已提交' },
           { text: '已确认', value: '已确认' },
         ]"
-        :filter-method="filterStatus"
+        :filter-method="filterQAStatus"
         filter-placement="bottom-end"
       >
         <template slot-scope="scope">
@@ -140,12 +142,62 @@ export default {
     return {
       order_no: "",
       isdisable: true,
+      tableHeight: 100,
+      spanArr: [],
+      pos: 0,
       tableData: [],
     };
   },
   methods: {
-    filterStatus(value, row) {
-      return row.fstatus === value;
+    getSpanArr(data) {
+      this.spanArr = [];
+      if (data === null) {
+        return;
+      }
+      for (var i = 0; i < data.length; i++) {
+        if (i === 0) {
+          this.spanArr.push(1);
+          this.pos = 0;
+        } else {
+          if (data[i].slip_id === data[i - 1].slip_id) {
+            // 如果ID一样则需要进行合并
+            this.spanArr[this.pos] += 1;
+            this.spanArr.push(0);
+          } else {
+            this.spanArr.push(1);
+            this.pos = i;
+          }
+        }
+      }
+    },
+
+    arraySpanMethod({ rowIndex, columnIndex }) {
+      // 合并的列数
+      if (
+        columnIndex === 0 ||
+        columnIndex === 1 ||
+        columnIndex === 2 ||
+        columnIndex === 3 ||
+        columnIndex === 4 ||
+        columnIndex === 5 ||
+        columnIndex === 6 ||
+        columnIndex === 7
+      ) {
+        const _row = this.spanArr[rowIndex]; // 从处理完的数组里获取
+        const _col = _row > 0 ? 1 : 0;
+        return {
+          rowspan: _row,
+          colspan: _col, // 相当于给给表格加上rowspan,colspan属性
+        };
+      }
+    },
+
+    filterSlipStatus(value, row) {
+      return row.slip_status === value;
+    },
+
+    filterQAStatus(value, row) {
+      return row.qa_status === value;
     },
 
     openObjectSummary(id) {
@@ -249,6 +301,13 @@ export default {
           code_id: code_id,
         };
         this.tableData.push(project);
+
+        this.getSpanArr(this.tableData);
+
+        this.tableHeight = this.tableData.length * 43 + 47;
+        if (this.tableHeight > 600) {
+          this.tableHeight = 600;
+        }
       }
     },
   },

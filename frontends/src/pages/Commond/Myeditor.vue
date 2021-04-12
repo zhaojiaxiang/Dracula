@@ -7,8 +7,9 @@
             id="editor"
             @ready="onReady"
             :editor="editor"
-            v-model="editorData"
+            :value="editorData"
             :config="editorConfig"
+            @input="receivedata"
           ></ckeditor>
         </div>
       </el-col>
@@ -82,6 +83,7 @@ export default {
   props: ['editorData', 'isdisable'],
   data() {
     return {
+      outEditorData:"",
       editor: ClassicEditor,
     //   editorData: this.contentText,
       editorConfig: {
@@ -233,9 +235,12 @@ export default {
   },
   methods: {
     handle() {
-      this.$emit("handleContentText", this.editorData);
+      this.$emit("handleContentText", this.outEditorData);
     },
-
+    receivedata(e){
+      this.$emit("receivedata", e);
+      this.outEditorData=e;
+    },
     async beforeFileUpload(file) {
       const isLt2M = file.size / 1024 / 1024 < 2;
 

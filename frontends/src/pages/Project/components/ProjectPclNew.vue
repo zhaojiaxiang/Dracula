@@ -8,7 +8,6 @@
               v-model="form.fslipno"
               class="width-sytle"
               placeholder="订单号"
-              :disabled="true"
             ></el-input>
           </el-form-item>
         </el-col>
@@ -22,6 +21,32 @@
           </el-form-item>
         </el-col>
       </el-form-item>
+      <el-form-item required>
+          <el-col :span="12">
+            <el-form-item prop="fsystemcd" size="medium">
+              <el-select v-model="form.fsystemcd" placeholder="请选择系统名称">
+                <el-option
+                  v-for="(item, i) in systems"
+                  :key="i"
+                  :label="item.fsystemnm"
+                  :value="item.fsystemcd"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item prop="fprojectcd" >
+              <el-select v-model="form.fprojectcd" placeholder="请选择项目名称">
+                <el-option
+                  v-for="(item, i) in projects"
+                  :key="i"
+                  :label="projects.fprojectsn"
+                  :value="item.fprojectcd"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button type="primary" @click="onSubmit('form')">确 定</el-button>
@@ -32,10 +57,17 @@
 
 <script>
 import { getQaHead, newQaHead } from "./../../../services/qaService";
+import {
+  getProjects,
+  getSystems,
+} from "../../../services/commonService";
 export default {
   data() {
     return {
       dialogFormVisible: false,
+      isFirstPCL:false,
+      projects: {},
+      systems: {},
       form: {
         fsystemcd: "",
         fprojectcd: "",
@@ -55,16 +87,22 @@ export default {
     async handleDialog(id) {
       this.dialogFormVisible = !this.dialogFormVisible;
 
-      var resp = await getQaHead(id).catch(() => {
-        this.$message.error("结合测试数据获取异常");
-      });
-      if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
-        this.$message.error(resp.data.message);
+      if (id) {
+        var resp = await getQaHead(id).catch(() => {
+          this.$message.error("结合测试数据获取异常");
+        });
+        if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
+          this.$message.error(resp.data.message);
+        }
+        this.form.fsystemcd = resp.data.fsystemcd;
+        this.form.fprojectcd = resp.data.fprojectcd;
+        this.form.fobjectid = resp.data.fobjectid;
+        this.form.fslipno = resp.data.fslipno;
+        this.isFirstPCL = true
+      }else{
+        this.isFirstPCL = true
       }
-      this.form.fsystemcd = resp.data.fsystemcd;
-      this.form.fprojectcd = resp.data.fprojectcd;
-      this.form.fobjectid = resp.data.fobjectid;
-      this.form.fslipno = resp.data.fslipno;
+      
     },
 
     async onSubmit(formName) {
@@ -88,6 +126,19 @@ export default {
       });
     },
   },
+  mounted:async function(){
+    var p_resp = await getProjects().catch(() => {
+      this.$message.error("项目主表数据获取异常");
+      return;
+    });
+    var s_resp = await getSystems().catch(() => {
+      this.$message.error("系统主表数据获取异常");
+      return;
+    });
+
+    this.projects = p_resp.data;
+    this.systems = s_resp.data;
+  }
 };
 </script>
 

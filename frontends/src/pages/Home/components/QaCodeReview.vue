@@ -7,12 +7,10 @@
             @handleContentText="updateQaCodeReview"
             :editorData="contentText"
             :isdisable="isdisable"
+            @receivedata="receivedata"
           ></Myeditor>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-      </div>
     </el-dialog>
   </div>
 </template>
@@ -40,6 +38,10 @@ export default {
     };
   },
   methods: {
+    receivedata(e){
+      this.content_text=e;
+    },
+
     async handleDialog(slipno, objectid) {
       this.slipno = slipno;
       this.objectid = objectid;

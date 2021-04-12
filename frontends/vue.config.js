@@ -31,6 +31,13 @@ module.exports = {
           "^/qa/files": "/api/files",
         },
       },
+      "/files": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+        pathRewrite: {
+          "^/files": "/api/files",
+        },
+      },
     },
     // build: {
     //   // Template for index.html

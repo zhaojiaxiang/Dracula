@@ -158,7 +158,7 @@
             :underline="false"
             style="margin-left:15px"
             @click="handleContentText(scope.row.id)"
-            v-show="scope.row.fcontent_text.length > 0"
+            v-show="scope.row.fcontent_text"
             >{{ scope.row.test_tag }}</el-link
           >
           <el-link
@@ -166,7 +166,7 @@
             type="primary"
             :underline="false"
             @click="handleContentText(scope.row.id)"
-            v-show="scope.row.fcontent_text.length === 0 && isCanTest()"
+            v-show="!scope.row.fcontent_text && isCanTest()"
             >贴图</el-link
           >
         </template>

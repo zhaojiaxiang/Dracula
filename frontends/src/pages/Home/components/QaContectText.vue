@@ -8,6 +8,7 @@
       @handleContentText="submitContentText"
       :editorData="content_text"
       :isdisable="isdisable"
+      @receivedata="receivedata"
     ></Myeditor>
     <MyReadOnlyeditor :proofs="proofs"></MyReadOnlyeditor>
   </div>
@@ -37,6 +38,9 @@ export default {
     };
   },
   methods: {
+    receivedata(e){
+      this.content_text=e;
+    },
     goBack() {
       window.history.go(-1);
     },

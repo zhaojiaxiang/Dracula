@@ -1,19 +1,21 @@
 <template>
   <div>
     <el-row style="margin-top:20px; margin-bottom:5px">
-        <el-col :span="12">
-          <Guide>
+      <el-col :span="12">
+        <Guide>
           <template>
             <div>
               <h5><strong>结合测试</strong></h5>
             </div>
           </template>
         </Guide>
-        </el-col>
+      </el-col>
 
       <el-col :span="12">
         <div style="text-align:right;">
-          <el-button v-show="isCanAddPCL" @click="openPCLNew">新建结合测试</el-button>
+          <el-button v-show="isCanAddPCL" @click="openPCLNew"
+            >新建结合测试</el-button
+          >
         </div>
       </el-col>
     </el-row>
@@ -117,7 +119,7 @@ export default {
       loading: false,
       order_no: "",
       any_qahf_id: "",
-      order_info:{},
+      order_info: {},
       pcltable: [],
     };
   },
@@ -129,7 +131,7 @@ export default {
       });
     },
 
-    openPclModify(id){
+    openPclModify(id) {
       this.$refs.ProjectPclModify.handleDialog(id);
     },
 
@@ -137,11 +139,11 @@ export default {
       this.$refs.ProjectPclNew.handleDialog(this.any_qahf_id);
     },
 
-    isCanAddPCL(){
-      if(this.order_info.status == 4){
-        return false
+    isCanAddPCL() {
+      if (this.order_info.status == 4) {
+        return false;
       }
-      return true
+      return true;
     },
 
     deleteQaHead(id, fobjectid) {
@@ -177,14 +179,20 @@ export default {
     },
 
     refreshPCLList() {
-        console.log("re");
+      console.log("re");
       this.refreshPCL();
     },
 
     async refreshPCL() {
       this.order_no = this.$route.query.order_no;
 
-      var resp_order = await getQaProjectGroup("", "", this.order_no, 1, 1).catch(() => {
+      var resp_order = await getQaProjectGroup(
+        "",
+        "",
+        this.order_no,
+        1,
+        1
+      ).catch(() => {
         this.$message.error("订单数据获取异常");
       });
       this.order_info = resp_order.data.results[0];
@@ -197,21 +205,23 @@ export default {
       }
       this.pcltable = resp.data;
 
-      this.any_qahf_id = resp.data[0].id;
+      if (this.pcltable.length > 0) {
+        this.any_qahf_id = resp.data[0].id;
 
-      for (var i in this.pcltable) {
-        if (this.pcltable[i].fstatus === "1") {
-          this.pcltable[i].fstatus = "初始";
-          this.pcltable[i].tagtype = "info";
-        } else if (this.pcltable[i].fstatus === "2") {
-          this.pcltable[i].fstatus = "已审核";
-          this.pcltable[i].tagtype = "";
-        } else if (this.pcltable[i].fstatus === "3") {
-          this.pcltable[i].fstatus = "已提交";
-          this.pcltable[i].tagtype = "warning";
-        } else if (this.pcltable[i].fstatus === "4") {
-          this.pcltable[i].fstatus = "已确认";
-          this.pcltable[i].tagtype = "success";
+        for (var i in this.pcltable) {
+          if (this.pcltable[i].fstatus === "1") {
+            this.pcltable[i].fstatus = "初始";
+            this.pcltable[i].tagtype = "info";
+          } else if (this.pcltable[i].fstatus === "2") {
+            this.pcltable[i].fstatus = "已审核";
+            this.pcltable[i].tagtype = "";
+          } else if (this.pcltable[i].fstatus === "3") {
+            this.pcltable[i].fstatus = "已提交";
+            this.pcltable[i].tagtype = "warning";
+          } else if (this.pcltable[i].fstatus === "4") {
+            this.pcltable[i].fstatus = "已确认";
+            this.pcltable[i].tagtype = "success";
+          }
         }
       }
     },

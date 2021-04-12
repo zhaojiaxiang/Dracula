@@ -4,7 +4,7 @@
       <el-page-header @back="goBack"></el-page-header>
     </div>
     <el-row>
-      <el-col :xs="22" :sm="22" :md="22" :lg="22" :xl="22">
+      <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
         <Guide>
           <template>
             <div>
@@ -19,10 +19,6 @@
           <ProjectPclItem></ProjectPclItem>
         </div>
       </el-col>
-      <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2"
-        ><div>
-        </div
-      ></el-col>
     </el-row>
   </div>
 </template>
