@@ -98,7 +98,8 @@ class QaProjectForGroupViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin,
     def get_queryset(self):
         all_group_tuple = get_all_organization_group_belong_me(self.request)
         # 此处没有对数据进行排序，因为不好排，前端获取到该数据后会进行排序
-        return Liaisons.objects.values("fodrno", "forganization").filter(forganization__in=all_group_tuple).distinct()
+        return Liaisons.objects.values("fodrno", "forganization").filter(
+            forganization__in=all_group_tuple).distinct().order_by('-fodrno')
 
     serializer_class = QaProjectSerializer
     pagination_class = QaProjectForGroupPagination

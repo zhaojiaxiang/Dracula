@@ -41,7 +41,10 @@ class QaHeadSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("该测试对象已经在该联络下存在")
         else:
             max_slipno2 = QaHead.objects.filter(fslipno__exact=validated_data['fslipno']).aggregate(Max('fslipno2'))
-            slip_no2 = max_slipno2['fslipno2__max'] + 1
+            if max_slipno2['fslipno2__max']:
+                slip_no2 = max_slipno2['fslipno2__max'] + 1
+            else:
+                slip_no2 = 1
 
         user = self.context['request'].user
         qahead = QaHead.objects.create(**validated_data)
