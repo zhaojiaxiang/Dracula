@@ -35,11 +35,11 @@ class LiaisonsSerializer(serializers.ModelSerializer):
     fcreatedte = serializers.CharField(read_only=True)
     fcreateusr = serializers.CharField(read_only=True)
     forganization = serializers.IntegerField(read_only=True)
-    fentdt = serializers.DateField(read_only=True)
+    fentdt = serializers.DateTimeField(read_only=True)
     fentusr = serializers.CharField(read_only=True)
-    fupdtedt = serializers.DateField(read_only=True)
+    fupdtedt = serializers.DateTimeField(read_only=True)
     fupdteusr = serializers.CharField(read_only=True)
-    fupdteprg = serializers.DateField(read_only=True)
+    fupdteprg = serializers.CharField(read_only=True)
 
     class Meta:
         model = Liaisons
