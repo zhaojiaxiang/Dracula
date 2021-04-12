@@ -27,9 +27,9 @@ class Liaisons(models.Model):
     freleaserpt = models.CharField(verbose_name='程序发布报告URL', max_length=200, null=True, blank=True)
     fsirno = models.CharField(verbose_name='SIR号', max_length=10, null=True, blank=True)
     forganization = models.IntegerField(verbose_name='组织构架中组名', null=True, blank=True)  # 不再使用外键
-    fentdt = models.DateField(verbose_name='登入日期', auto_now_add=True)
+    fentdt = models.DateTimeField(verbose_name='登入日期', auto_now_add=True)
     fentusr = models.CharField(verbose_name='登录者', max_length=24, null=True, blank=True)
-    fupdtedt = models.DateField(verbose_name='更新日期', null=True, blank=True, auto_now=True)
+    fupdtedt = models.DateTimeField(verbose_name='更新日期', null=True, blank=True, auto_now=True)
     fupdteusr = models.CharField(verbose_name='更新者', max_length=24, null=True, blank=True)
     fupdteprg = models.CharField(verbose_name='更新程序名', max_length=110, null=True, blank=True)
 

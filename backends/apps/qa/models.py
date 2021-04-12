@@ -29,9 +29,9 @@ class QaHead(models.Model):
     freviewcode = models.TextField(verbose_name='程序确认结果', null=True, blank=True)
     fselflevel = models.CharField(verbose_name='自我评价难易等级', max_length=2, null=True, blank=True)
     flevel = models.CharField(verbose_name='难易等级', max_length=2, null=True, blank=True)
-    fentdt = models.DateField(verbose_name='登入日期', auto_now_add=True)
+    fentdt = models.DateTimeField(verbose_name='登入日期', auto_now_add=True)
     fentusr = models.CharField(verbose_name='登录者', max_length=24, null=True, blank=True)
-    fupdtedt = models.DateField(verbose_name='更新日期', null=True, blank=True, auto_now=True)
+    fupdtedt = models.DateTimeField(verbose_name='更新日期', null=True, blank=True, auto_now=True)
     fupdteusr = models.CharField(verbose_name='更新者', max_length=24, null=True, blank=True)
     fupdteprg = models.CharField(verbose_name='更新程序名', max_length=110, null=True, blank=True)
 
@@ -63,9 +63,9 @@ class QaDetail(models.Model):
     flastapproveid = models.SmallIntegerField(verbose_name="最后一次审核ID", null=True, blank=True)
     flastsubmitid = models.SmallIntegerField(verbose_name="最后一次提交ID", null=True, blank=True)
     qahf = models.ForeignKey(QaHead, related_name='qahf', on_delete=models.CASCADE)
-    fentdt = models.DateField(verbose_name='登入日期', auto_now_add=True)
+    fentdt = models.DateTimeField(verbose_name='登入日期', auto_now_add=True)
     fentusr = models.CharField(verbose_name='登录者', max_length=24, null=True, blank=True)
-    fupdtedt = models.DateField(verbose_name='更新日期', null=True, blank=True, auto_now=True)
+    fupdtedt = models.DateTimeField(verbose_name='更新日期', null=True, blank=True, auto_now=True)
     fupdteusr = models.CharField(verbose_name='更新者', max_length=24, null=True, blank=True)
     fupdteprg = models.CharField(verbose_name='更新程序名', max_length=110, null=True, blank=True)
 
