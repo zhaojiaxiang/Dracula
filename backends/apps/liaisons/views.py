@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from accounts.models import User
-from liaisons.filters import LiaisonsFilter, QAProjectFilter
+from liaisons.filters import LiaisonsFilter, QAProjectFilter, QAProjectDataStatisticsFilter
 from liaisons.models import Liaisons
 from liaisons.serializers import LiaisonsSerializer, LiaisonUpdateStatusSerializer, QaProjectSerializer, \
     QaProjectDataStatisticsSerializer
