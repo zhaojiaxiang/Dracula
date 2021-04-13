@@ -1,10 +1,12 @@
 from datetime import date
+from math import ceil
 
 from django.db import transaction
+from django.db.models import Sum
 from rest_framework import serializers
 
 from liaisons.models import Liaisons
-from qa.models import QaHead
+from qa.models import QaHead, QaDetail
 from rbac.models import Organizations
 from utils.db_connection import man_power_connection_execute, db_connection_execute, query_single_with_no_parameter
 from utils.slims import SLIMSExchange
@@ -357,3 +359,102 @@ class QaProjectSerializer(serializers.ModelSerializer):
     def get_organization(self, obj):
         organizations = Organizations.objects.values('name').filter(pk=obj['forganization'])
         return organizations[0]['name']
+
+
+class QaProjectDataStatisticsSerializer(serializers.ModelSerializer):
+    slip_no = serializers.SerializerMethodField()
+    assigned_to = serializers.SerializerMethodField()
+    total_lines = serializers.SerializerMethodField()
+    modify_lines = serializers.SerializerMethodField()
+    target_tests = serializers.SerializerMethodField()
+    target_regressions = serializers.SerializerMethodField()
+    target_total = serializers.SerializerMethodField()
+    target_ng = serializers.SerializerMethodField()
+    actual_tests = serializers.SerializerMethodField()
+    actual_regressions = serializers.SerializerMethodField()
+    actual_total = serializers.SerializerMethodField()
+    actual_ng = serializers.SerializerMethodField()
+    actual_ng_rate = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Liaisons
+        fields = ('slip_no', 'assigned_to', 'total_lines', 'modify_lines', 'target_tests', 'target_regressions',
+                  'target_total',
+                  'target_ng', 'actual_tests', 'actual_regressions', 'actual_total', 'actual_ng', 'actual_ng_rate')
+
+    def get_slip_no(self, obj):
+        return obj['fslipno']
+
+    def get_assigned_to(self, obj):
+        return obj['fassignedto']
+
+    def get_total_lines(self, obj):
+        qa_head = QaHead.objects.values('fslipno').annotate(sum=Sum('fttlcodelines')).filter(
+            fslipno__exact=obj['fslipno'])
+        return qa_head[0]['sum']
+
+    def get_modify_lines(self, obj):
+        qa_head = QaHead.objects.values('fslipno').annotate(sum=Sum('fmodifiedlines')).filter(
+            fslipno__exact=obj['fslipno'])
+        return qa_head[0]['sum']
+
+    def get_target_tests(self, obj):
+        qa_heads = QaHead.objects.filter(fslipno__exact=obj['fslipno'])
+        target_tests = 0
+        for qa_head in qa_heads:
+            if qa_head.fmodifiedlines:
+                target_tests = target_tests + ceil(qa_head.fmodifiedlines * qa_head.fcomplexity / 11)
+
+        return target_tests
+
+    def get_target_regressions(self, obj):
+        qa_heads = QaHead.objects.filter(fslipno__exact=obj['fslipno'])
+        target_regressions = 0
+        for qa_head in qa_heads:
+            if qa_head.fttlcodelines:
+                target_regressions = target_regressions + ceil(qa_head.fttlcodelines / 50)
+
+        return target_regressions
+
+    def get_target_total(self, obj):
+        return self.get_target_tests(obj) + self.get_target_regressions(obj)
+
+    def get_target_ng(self, obj):
+        qa_heads = QaHead.objects.filter(fslipno__exact=obj['fslipno'])
+        target_ng = 0
+
+        for qa_head in qa_heads:
+            if qa_head.fmodifiedlines:
+                target_ng = target_ng + ceil(self.get_target_tests(obj) / 11)
+
+        return target_ng
+
+    def get_actual_tests(self, obj):
+        qa_heads = QaHead.objects.values('id').filter(fslipno__exact=obj['fslipno'])
+
+        actual_tests = QaDetail.objects.filter(qahf__in=qa_heads, fresult__in=('OK', 'NG', 'NGOK'),
+                                               fregression__exact='N').count()
+        return actual_tests
+
+    def get_actual_regressions(self, obj):
+        qa_heads = QaHead.objects.values('id').filter(fslipno__exact=obj['fslipno'])
+
+        actual_regressions = QaDetail.objects.filter(qahf__in=qa_heads, fresult__in=('OK', 'NG', 'NGOK'),
+                                                     fregression__exact='Y').count()
+        return actual_regressions
+
+    def get_actual_total(self, obj):
+        return self.get_target_tests(obj) + self.get_target_regressions(obj)
+
+    def get_actual_ng(self, obj):
+        qa_heads = QaHead.objects.values('id').filter(fslipno__exact=obj['fslipno'])
+
+        actual_ng = QaDetail.objects.filter(qahf__in=qa_heads, fresult__in=('NG', 'NGOK')).count()
+        return actual_ng
+
+    def get_actual_ng_rate(self, obj):
+        total = self.get_actual_total(obj)
+        ng = self.get_actual_ng(obj)
+        if total == 0:
+            total = 1
+        return str(round(ng / total, 4) * 100) + "%"

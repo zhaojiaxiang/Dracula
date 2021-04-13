@@ -13,7 +13,8 @@ from rest_framework.viewsets import GenericViewSet
 from accounts.models import User
 from liaisons.filters import LiaisonsFilter, QAProjectFilter
 from liaisons.models import Liaisons
-from liaisons.serializers import LiaisonsSerializer, LiaisonUpdateStatusSerializer, QaProjectSerializer
+from liaisons.serializers import LiaisonsSerializer, LiaisonUpdateStatusSerializer, QaProjectSerializer, \
+    QaProjectDataStatisticsSerializer
 from qa.models import QaHead, QaDetail
 from utils.db_connection import query_single_with_no_parameter, db_connection_execute
 from utils.slims import SLIMSExchange
@@ -131,6 +132,19 @@ class QaProjectViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, Generic
         return Liaisons.objects.values("fodrno").distinct()
 
     serializer_class = QaProjectSerializer
+
+
+class QaProjectDataStatisticsViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
+    """
+    订单下联络票的测试数据统计
+    """
+    def get_queryset(self):
+        return Liaisons.objects.values("fslipno", "fassignedto").distinct().order_by('fslipno')
+
+    serializer_class = QaProjectDataStatisticsSerializer
+
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
+    filter_class = QAProjectDataStatisticsFilter
 
 
 class QaProjectDetailView(APIView):

@@ -25,7 +25,7 @@ from accounts.views import UserViewSet, SystemSettingViewSet, MyGroupUserViewSet
 from backends import settings
 from checkouts.views import CheckOutFilesViewSet
 from liaisons.views import LiaisonsViewSet, LiaisonUpdateStatusViewSet, QaProjectViewSet, QaProjectForMineViewSet, \
-    QaProjectForGroupViewSet, LiaisonFileUpload, QaProjectDetailView, SyncLiaisonBySirNo
+    QaProjectForGroupViewSet, LiaisonFileUpload, QaProjectDetailView, SyncLiaisonBySirNo, QaProjectDataStatisticsViewSet
 from projects.views import ProjectsViewSet
 from qa.views import MCLQaHeadViewSet, QaDetailViewSet, QaDetailUpdateResultViewSet, \
     QaDetailUpdateContentTextViewSet, QaHeadUpdateObjectSummaryViewSet, QaHeadModifyDetailViewSet, \
@@ -65,6 +65,7 @@ router.register('qa/code_review', CodeReviewViewSet, basename='code_review')
 router.register('accounts/system_setting', SystemSettingViewSet, basename='system_setting')
 # 开发项目，和上面的项目代码不一样
 router.register('qa_project', QaProjectViewSet, basename='qa_project')
+router.register('qa_test_statistics', QaProjectDataStatisticsViewSet, basename='qa_test_statistics')
 router.register('qa_project_group', QaProjectForGroupViewSet, basename='qa_project_group')
 router.register('qa_project_mine', QaProjectForMineViewSet, basename='qa_project_mine')
 router.register('pb_file_checkout', CheckOutFilesViewSet, basename='pb_file_checkout')

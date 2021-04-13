@@ -35,3 +35,14 @@ class QAProjectFilter(django_filters.rest_framework.FilterSet):
     class Meta:
         model = Liaisons
         fields = ['fprojectcd', 'fodrno', 'forganization']
+
+
+class QAProjectDataStatisticsFilter(django_filters.rest_framework.FilterSet):
+    """
+    订单下联络票的测试数据统计的过滤类
+    """
+    fodrno = django_filters.CharFilter(field_name='fodrno', lookup_expr='exact')
+
+    class Meta:
+        model = Liaisons
+        fields = ['fodrno']
