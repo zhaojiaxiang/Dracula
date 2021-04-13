@@ -24,14 +24,14 @@
             class="upload-demo"
             :before-upload="beforeFileUpload"
             action="/api/file_upload/">
-            <el-button slot="trigger" type="primary">上传文件</el-button>
+            <el-button slot="trigger" v-show="!isdisable" type="primary">上传文件</el-button>
             <!-- <div slot="tip" class="el-upload__tip">文件大小不可超过 2MB</div> -->
           </el-upload>
         </div>
       </el-col>
       <el-col :span="12">
         <div style="text-align:right;margin-right:40px; margin-top:10px">
-          <el-button type="primary" :disabled="isdisable" @click="handle()">提交</el-button>
+          <el-button type="primary" v-show="!isdisable" @click="handle()">提交</el-button>
         </div>
       </el-col>
     </el-row>

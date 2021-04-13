@@ -32,7 +32,7 @@
           <el-input v-model="form.order_no"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="onQuery">查询</el-button>
+          <el-button type="primary" @click="onQuery" v-loading.fullscreen.lock="fullscreenLoading">查询</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -55,6 +55,7 @@ export default {
     return {
       organization: [],
       project: [],
+      fullscreenLoading: false,
       form: {
         organization_id: "",
         project_code: "",
@@ -76,15 +77,18 @@ export default {
   },
   methods: {
     onQuery() {
+      this.fullscreenLoading = true
       this.$refs.ProjectItemGroup.getProjectItems(
         this.form.organization_id,
         this.form.project_code,
         this.form.order_no
       );
+      this.fullscreenLoading = false
     },
     async refreshProject(organization_id) {
       var resp_project = await getWorkingProject(organization_id).catch(() => {
         this.$message.error("制番数据获取异常");
+        this.fullscreenLoading = false
         return;
       });
 
@@ -92,13 +96,16 @@ export default {
     },
   },
   created: async function() {
+    this.fullscreenLoading = true
     var resp = await getWorkingOrganization().catch(() => {
       this.$message.error("组织架构数据获取异常");
+      this.fullscreenLoading = false
       return;
     });
     this.organization = resp.data;
 
     await this.refreshProject("");
+    this.fullscreenLoading = false
   },
 };
 </script>

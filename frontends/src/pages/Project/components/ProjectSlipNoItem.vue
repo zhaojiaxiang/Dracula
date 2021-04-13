@@ -1,5 +1,22 @@
 <template>
   <div class="div-style">
+    <el-row style="margin-top:20px; margin-bottom:5px">
+      <el-col :span="12">
+        <Guide>
+          <template>
+            <div>
+              <h5><strong>联络票&单体测试</strong></h5>
+            </div>
+          </template>
+        </Guide>
+      </el-col>
+
+      <el-col :span="12">
+        <div style="text-align:right;">
+          <el-button @click="openTestStatistics">测试数据统计</el-button>
+        </div>
+      </el-col>
+    </el-row>
     <el-table
       border
       :data="tableData"
@@ -13,12 +30,7 @@
         label="状态"
         fixed
         width="80"
-        :filters="[
-          { text: '待办', value: '待办' },
-          { text: '进行中', value: '进行中' },
-          { text: '已完成', value: '已完成' },
-          { text: '已发布', value: '已发布' },
-        ]"
+        :filters="slip_status_filters"
         :filter-method="filterSlipStatus"
         filter-placement="bottom-end"
       >
@@ -28,9 +40,24 @@
           }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column fixed prop="slip_slip" label="联络票号" min-width="150">
+      <el-table-column
+        fixed
+        prop="slip_slip"
+        label="联络票号"
+        min-width="150"
+        :filters="slip_slip_filters"
+        :filter-method="filterSlipNo"
+        filter-placement="bottom-end"
+      >
       </el-table-column>
-      <el-table-column prop="slip_assignedto" label="对应者" min-width="70">
+      <el-table-column
+        prop="slip_assignedto"
+        label="对应者"
+        min-width="70"
+        :filters="slip_assignedto_filters"
+        :filter-method="filterSlipAssignedto"
+        filter-placement="bottom-end"
+      >
       </el-table-column>
       <el-table-column
         prop="slip_brief"
@@ -67,12 +94,7 @@
         prop="qa_status"
         label="状态"
         width="80"
-        :filters="[
-          { text: '初始', value: '初始' },
-          { text: '已审核', value: '已审核' },
-          { text: '已提交', value: '已提交' },
-          { text: '已确认', value: '已确认' },
-        ]"
+        :filters="qa_status_filters"
         :filter-method="filterQAStatus"
         filter-placement="bottom-end"
       >
@@ -117,13 +139,14 @@
         </template>
       </el-table-column>
     </el-table>
-    <QaObjectSummary ref="QaObjectSummary"></QaObjectSummary>
+    <QaObjectSummary ref="QaObjectSummary" :isdisable="isdisable"></QaObjectSummary>
 
     <QaDesignReview
       ref="QaDesignReview"
       :isdisable="isdisable"
     ></QaDesignReview>
     <QaCodeReview ref="QaCodeReview" :isdisable="isdisable"></QaCodeReview>
+    <TestDataStatistics ref="TestDataStatistics"></TestDataStatistics>
   </div>
 </template>
 
@@ -131,12 +154,16 @@
 import QaObjectSummary from "./../../Home/components/QaObjectSummary";
 import QaDesignReview from "./../../Home/components/QaDesignReview";
 import QaCodeReview from "./../../Home/components/QaCodeReview";
+import TestDataStatistics from "../components/TestDataStatistics";
+import Guide from "./../../Home/components/Guide";
 import { getProjectDetailView } from "../../../services/projectService";
 export default {
   components: {
     QaObjectSummary,
     QaDesignReview,
     QaCodeReview,
+    Guide,
+    TestDataStatistics,
   },
   data() {
     return {
@@ -146,9 +173,18 @@ export default {
       spanArr: [],
       pos: 0,
       tableData: [],
+      slip_status_filters: [],
+      qa_status_filters: [],
+      slip_slip_filters: [],
+      slip_assignedto_filters: [],
     };
   },
   methods: {
+
+    openTestStatistics(){
+      this.$refs.TestDataStatistics.handleDialog(this.order_no)
+    },
+
     getSpanArr(data) {
       this.spanArr = [];
       if (data === null) {
@@ -200,6 +236,14 @@ export default {
       return row.qa_status === value;
     },
 
+    filterSlipNo(value, row) {
+      return row.slip_slip === value;
+    },
+
+    filterSlipAssignedto(value, row) {
+      return row.slip_assignedto === value;
+    },
+
     openObjectSummary(id) {
       this.$refs.QaObjectSummary.handleDialog(id);
     },
@@ -230,6 +274,16 @@ export default {
       projectView = resp.data;
 
       for (var i in projectView) {
+        var slip_json = {};
+        var assignedto_json = {};
+        var slip_status_json = {};
+        var qa_status_json = {};
+
+        var isSlipExisted = false;
+        var isAssignedtoExisted = false;
+        var isSlipStatusExisted = false;
+        var isQAStatusExisted = false;
+
         var slip_id = projectView[i].slip_id;
         var slip_slip = projectView[i].slip_slip;
         var slip_status = projectView[i].slip_status;
@@ -300,14 +354,80 @@ export default {
           qa_modification: qa_modification,
           code_id: code_id,
         };
+
+        slip_json.text = slip_slip;
+        slip_json.value = slip_slip;
+
+        assignedto_json.text = slip_assignedto;
+        assignedto_json.value = slip_assignedto;
+
+        slip_status_json.text = slip_status;
+        slip_status_json.value = slip_status;
+
+        qa_status_json.text = qa_status;
+        qa_status_json.value = qa_status;
+
+        for (var j in this.slip_slip_filters) {
+          if (this.slip_slip_filters[j].text === slip_slip) {
+            isSlipExisted = true;
+            continue;
+          }
+        }
+
+        if (!isSlipExisted) {
+          this.slip_slip_filters.push(slip_json);
+        }
+
+        for (var k in this.slip_assignedto_filters) {
+          if (this.slip_assignedto_filters[k].text === slip_assignedto) {
+            isAssignedtoExisted = true;
+            continue;
+          }
+        }
+
+        if (!isAssignedtoExisted) {
+          this.slip_assignedto_filters.push(assignedto_json);
+        }
+
+        for (var l in this.slip_status_filters) {
+          if (this.slip_status_filters[l].text === slip_status) {
+            isSlipStatusExisted = true;
+            continue;
+          }
+        }
+
+        if (!isSlipStatusExisted) {
+          this.slip_status_filters.push(slip_status_json);
+        }
+
+        for (var m in this.qa_status_filters) {
+          if (this.qa_status_filters[m].text === qa_status) {
+            isQAStatusExisted = true;
+            continue;
+          }
+        }
+
+        if (!isQAStatusExisted) {
+          this.qa_status_filters.push(qa_status_json);
+        }
+
         this.tableData.push(project);
 
         this.getSpanArr(this.tableData);
+      }
 
-        this.tableHeight = this.tableData.length * 43 + 47;
-        if (this.tableHeight > 600) {
-          this.tableHeight = 600;
-        }
+      var clientHeight = document.documentElement.clientHeight;
+      var maxHeight = 600;
+
+      this.tableHeight = this.tableData.length * 43 + 60;
+      if (clientHeight > 900) {
+        maxHeight = 600;
+      } else {
+        maxHeight = 350;
+      }
+
+      if (this.tableHeight > maxHeight) {
+        this.tableHeight = maxHeight;
       }
     },
   },

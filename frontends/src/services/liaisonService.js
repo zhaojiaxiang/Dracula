@@ -84,3 +84,8 @@ export async function syncLiaisonbySirNo(sync_sirno){
   var resp = await axios.get("/api/sync_sir/?sync_sirno="+sync_sirno)
   return resp
 }
+
+export async function getTestStatistics(order_no){
+  var resp = await axios.get("/api/qa_test_statistics/?fodrno=" + order_no)
+  return resp
+}

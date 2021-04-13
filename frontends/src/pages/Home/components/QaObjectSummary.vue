@@ -12,8 +12,8 @@
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
-      <el-button type="primary" @click="onSubmit('form')">确 定</el-button>
-      <el-button @click="resetForm('form')">重 置</el-button>
+      <el-button type="primary" v-show="!isdisable" @click="onSubmit('form')">确 定</el-button>
+      <el-button @click="resetForm('form')" v-show="!isdisable">重 置</el-button>
       <el-button @click="dialogFormVisible = false">取 消</el-button>
     </div>
   </el-dialog>
@@ -22,6 +22,7 @@
 <script>
 import { getQaHead, updateQaHeadSummary } from "./../../../services/qaService";
 export default {
+  props:['isdisable'],
   data() {
     return {
       dialogFormVisible: false,

@@ -5,13 +5,6 @@
     </div>
     <el-row>
       <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-        <Guide>
-          <template>
-            <div>
-              <h5><strong>联络票&单体测试</strong></h5>
-            </div>
-          </template>
-        </Guide>
         <div>
           <ProjectSlipNoItem></ProjectSlipNoItem>
         </div>
@@ -26,12 +19,10 @@
 <script>
 import ProjectSlipNoItem  from "./ProjectSlipNoItem";
 import ProjectPclItem  from "./ProjectPclItem";
-import Guide from "./../../Home/components/Guide";
 export default {
   components: {
     ProjectSlipNoItem,
     ProjectPclItem,
-    Guide,
   },
   data() {
     return {

@@ -1,11 +1,10 @@
 <template>
   <div>
-    <el-row :gutter="12">
+    <el-row :gutter="18" style="margin-left:40px">
       <el-col
         v-for="item in orderInfo"
         :key="item.orderno"
         :span="7"
-        v-loading="loading"
         class="card-style"
       >
         <el-card shadow="hover" class="card-color mouse_style_link">
@@ -22,7 +21,7 @@
             <el-row>
               <el-col :span="24"
                 ><div>
-                  <h6 class="clear-margin-padding">
+                  <h6 class="clear-margin-padding" style="text-overflow:ellipsis;white-space:nowrap; overflow:hidden;">
                     {{ item.note }}
                   </h6>
                 </div></el-col
@@ -131,7 +130,9 @@ export default {
       pageCount:1,
       currentID: 0,
       orderInfo: [],
-      loading:false,
+      query_organization_id:"",
+      query_project_code:"", 
+      query_order_no:"",
     };
   },
   methods: {
@@ -144,7 +145,7 @@ export default {
 
     handlePage(page) {
       this.currentPage = page;
-      this.getProjectItems("" ,"", "", this.currentPage, this.pageSize);
+      this.getProjectItems(this.query_organization_id, this.query_project_code, this.query_order_no);
     },
 
     calcPageTotal(liaisonCount, pageSize) {
@@ -166,7 +167,10 @@ export default {
       return x.status - y.status;
     },
     async getProjectItems(query_organization_id, query_project_code, query_order_no) {
-      this.loading = true
+      this.currentPage = 1
+      this.query_organization_id = query_organization_id
+      this.query_project_code = query_project_code
+      this.query_order_no = query_order_no
       var resp = await getQaProjectGroup(query_organization_id, query_project_code, query_order_no, this.currentPage, this.pageSize);
       if (resp.status === 200) {
         this.orderTotal = resp.data.count
@@ -175,13 +179,11 @@ export default {
         this.orderInfo.sort(this.up);
       } else {
         this.$message.error("项目明细获取失败");
-         this.loading = false
       }
-      this.loading = false
     },
   },
   mounted: function() {
-    this.getProjectItems("" ,"", "", this.currentPage, this.pageSize);
+    this.getProjectItems(this.query_organization_id, this.query_project_code, this.query_order_no);
   },
 };
 </script>

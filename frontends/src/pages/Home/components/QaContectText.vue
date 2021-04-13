@@ -6,6 +6,7 @@
 
     <Myeditor
       @handleContentText="submitContentText"
+      v-show="isshow"
       :editorData="content_text"
       :isdisable="isdisable"
       @receivedata="receivedata"
@@ -31,6 +32,7 @@ export default {
   data() {
     return {
       operate_type: "",
+      isshow: true,
       isdisable: false,
       content_text: "",
       qadf: {},
@@ -38,8 +40,8 @@ export default {
     };
   },
   methods: {
-    receivedata(e){
-      this.content_text=e;
+    receivedata(e) {
+      this.content_text = e;
     },
     goBack() {
       window.history.go(-1);
@@ -47,15 +49,13 @@ export default {
     async submitContentText(val) {
       this.qadf.fcontent_text = val;
       var resp;
-      if(this.operate_type === "test")
-      {
+      if (this.operate_type === "test") {
         resp = await updateQaDetailContentText(this.qadf.id, this.qadf).catch(
           () => {
             this.$message.error("测试贴图提交异常");
           }
         );
-      }
-      else if(this.operate_type === "approval"){
+      } else if (this.operate_type === "approval") {
         resp = await approvalQaDetailContentText(this.qadf.id, this.qadf).catch(
           () => {
             this.$message.error("测试贴图提交异常");
@@ -88,6 +88,11 @@ export default {
       this.$message.error("测试贴图信息获取异常");
     });
     this.qadf = resp.data;
+
+    if (resp.data.status === "4") {
+      this.isshow = false;
+    }
+
     if (resp.data.status === "3" || resp.data.status === "4") {
       this.isdisable = true;
     } else {
