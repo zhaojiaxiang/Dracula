@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny
@@ -21,9 +22,10 @@ class LoginView(APIView):
     """
     自定义用户登录
     """
+
     def post(self, request):
         # 实例化得到一个序列化类的对象
-        serializer = LoginSerializer(data=request.data,)
+        serializer = LoginSerializer(data=request.data, )
         # 序列化类的对象的校验方法
         serializer.is_valid(raise_exception=True)
         token = serializer.context.get('token')
@@ -195,11 +197,15 @@ class MyTaskBar(APIView):
     def get(self, request):
         user = request.user
 
+        all_organization_tuple = get_all_organization_belong_me(request)
+
         mcl = QaHead.objects.filter(fcreateusr__exact=user.name,
                                     fstatus__exact='2',
                                     ftesttyp__exact='MCL').count()
 
-        pcl = QaHead.objects.filter(fslipno__in=Liaisons.objects.values('fodrno').filter(fleader__contains=user.name),
+        pcl = QaHead.objects.filter(fslipno__in=Liaisons.objects.values('fodrno').
+                                    filter(Q(fleader__contains=user.name) |
+                                           Q(fassignedto__in=all_organization_tuple)),
                                     fstatus__in=(1, 2),
                                     ftesttyp__exact='PCL').count()
 
@@ -408,7 +414,7 @@ class MyPcl(APIView):
 
     def get(self, request):
         user = request.user
-
+        all_organization_tuple = get_all_organization_belong_me(request)
         pcl_sql = f"""
                    select distinct
                        qahf.id    qahf_id,
@@ -423,8 +429,8 @@ class MyPcl(APIView):
                    from liaisonf,
                          qahf
                    where liaisonf.fodrno = qahf.fslipno
-                      and liaisonf.ftype = '追加开发'
-                      and liaisonf.fleader like '%{user.name}%'
+                      and (liaisonf.fleader like '%{user.name}%' or liaisonf.fassignedto in 
+                                   (select name from users where ammic_organization_id in {all_organization_tuple}))
                       and qahf.ftesttyp = 'PCL'
                       and qahf.fstatus in (1, 2)
                     order by qahf.fstatus, liaisonf.fodrno

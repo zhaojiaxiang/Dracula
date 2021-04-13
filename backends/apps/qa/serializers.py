@@ -373,7 +373,7 @@ class QaHeadTargetAndActualSerializer(serializers.ModelSerializer):
         total = self.get_actual_total(obj)
         if total == 0:
             total = 1
-        ng_rate = round(self.get_actual_ng(obj) / total, 2) * 100
+        ng_rate = round(self.get_actual_ng(obj) / total, 4) * 100
 
         return str(ng_rate) + "%"
 
