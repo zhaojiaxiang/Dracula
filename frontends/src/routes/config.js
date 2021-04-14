@@ -120,7 +120,12 @@ export default {
         meta: { requiresAuth: true },
         component: () => import("@/pages/Master/components/SystemMaster"),
       },
-      
+      {
+        path: "/checkouts",
+        name: "Checkouts",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/Checkouts/Checkouts"),
+      },      
     ],
     mode: "history",
   };
