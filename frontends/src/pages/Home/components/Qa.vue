@@ -71,6 +71,7 @@
             style="margin-top:20px"
             size="medium"
             v-loading="loading"
+            class="card-shadow"
           >
             <el-table-column
               fixed
@@ -288,6 +289,9 @@ export default {
 </script>
 
 <style scoped>
+.card-shadow {
+  box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.05);
+}
 .table-height {
   height: calc(100vh - 100);
 }

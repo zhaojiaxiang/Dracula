@@ -3,7 +3,7 @@
     <div style="margin:10px">
       <el-page-header @back="goBack"> </el-page-header>
     </div>
-    <el-table :data="tableData" style="width: 100%" size="medium">
+    <el-table :data="tableData" class="card-shadow" style="width: 100%" size="medium">
       <el-table-column
         prop="fstatus"
         label="状态"
@@ -13,9 +13,11 @@
       >
         <template slot-scope="scope">
           <el-dropdown trigger="click" @command="handleStatus">
-            <el-tag type="primary" disable-transitions>{{
-              scope.row.fstatus
-            }}</el-tag>
+            <el-tag
+              :class="statusTagClass(scope.row.fstatus)"
+              disable-transitions
+              >{{ scope.row.fstatus }}</el-tag
+            >
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item
                 v-show="
@@ -44,7 +46,7 @@
         filter-placement="bottom-end"
       >
         <template slot-scope="scope">
-          <el-tag type="primary" disable-transitions>{{
+          <el-tag :type="typeTagClass(scope.row.ftype)" disable-transitions>{{
             scope.row.ftype
           }}</el-tag>
         </template>
@@ -105,6 +107,28 @@ export default {
     };
   },
   methods: {
+    typeTagClass(type) {
+      if (type === "追加开发") {
+        return "success";
+      } else if (type === "改善需求") {
+        return "warning";
+      } else {
+        return "danger";
+      }
+    },
+
+    statusTagClass(status) {
+      if (status === "待办") {
+        return "status-1";
+      } else if (status === "进行中") {
+        return "status-2";
+      } else if (status === "已完成") {
+        return "status-3";
+      } else {
+        return "status-4";
+      }
+    },
+
     filterType(value, row) {
       return row.ftype === value;
     },
@@ -250,6 +274,30 @@ export default {
 </script>
 
 <style>
+.card-shadow {
+  box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.05);
+}
+.status-1 {
+  background-color: #fbe6d4;
+  border-color: #fbe6d4;
+  color: #ffa931;
+}
+.status-2 {
+  background-color: #fecb89;
+  border-color: #fecb89;
+  color: #fff;
+}
+.status-3 {
+  background-color: #ffa931;
+  color: #fff;
+  border-color: #ffa931;
+}
+.status-4 {
+  background-color: #b9ac92;
+  border-color: #b9ac92;
+  color: #fff;
+}
+
 .el-table--medium td,
 .el-table--medium th {
   padding: 5px 0px;

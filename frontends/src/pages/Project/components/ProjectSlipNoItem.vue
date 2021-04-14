@@ -36,9 +36,11 @@
         filter-placement="bottom-end"
       >
         <template slot-scope="scope">
-          <el-tag type="primary" disable-transitions>{{
-            scope.row.slip_status
-          }}</el-tag>
+          <el-tag
+            :class="statusTagClass(scope.row.slip_status)"
+            disable-transitions
+            >{{ scope.row.slip_status }}</el-tag
+          >
         </template>
       </el-table-column>
       <el-table-column
@@ -140,7 +142,10 @@
         </template>
       </el-table-column>
     </el-table>
-    <QaObjectSummary ref="QaObjectSummary" :isdisable="isdisable"></QaObjectSummary>
+    <QaObjectSummary
+      ref="QaObjectSummary"
+      :isdisable="isdisable"
+    ></QaObjectSummary>
 
     <QaDesignReview
       ref="QaDesignReview"
@@ -181,9 +186,8 @@ export default {
     };
   },
   methods: {
-
-    openTestStatistics(){
-      this.$refs.TestDataStatistics.handleDialog(this.order_no)
+    openTestStatistics() {
+      this.$refs.TestDataStatistics.handleDialog(this.order_no);
     },
 
     getSpanArr(data) {
@@ -262,6 +266,18 @@ export default {
         name: "ProjectOverviewQA",
         query: { qahf_id: qahf_id },
       });
+    },
+
+    statusTagClass(status) {
+      if (status === "待办") {
+        return "status-1";
+      } else if (status === "进行中") {
+        return "status-2";
+      } else if (status === "已完成") {
+        return "status-3";
+      } else {
+        return "status-4";
+      }
     },
 
     async refreshProjectDetailView() {
@@ -440,6 +456,26 @@ export default {
 </script>
 
 <style>
+.status-1 {
+  background-color: #fbe6d4;
+  border-color: #fbe6d4;
+  color: #ffa931;
+}
+.status-2 {
+  background-color: #fecb89;
+  border-color: #fecb89;
+  color: #fff;
+}
+.status-3 {
+  background-color: #ffa931;
+  color: #fff;
+  border-color: #ffa931;
+}
+.status-4 {
+  background-color: #b9ac92;
+  border-color: #b9ac92;
+  color: #fff;
+}
 .el-table--medium td,
 .el-table--medium th {
   padding: 5px 0px;
@@ -454,7 +490,7 @@ export default {
   padding: 8px 10px;
 }
 .card-shadow {
-  box-shadow:4px 4px 40px rgba(0,0,0,.05)
+  box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.05);
 }
 .div-style-2 {
   margin: 0px;

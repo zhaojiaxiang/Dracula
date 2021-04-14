@@ -17,7 +17,7 @@
       >
         <template slot-scope="scope">
           <el-dropdown trigger="click" @command="handleStatus">
-            <el-tag type="primary" disable-transitions>{{
+            <el-tag :class="statusTagClass(scope.row.fstatus)" disable-transitions effect="plain">{{
               scope.row.fstatus
             }}</el-tag>
             <el-dropdown-menu slot="dropdown">
@@ -75,7 +75,7 @@
         filter-placement="bottom-end"
       >
         <template slot-scope="scope">
-          <el-tag type="primary" disable-transitions>{{
+          <el-tag :type="typeTagClass(scope.row.ftype)" disable-transitions>{{
             scope.row.ftype
           }}</el-tag>
         </template>
@@ -170,7 +170,31 @@ export default {
         this.$message.error("请先开始该项目");
       }
     },
+
+    typeTagClass(type){
+      if(type === "追加开发"){
+        return "success"
+      }else if(type === "改善需求"){
+        return "warning"
+      }else{
+        return "danger"
+      }
+    },
+
+    statusTagClass(status){
+      if(status === "待办"){
+        return "status-1"
+      }else if(status === "进行中"){
+        return "status-2"
+      }else if(status === "已完成"){
+        return "status-3"
+      }else{
+        return "status-4"
+      }
+    },
+
     filterStatus(value, row) {
+      console.log('fileter')
       return row.fstatus === value;
     },
     filterType(value, row) {
@@ -338,6 +362,27 @@ export default {
 </script>
 
 <style>
+.status-1{
+  background-color: #fbe6d4;
+  border-color: #fbe6d4;
+  color: #ffa931;
+}
+.status-2{
+  background-color: #fecb89;
+  border-color: #fecb89;
+  color: #fff;
+}
+.status-3{
+  background-color: #ffa931;
+  color: #fff;
+  border-color: #ffa931;
+}
+.status-4{
+  background-color: #b9ac92;
+  border-color: #b9ac92;
+  color: #fff;
+}
+
 .el-table--medium td,
 .el-table--medium th {
   padding: 5px 0px;

@@ -76,6 +76,7 @@
       style="width: 98%; margin-top:5px"
       @selection-change="handleSelectionChange"
       v-loading="loading"
+      class="card-shadow"
     >
       <el-table-column type="selection" width="40"> </el-table-column>
       <el-table-column label="序号" type="index" width="50"> </el-table-column>
@@ -537,6 +538,9 @@ export default {
 </script>
 
 <style>
+.card-shadow {
+  box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.05);
+}
 .goTop {
   height: calc(100vh - 70px);
   overflow-x: hidden;

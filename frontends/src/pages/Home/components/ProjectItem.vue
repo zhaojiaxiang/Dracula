@@ -12,7 +12,7 @@
             <el-row>
               <el-col :span="24"
                 ><div>
-                  <h6 class="clear-margin-padding">
+                  <h6 class="clear-margin-padding hidden-text">
                    {{ item.project }} - [ {{ item.order_no }} ]
                   </h6>
                 </div></el-col
@@ -21,7 +21,7 @@
             <el-row>
               <el-col :span="24"
                 ><div>
-                  <h6 class="clear-margin-padding">
+                  <h6 class="clear-margin-padding hidden-text">
                     {{ item.order_note }}
                   </h6>
                 </div></el-col
@@ -145,6 +145,10 @@ export default {
 
 .card-shadow {
   box-shadow:4px 4px 40px rgba(0,0,0,.05)
+}
+
+.hidden-text{
+  text-overflow:ellipsis;white-space:nowrap; overflow:hidden;
 }
 
 .card-style {
