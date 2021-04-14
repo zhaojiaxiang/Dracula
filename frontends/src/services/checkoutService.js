@@ -1,10 +1,5 @@
 import axios from "axios";
 
-axios.defaults.headers.post["Content-Type"] = "application/json";
-axios.defaults.headers["Authorization"] =
-    "JWT " + localStorage.getItem("token");
-
-
 export async function getCheckoutList(applicant, chkstatus) {
     var resp = await axios.get("api/pb_file_checkout/?page_size=1000&fapplicant=" + applicant + "&fchkstatus=" + chkstatus)
     return resp;
