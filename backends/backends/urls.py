@@ -23,7 +23,7 @@ from rest_framework_jwt.views import obtain_jwt_token
 from accounts.views import UserViewSet, SystemSettingViewSet, MyGroupUserViewSet, UserDevelopmentDetail, MyTaskBar, \
     MyMcl, MyRelease, MyConfirm, MyApproval, MyPcl, LoginView
 from backends import settings
-from checkouts.views import CheckOutFilesViewSet
+from checkouts.views import CheckOutFilesViewSet, SendEmail
 from liaisons.views import LiaisonsViewSet, LiaisonUpdateStatusViewSet, QaProjectViewSet, QaProjectForMineViewSet, \
     QaProjectForGroupViewSet, LiaisonFileUpload, QaProjectDetailView, SyncLiaisonBySirNo, QaProjectDataStatisticsViewSet
 from projects.views import ProjectsViewSet
@@ -96,6 +96,7 @@ urlpatterns = [
     path('api/working_project/', WorkingProject.as_view()),
     path('api/default_ok/', TestResultDefaultOK.as_view()),
     path('api/sync_sir/', SyncLiaisonBySirNo.as_view()),
+    path('api/sendemail/', SendEmail.as_view()),  # 发送邮件
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
               + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
