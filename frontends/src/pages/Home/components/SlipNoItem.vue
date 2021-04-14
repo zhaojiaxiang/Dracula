@@ -1,5 +1,5 @@
 <template>
-  <div class="div-style">
+  <div class="div-style-1">
     <el-table :data="tableData" style="width: 100%" size="medium">
       <el-table-column
         prop="fstatus"
@@ -124,6 +124,7 @@
       <el-pagination
         background
         layout="prev, pager, next"
+        :hide-on-single-page="true"
         :total="liaisonTotal"
         :page-size="pageSize"
         :current-page="currentPage"
@@ -350,7 +351,8 @@ export default {
 .body-style {
   padding: 8px 10px;
 }
-.div-style {
+.div-style-1 {
   margin: 0px;
+  box-shadow:4px 4px 40px rgba(0,0,0,.05)
 }
 </style>

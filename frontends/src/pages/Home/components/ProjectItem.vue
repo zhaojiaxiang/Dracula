@@ -7,7 +7,7 @@
         :span="7"
         class="card-style"
       >
-        <el-card shadow="hover" class="card-color mouse_style_link">
+        <el-card shadow="hover" class="card-color card-shadow mouse_style_link">
           <div @click="openProjectOverView(item.order_no)">
             <el-row>
               <el-col :span="24"
@@ -30,7 +30,7 @@
             <el-row>
               <el-col :span="24"
                 ><div>
-                  <el-steps :active="item.order_status">
+                  <el-steps :active="item.order_status" finish-status="success">
                     <el-step title="未开始" class="step-style"></el-step>
                     <el-step title="已开始"></el-step>
                     <el-step title="已结束"></el-step>
@@ -140,8 +140,13 @@ export default {
 
 <style>
 .card-color {
-  background-color: #e3f4ff;
+  background-color:'';
 }
+
+.card-shadow {
+  box-shadow:4px 4px 40px rgba(0,0,0,.05)
+}
+
 .card-style {
   padding-bottom: 0px;
   margin-bottom: 10px;

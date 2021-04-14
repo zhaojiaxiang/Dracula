@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div style="text-align:center; margin-top:15px">
+    <div style="text-align:center; margin-top:10px">
       <el-form ref="form" :inline="true" :model="form" class="demo-form-inline">
         <el-form-item label="组别:">
           <el-select v-model="form.organization_id" clearable>
@@ -78,6 +78,7 @@ export default {
   methods: {
     onQuery() {
       this.fullscreenLoading = true
+      this.$refs.ProjectItemGroup.currentPage = 1
       this.$refs.ProjectItemGroup.getProjectItems(
         this.form.organization_id,
         this.form.project_code,

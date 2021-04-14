@@ -2,18 +2,18 @@
   <div id="app">
     <el-container>
       <el-header>
-        <Header/>
+        <Header />
       </el-header>
       <el-container>
-        <el-aside width="5%">
-          <Side/>
+        <el-aside width="4%">
+          <Side />
         </el-aside>
         <el-main>
           <router-view></router-view>
         </el-main>
       </el-container>
     </el-container>
-  </div> 
+  </div>
 </template>
 
 <script>
@@ -29,14 +29,24 @@ export default {
 </script>
 
 <style scoped>
-.el-header{
+#app {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+  background-color: #f0f2f5;
+}
+
+.el-header {
   padding: 0px;
   height: 50%;
 }
-.el-aside{
-  overflow:visible;
+.el-aside {
+  overflow: visible;
 }
-.el-main{
+.el-main {
   padding: 0px;
   height: calc(100vh - 60px);
 }

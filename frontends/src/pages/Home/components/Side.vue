@@ -14,11 +14,11 @@
         <i class="el-icon-collection"></i>
         <span slot="title">项目</span>
       </el-menu-item>
-      <el-menu-item index="3">
+      <el-menu-item index="3" v-show="false">
         <i class="el-icon-s-data"></i>
         <span slot="title">统计</span>
       </el-menu-item>
-      <el-menu-item index="4">
+      <el-menu-item index="4" v-show="false">
         <i class="el-icon-user"></i>
         <span slot="title">成员</span>
       </el-menu-item>

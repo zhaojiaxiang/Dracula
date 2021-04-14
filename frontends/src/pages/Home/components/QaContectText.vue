@@ -108,6 +108,7 @@ export default {
       var first_content_type = this.proofs[0].type;
 
       if (this.operate_type === "test") {
+        this.isshow = true;
         if (first_content_type === "A") {
           this.content_text = "";
         } else if (first_content_type === "T") {

@@ -1,6 +1,6 @@
 <template>
-  <div class="div-style">
-    <el-row style="margin-top:20px; margin-bottom:5px">
+  <div class="div-style-2">
+    <el-row style="margin-bottom:5px">
       <el-col :span="12">
         <Guide>
           <template>
@@ -24,6 +24,7 @@
       :height="tableHeight"
       :span-method="arraySpanMethod"
       size="medium"
+      class="card-shadow"
     >
       <el-table-column
         prop="slip_status"
@@ -452,7 +453,11 @@ export default {
 .body-style {
   padding: 8px 10px;
 }
-.div-style {
+.card-shadow {
+  box-shadow:4px 4px 40px rgba(0,0,0,.05)
+}
+.div-style-2 {
   margin: 0px;
+  background-color: #f0f2f5;
 }
 </style>
