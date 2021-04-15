@@ -35,16 +35,12 @@ class SendEmail(APIView):
     目前没有使用多联络票多邮件发送，每次请求只发送一次邮件
     多邮件发送存在问题，代码注释进行保留
     """
+
     def post(self, request):
         data = request.data
         user = request.user
-        receivers = data['addresslist'].split(',')
-        sender = user.email
-        chklist = data['tableData']
-        mail_host = env('MAIL_HOST')
-        mail_user = env('MAIL_USER')
-        mail_pass = env('MAIL_PASS')
-        mail_post = env('MAIL_POST')
+
+        check_list = data['tableData']
 
         mail_html_start = '''<p>你好</p>
                              <p>请迁出以下文档：</p>
@@ -103,7 +99,7 @@ class SendEmail(APIView):
 
         '''单邮件发送'''
         mail_html_mid = ''
-        for row in chklist:
+        for row in check_list:
             mail_html_mid += "<tr>"
             mail_html_mid += "<td>" + row['fsystem'] + "</td>"
             mail_html_mid += "<td>" + row['fcomment'] + "</td>"
@@ -111,8 +107,12 @@ class SendEmail(APIView):
             mail_html_mid += "<td>" + row['fchkoutobj'] + "</td>"
             mail_html_mid += "</tr>"
 
-        if not send_email(mail_html_start + mail_html_mid + mail_html_end, sender, data['addresslist'],
-                          '[ AMMIC ] 程序迁出-' + user.name, mail_host, mail_post, mail_user, mail_pass, receivers):
+        email_title = '[ AMMIC ] 程序迁出-' + user.name
+        email_content = mail_html_start + mail_html_mid + mail_html_end
+        address_list = data['addresslist']
+        receivers = address_list.split(',')
+
+        if not send_email(email_title, email_content, address_list, receivers):
             ret_data = {
                 'code': '400',
                 'message': '邮件发送失败'
