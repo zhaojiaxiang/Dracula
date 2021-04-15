@@ -105,6 +105,7 @@
         prop="fchkoutobj"
         label="文件名称"
         min-width="200"
+        show-overflow-tooltip
       ></el-table-column>
       <el-table-column
         prop="fapplicant"
@@ -120,6 +121,7 @@
         prop="fchkoutfile"
         label="迁出PBL"
         min-width="200"
+        show-overflow-tooltip
       ></el-table-column>
       <el-table-column
         prop="fchkoutperson"

@@ -1,7 +1,7 @@
 <template>
     <div class="body-color">
         <el-row>
-            <el-col :xs="22" :sm="22" :md="22" :lg="22" :xl="22">
+            <el-col :xs="23" :sm="23" :md="23" :lg="23" :xl="23">
                 <div>
                     <CheckoutList ref="CheckoutList"></CheckoutList>
                 </div>

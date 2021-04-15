@@ -58,7 +58,7 @@ class UserSerializer(serializers.ModelSerializer):
 class MyGroupUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("id", "name", "username", "avatar")
+        fields = ("id", "name", "username", "avatar", "email")
 
 
 class SystemSettingSerializer(serializers.ModelSerializer):
