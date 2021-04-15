@@ -46,7 +46,7 @@
       <el-col :span="12">
         <div style="text-align:right;margin-right:40px">
           <el-button-group>
-            <el-button @click="defaultOK()">Default OK</el-button>
+            <el-button @click="defaultOK()" v-show="isCanDefaultOK()">Default OK</el-button>
             <el-button @click="detailModify()">修改明细</el-button>
             <el-button v-show="isCanAdd()" @click="singleAdd()"
               >逐条添加</el-button
@@ -267,6 +267,14 @@ export default {
         }
       }
       return true;
+    },
+
+    isCanDefaultOK(){
+      if(this.qahead.fstatus === "2"){
+        return true
+      }else{
+        return false
+      }
     },
 
     isCanAdd() {
