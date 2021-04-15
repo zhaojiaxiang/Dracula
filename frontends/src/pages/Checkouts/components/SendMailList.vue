@@ -17,7 +17,7 @@
           <el-table-column prop="fsystem" label="系统" min-width="50"></el-table-column>
           <el-table-column prop="fcomment" label="程序" min-width="80"></el-table-column>
           <el-table-column prop="fslipno" label="联络票号" min-width="130"></el-table-column>
-          <el-table-column prop="fchkoutobj" label="文件名称" min-width="200"></el-table-column>
+          <el-table-column prop="fchkoutobj" label="文件名称" min-width="200" show-overflow-tooltip></el-table-column>
         </el-table>
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogEdit = false">取 消</el-button>
@@ -29,10 +29,10 @@
 
 <script>
   import {
-    getAddressList,
     getCheckoutList,
     sendMail,
   } from "../../../services/checkoutService";
+  import { getGroupUsers } from "../../../services/commonService";
 
   export default {
     data() {
@@ -57,7 +57,7 @@
       async getAddressList() {
         this.address = [];
         this.addresslist = [];
-        var resp = await getAddressList().catch(() => {
+        var resp = await getGroupUsers().catch(() => {
           this.$message.error("地址列表数据获取异常");
           return;
         });
