@@ -416,8 +416,8 @@ class QaDetailSerializer(serializers.ModelSerializer):
 
     @transaction.atomic()
     def create(self, validated_data):
-        is_exist = QaDetail.objects.filter(fcontent__exact=validated_data['fcontent'],
-                                           qahf_id__exact=validated_data['qahf'])
+        is_exist = QaDetail.objects.filter(Q(fcontent__exact=validated_data['fcontent']),
+                                           Q(qahf_id__exact=validated_data['qahf']) & ~Q(fresult__exact='CANCEL'))
         if is_exist.count() > 0:
             raise serializers.ValidationError("该测试项已经在该对象下存在")
 

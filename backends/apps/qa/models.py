@@ -45,8 +45,8 @@ class QaHead(models.Model):
 
 
 class QaDetail(models.Model):
-    fclass1 = models.CharField(db_index=True, verbose_name='分类1', max_length=20, null=True, blank=True)
-    fclass2 = models.CharField(verbose_name='分类2', max_length=20, null=True, blank=True)
+    fclass1 = models.CharField(db_index=True, verbose_name='分类1', max_length=60, null=True, blank=True)
+    fclass2 = models.CharField(verbose_name='分类2', max_length=60, null=True, blank=True)
     fsortrule = models.CharField(db_index=True, verbose_name='排序规则', max_length=100, null=True, blank=True)
     fregression = models.CharField(db_index=True, verbose_name='回归测试', max_length=1, default='N')
     fcontent_text = UEditorField(verbose_name='测试截图', imagePath="qa/images/%Y%m%D/", width=1000, height=300,

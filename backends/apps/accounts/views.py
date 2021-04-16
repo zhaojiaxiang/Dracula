@@ -264,47 +264,49 @@ class MyTaskBar(APIView):
 
         approval_list = query_single_with_no_parameter(approval_sql, 'list')
         approval = approval_list[0]
+        all_organization_tuple = get_all_organization_belong_me(request)
 
         confirm_sql = f"""
                       select count(*)
                         from (
-                                 select qahf.id                                   qahf_id,
-                                        qahf.ftesttyp,
-                                        liaisonf.fodrno,
-                                        liaisonf.fslipno,
-                                        qahf.fobjectid,
-                                        qahf.fstatus,
-                                        qahf.fobjmodification,
-                                        (select codereview.id
-                                         from codereview
-                                         where codereview.fobjectid = qahf.fobjectid
-                                           and codereview.fslipno = qahf.fslipno) code_id,
-                                        (select codereview.id
-                                         from codereview
-                                         where codereview.fobjectid = 'Design Review'
-                                           and codereview.fslipno = qahf.fslipno) design_id
-                                 from liaisonf,
-                                      qahf
-                                 where (liaisonf.fslipno = qahf.fslipno or liaisonf.fodrno = qahf.fslipno)
-                                   and qahf.fcreateusr in (select name from users where ammic_organization_id in {all_organization_tuple})
-                                   and qahf.fstatus = '3'
-                                   and qahf.ftesttyp = 'MCL'
-                                 union all
-                                 select distinct qahf.id,
-                                                 qahf.ftesttyp,
-                                                 qahf.fslipno,
-                                                 qahf.fslipno2 fslipno,
-                                                 qahf.fobjectid,
-                                                 qahf.fstatus,
-                                                 qahf.fnote,
-                                                 ''            code_id,
-                                                 ''            design_id
-                                 from qahf,
-                                      liaisonf
-                                 where qahf.ftesttyp = 'PCL'
-                                   and qahf.fstatus = '3'
-                                   and liaisonf.fodrno = qahf.fslipno
-                                   and liaisonf.fleader like '%{user.name}%') a
+                         select qahf.id                                   qahf_id,
+                                qahf.ftesttyp,
+                                liaisonf.fodrno,
+                                liaisonf.fslipno,
+                                qahf.fobjectid,
+                                qahf.fstatus,
+                                qahf.fobjmodification,
+                                (select codereview.id
+                                 from codereview
+                                 where codereview.fobjectid = qahf.fobjectid
+                                   and codereview.fslipno = qahf.fslipno) code_id,
+                                (select codereview.id
+                                 from codereview
+                                 where codereview.fobjectid = 'Design Review'
+                                   and codereview.fslipno = qahf.fslipno) design_id
+                         from liaisonf,
+                              qahf
+                         where (liaisonf.fslipno = qahf.fslipno or liaisonf.fodrno = qahf.fslipno)
+                           and qahf.fcreateusr in (select name from users where ammic_organization_id in {all_organization_tuple})
+                           and qahf.fstatus = '3'
+                           and qahf.ftesttyp = 'MCL'
+                         union all
+                         select distinct qahf.id,
+                                         qahf.ftesttyp,
+                                         qahf.fslipno,
+                                         qahf.fslipno2 fslipno,
+                                         qahf.fobjectid,
+                                         qahf.fstatus,
+                                         qahf.fnote,
+                                         ''            code_id,
+                                         ''            design_id
+                         from qahf,
+                              liaisonf
+                         where qahf.ftesttyp = 'PCL'
+                           and qahf.fstatus = '3'
+                           and liaisonf.fodrno = qahf.fslipno
+                           and (liaisonf.fleader like '%{user.name}%' or liaisonf.fassignedto in
+                            (select name from users where ammic_organization_id in {all_organization_tuple}))) a1
                       """
         confirm_list = query_single_with_no_parameter(confirm_sql, 'list')
         confirm = confirm_list[0]
@@ -391,6 +393,7 @@ class MyMcl(APIView):
                    qahf.fobjectid,
                    qahf.fstatus,
                    qahf.ftesttyp,
+                   qahf.fcreateusr ftestusr,
                    qahf.fobjmodification,
                    (select codereview.id from codereview where 
                         codereview.fobjectid = qahf.fobjectid and codereview.fslipno = qahf.fslipno) code_id,
@@ -416,21 +419,21 @@ class MyPcl(APIView):
         user = request.user
         all_organization_tuple = get_all_organization_belong_me(request)
         pcl_sql = f"""
-                   select distinct
-                       qahf.id    qahf_id,
-                       liaisonf.fodrno,
-                       qahf.fslipno2 fslipno,
-                       qahf.fnote fobjmodification,
-                       qahf.fobjectid,
-                       qahf.ftesttyp,
-                       qahf.fstatus,
-                       ''         design_id,
-                       ''         code_id
-                   from liaisonf,
+                   select distinct qahf.id                                                                     qahf_id,
+                        liaisonf.fodrno,
+                        qahf.fslipno2                                                               fslipno,
+                        qahf.fnote                                                                  fobjmodification,
+                        qahf.fobjectid,
+                        qahf.ftesttyp,
+                        qahf.fstatus,
+                        (select ifnull(fimpusr, fentusr) from qadf where qahf_id = qahf.id limit 1) ftestusr,
+                        ''                                                                          design_id,
+                        ''                                                                          code_id
+                    from liaisonf,
                          qahf
-                   where liaisonf.fodrno = qahf.fslipno
-                      and (liaisonf.fleader like '%{user.name}%' or liaisonf.fassignedto in 
-                                   (select name from users where ammic_organization_id in {all_organization_tuple}))
+                    where liaisonf.fodrno = qahf.fslipno
+                      and (liaisonf.fleader like '%{user.name}%' or liaisonf.fassignedto in
+                          (select name from users where ammic_organization_id in {all_organization_tuple}))
                       and qahf.ftesttyp = 'PCL'
                       and qahf.fstatus in (1, 2)
                     order by qahf.fstatus, liaisonf.fodrno
@@ -457,6 +460,7 @@ class MyApproval(APIView):
                                      liaisonf.fslipno,
                                      qahf.fobjectid,
                                      qahf.fstatus,
+                                     (select ifnull(fimpusr, fentusr) from qadf where qahf_id = qahf.id limit 1) ftestusr,
                                      qahf.fobjmodification,
                                      (select codereview.id
                                       from codereview
@@ -478,14 +482,15 @@ class MyApproval(APIView):
                                    and qahf.fstatus in ('1', '2')
                                  union all
                                  select distinct qahf.id,
-                                                 qahf.ftesttyp,
-                                                 qahf.fslipno,
-                                                 qahf.fslipno2 fslipno,
-                                                 qahf.fobjectid,
-                                                 qahf.fstatus,
-                                                 qahf.fnote,
-                                                 ''            code_id,
-                                                 ''            design_id
+                                     qahf.ftesttyp,
+                                     qahf.fslipno,
+                                     qahf.fslipno2 fslipno,
+                                     qahf.fobjectid,
+                                     qahf.fstatus,
+                                     (select ifnull(fimpusr, fentusr) from qadf where qahf_id = qahf.id limit 1) ftestusr,
+                                     qahf.fnote,
+                                     ''            code_id,
+                                     ''            design_id
                                  from qahf,
                                       qadf,
                                       liaisonf
@@ -518,6 +523,7 @@ class MyConfirm(APIView):
                                liaisonf.fslipno,
                                qahf.fobjectid,
                                qahf.fstatus,
+                               qahf.ftestusr,
                                qahf.fobjmodification,
                                (select codereview.id
                                 from codereview
@@ -540,6 +546,7 @@ class MyConfirm(APIView):
                                         qahf.fslipno2 fslipno,
                                         qahf.fobjectid,
                                         qahf.fstatus,
+                                        qahf.ftestusr,
                                         qahf.fnote,
                                         ''            code_id,
                                         ''            design_id

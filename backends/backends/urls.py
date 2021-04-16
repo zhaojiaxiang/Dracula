@@ -76,8 +76,8 @@ urlpatterns = [
     path('api/api-auth/', include('rest_framework.urls')),
     path('api/docs/', include_docs_urls(title="drf docs")),
     path('api/', include(router.urls)),
-    # path('api/login/', obtain_jwt_token),  # REST framework JWT默认用户登录接口
-    path('api/login/', LoginView.as_view()),
+    path('api/login/', obtain_jwt_token),  # REST framework JWT默认用户登录接口
+    # path('api/login/', LoginView.as_view()),
 
     path('api/mine_order_info/', UserDevelopmentDetail.as_view()),
     path('api/mine_task_bar/', MyTaskBar.as_view()),
