@@ -3,7 +3,12 @@
     <div style="margin:10px">
       <el-page-header @back="goBack"> </el-page-header>
     </div>
-    <el-table :data="tableData" class="card-shadow" style="width: 100%" size="medium">
+    <el-table
+      :data="tableData"
+      class="card-shadow"
+      style="width: 100%"
+      size="medium"
+    >
       <el-table-column
         prop="fstatus"
         label="状态"
@@ -50,6 +55,26 @@
             scope.row.ftype
           }}</el-tag>
         </template>
+      </el-table-column>
+      <el-table-column
+        fixed
+        prop="fassignedto"
+        label="对应者"
+        min-width="90"
+        :filters="user_filters"
+        :filter-method="filterUser"
+        filter-placement="bottom-end"
+      >
+      </el-table-column>
+      <el-table-column
+        fixed
+        prop="fodrno"
+        label="订单号"
+        min-width="160"
+        :filters="order_filters"
+        :filter-method="filterOrder"
+        filter-placement="bottom-end"
+      >
       </el-table-column>
       <el-table-column fixed prop="fslipno" label="联络票号" min-width="160">
       </el-table-column>
@@ -104,6 +129,8 @@ export default {
     return {
       currentID: 0,
       tableData: [],
+      user_filters: [],
+      order_filters: [],
     };
   },
   methods: {
@@ -129,6 +156,18 @@ export default {
       }
     },
 
+    filterUser(value, row) {
+      return row.fassignedto === value;
+    },
+
+    filterSlip(value, row) {
+      return row.fslipno === value;
+    },
+
+    filterOrder(value, row) {
+      return row.fodrno === value;
+    },
+
     filterType(value, row) {
       return row.ftype === value;
     },
@@ -152,10 +191,17 @@ export default {
       liaisons = resp.data;
 
       for (var i in liaisons) {
+        var isUserExisted = false;
+        var isOrderExisted = false;
+        var user_json = {};
+        var order_json = {};
+
         var id = liaisons[i].id;
         var ftype = liaisons[i].ftype;
         var fstatus = liaisons[i].fstatus;
         var fslipno = liaisons[i].fslipno;
+        var fodrno = liaisons[i].fodrno;
+        var fassignedto = liaisons[i].fassignedto;
         var fbrief = liaisons[i].fbrief;
         var factstart = liaisons[i].factstart;
         var factend = liaisons[i].factend;
@@ -183,11 +229,41 @@ export default {
           icon = "";
         }
 
+        user_json.text = fassignedto;
+        user_json.value = fassignedto;
+
+        order_json.text = fodrno;
+        order_json.value = fodrno;
+
+        for (var k in this.user_filters) {
+          if (this.user_filters[k].text === fassignedto) {
+            isUserExisted = true;
+            continue;
+          }
+        }
+
+        if (!isUserExisted) {
+          this.user_filters.push(user_json);
+        }
+
+        for (var l in this.order_filters) {
+          if (this.order_filters[l].text === fodrno) {
+            isOrderExisted = true;
+            continue;
+          }
+        }
+
+        if (!isOrderExisted) {
+          this.order_filters.push(order_json);
+        }
+
         var liaison = {
           id: id,
           ftype: ftype,
           fstatus: fstatus,
           fslipno: fslipno,
+          fodrno: fodrno,
+          fassignedto: fassignedto,
           fbrief: fbrief,
           actual: actual,
           freleasedt: "media/upload/file/" + freleasedt,

@@ -104,6 +104,8 @@ export default {
 
         var resp = await newQaDetail(form).catch(() => {
           this.$message.error("批量添加测试项异常");
+          this.$emit("refreshQaList");
+          this.dialogFormVisible = false;
           this.fullscreenLoading = false;
           this.qadetails = [];
           return;
@@ -111,6 +113,8 @@ export default {
 
         if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
           this.$message.error(resp.data.message);
+          this.$emit("refreshQaList");
+          this.dialogFormVisible = false;
           this.fullscreenLoading = false;
           this.qadetails = [];
           return;

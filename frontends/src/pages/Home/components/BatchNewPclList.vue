@@ -92,14 +92,18 @@ export default {
 
         var form = {};
         form["fregression"] = "N"
-        form["fclass1"] = this.qadetails[i][0].replace(/\r\n/g,"");
-        form["fclass2"] = this.qadetails[i][1].replace(/\r\n/g,"");
-        form["fcontent"] = this.qadetails[i][2].replace(/\r\n/g,"");
-        form["fsortrule"] = this.qadetails[i][3].replace(/\r\n/g,"");
+        form["fclass1"] = this.qadetails[i][0];
+        form["fclass2"] = this.qadetails[i][1];
+        form["fcontent"] = this.qadetails[i][2];
+        form["fsortrule"] = this.qadetails[i][3];
         form["qahf"] = this.qaheadid;
+
+        console.log(this.qadetails[i][2]);
 
         var resp = await newQaDetail(form).catch(() => {
           this.$message.error("批量添加测试项异常");
+          this.$emit("refreshQaList");
+          this.dialogFormVisible = false;
           this.fullscreenLoading = false;
           this.qadetails = [];
           return;
@@ -107,10 +111,14 @@ export default {
 
         if(Object.prototype.hasOwnProperty.call(resp.data, "message")){
           this.$message.error(resp.data.message)
+          this.$emit("refreshQaList");
+          this.dialogFormVisible = false;
           this.fullscreenLoading = false;
           this.qadetails = [];
           return
         }
+
+        console.log(this.qadetails[i][2]);
       }
       this.$emit("refreshQaList");
       this.dialogFormVisible = false;

@@ -55,6 +55,7 @@
       style="width: 98%; margin-top:5px"
       v-loading="loading"
       class="card-shadow"
+      :row-class-name="unApprovalClass"
     >
       <el-table-column label="序号" type="index" width="50"> </el-table-column>
       <el-table-column
@@ -159,6 +160,12 @@ export default {
   },
 
   methods: {
+    unApprovalClass({ row }) {
+      if (row.fapproval === "未审核") {
+        return "un-approval";
+      }
+    },
+
     isCanRollbackConfirm() {
       if (this.qahead.fstatus === "4") {
         return true;
@@ -379,5 +386,9 @@ export default {
 }
 .div-style {
   margin: 0px;
+}
+
+.el-table .un-approval {
+  background: oldlace;
 }
 </style>

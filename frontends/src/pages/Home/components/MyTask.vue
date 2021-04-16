@@ -16,13 +16,33 @@
     >
       <el-table-column prop="ftesttyp" label="测试类型" width="80">
       </el-table-column>
-      <el-table-column prop="fodrno" label="订单号" width="100">
+      <el-table-column
+        prop="fodrno"
+        label="订单号"
+        width="120"
+        :filters="order_filters"
+        :filter-method="filterOrder"
+        filter-placement="bottom-end"
+      >
       </el-table-column>
 
       <el-table-column
         prop="fslipno"
         label="联络票/订单支号"
-        width="200"
+        width="180"
+        :filters="slip_filters"
+        :filter-method="filterSlip"
+        filter-placement="bottom-end"
+      >
+      </el-table-column>
+
+      <el-table-column
+        prop="ftestusr"
+        label="对应者"
+        width="80"
+        :filters="user_filters"
+        :filter-method="filterUser"
+        filter-placement="bottom-end"
       >
       </el-table-column>
 
@@ -139,14 +159,17 @@ import {
 import QaDesignReview from "./QaDesignReview";
 import QaCodeReview from "./QaCodeReview";
 export default {
-  components:{
-QaDesignReview,
-QaCodeReview,
+  components: {
+    QaDesignReview,
+    QaCodeReview,
   },
   data() {
     return {
       loading: false,
       paramtype: "",
+      user_filters: [],
+      slip_filters: [],
+      order_filters: [],
       tasktable: [],
     };
   },
@@ -166,6 +189,18 @@ QaCodeReview,
 
     filterStatus(value, row) {
       return row.fstatus === value;
+    },
+
+    filterUser(value, row) {
+      return row.ftestusr === value;
+    },
+
+    filterSlip(value, row) {
+      return row.fslipno === value;
+    },
+
+    filterOrder(value, row) {
+      return row.fodrno === value;
     },
 
     openMyTaskList(id, paramtype) {
@@ -218,7 +253,14 @@ QaCodeReview,
         }
       }
 
-      for(var i in this.tasktable){
+      for (var i in this.tasktable) {
+        var isSlipExisted = false;
+        var isUserExisted = false;
+        var isOrderExisted = false;
+        var slip_json = {};
+        var user_json = {};
+        var order_json = {};
+
         if (this.tasktable[i].fstatus === "1") {
           this.tasktable[i].fstatus = "初始";
           this.tasktable[i].tagtype = "info";
@@ -231,6 +273,48 @@ QaCodeReview,
         } else if (this.tasktable[i].fstatus === "4") {
           this.tasktable[i].fstatus = "已确认";
           this.tasktable[i].tagtype = "success";
+        }
+
+        slip_json.text = this.tasktable[i].fslipno;
+        slip_json.value = this.tasktable[i].fslipno;
+
+        user_json.text = this.tasktable[i].ftestusr;
+        user_json.value = this.tasktable[i].ftestusr;
+
+        order_json.text = this.tasktable[i].fodrno;
+        order_json.value = this.tasktable[i].fodrno;
+
+        for (var j in this.slip_filters) {
+          if (this.slip_filters[j].text === this.tasktable[i].fslipno) {
+            isSlipExisted = true;
+            continue;
+          }
+        }
+
+        if (!isSlipExisted) {
+          this.slip_filters.push(slip_json);
+        }
+
+        for (var k in this.user_filters) {
+          if (this.user_filters[k].text === this.tasktable[i].ftestusr) {
+            isUserExisted = true;
+            continue;
+          }
+        }
+
+        if (!isUserExisted) {
+          this.user_filters.push(user_json);
+        }
+
+        for (var l in this.order_filters) {
+          if (this.order_filters[l].text === this.tasktable[i].fodrno) {
+            isOrderExisted = true;
+            continue;
+          }
+        }
+
+        if (!isOrderExisted) {
+          this.order_filters.push(order_json);
         }
       }
     },
