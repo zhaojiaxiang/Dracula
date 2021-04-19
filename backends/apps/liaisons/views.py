@@ -230,8 +230,9 @@ class SyncLiaisonBySirNo(APIView):
                 }
                 return Response(data, status.HTTP_200_OK)
 
-            slims = SLIMSExchange(request)
-            results = slims.sync_slims(sir_no)
+            # slims = SLIMSExchange(request)
+            # results = slims.sync_slims(sir_no)
+            results = None
 
             if results:
                 sir_no_list = results[0]

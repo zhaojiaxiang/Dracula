@@ -9,7 +9,7 @@ from liaisons.models import Liaisons
 from qa.models import QaHead, QaDetail
 from rbac.models import Organizations
 from utils.db_connection import man_power_connection_execute, db_connection_execute, query_single_with_no_parameter
-from utils.slims import SLIMSExchange
+# from utils.slims import SLIMSExchange
 
 
 class LiaisonsSerializer(serializers.ModelSerializer):
@@ -119,12 +119,12 @@ class LiaisonsSerializer(serializers.ModelSerializer):
             slip_status = instance.fstatus
             if slip_status == "2" or slip_status == "3":
                 sir_no = validated_data['fsirno']
-                if sir_no or len(sir_no) > 0:
-                    slims = SLIMSExchange(self.context['request'])
-                    ret = slims.update_slims_overload(validated_data)
+                # if sir_no or len(sir_no) > 0:
+                    # slims = SLIMSExchange(self.context['request'])
+                    # ret = slims.update_slims_overload(validated_data)
 
-                    if ret < 1:
-                        raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to fix MCL!")
+                    # if ret < 1:
+                    #     raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to fix MCL!")
 
             user = self.context['request'].user
             instance.fupdteusr = user.name
@@ -153,19 +153,19 @@ class LiaisonUpdateStatusSerializer(serializers.ModelSerializer):
             slip_no = instance.fslipno
             current_date = date.today()
             status_diff = abs(int(orig_status) - int(new_status))
-            slims = SLIMSExchange(self.context['request'])
+            # slims = SLIMSExchange(self.context['request'])
             if status_diff > 1:
                 raise serializers.ValidationError("联络票状态不可跨级修改！")
             if int(orig_status) < int(new_status):
                 if new_status == "2":
                     new_sir_no = ""
-                    if sir_no is None or len(sir_no) == 0:
-                        # 联络开始时，生成Sir No，并更新到本系统中
-                        new_sir_no = slims.insert_slims_overload(instance)
-
-                        if new_sir_no is None or len(new_sir_no) == 0:
-                            raise serializers.ValidationError(
-                                "AMMIC2SLMS Service exception--Unable to generate Sir No!!")
+                    # if sir_no is None or len(sir_no) == 0:
+                    #     # 联络开始时，生成Sir No，并更新到本系统中
+                    #     new_sir_no = slims.insert_slims_overload(instance)
+                    #
+                    #     if new_sir_no is None or len(new_sir_no) == 0:
+                    #         raise serializers.ValidationError(
+                    #             "AMMIC2SLMS Service exception--Unable to generate Sir No!!")
 
                     instance.factstart = current_date
                     instance.fsirno = new_sir_no
@@ -180,10 +180,10 @@ class LiaisonUpdateStatusSerializer(serializers.ModelSerializer):
                         raise serializers.ValidationError("当前联络票不满足完成条件，QA没有结束")
 
                     # 联络票结束时，第一次更新MCL测试数据到SLIMS系统中
-                    ret = slims.fix_slims_overload(sir_no, slip_no)
+                    # ret = slims.fix_slims_overload(sir_no, slip_no)
 
-                    if ret < 0:
-                        raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to fix MCL!")
+                    # if ret < 0:
+                    #     raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to fix MCL!")
 
                     instance.factend = current_date
                 elif new_status == "4":
@@ -205,19 +205,19 @@ class LiaisonUpdateStatusSerializer(serializers.ModelSerializer):
                         raise serializers.ValidationError("无法发布该联络票--Sir No为空!")
 
                     # 联络票发布时，第二次更新MCL测试数据到SLIMS系统中，先删除原始的MCL数据，在重新生成一遍
-                    ret = slims.delete_mcl(sir_no, slip_no)
-
-                    if ret < 0:
-                        raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to delete MCL!")
-
-                    ret = slims.fix_slims_overload(sir_no, slip_no)
-
-                    if ret < 0:
-                        raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to fix MCL!")
-
-                    ret = slims.close_slims(sir_no)
-                    if ret < 0:
-                        raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to close Sir No!")
+                    # ret = slims.delete_mcl(sir_no, slip_no)
+                    #
+                    # if ret < 0:
+                    #     raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to delete MCL!")
+                    #
+                    # ret = slims.fix_slims_overload(sir_no, slip_no)
+                    #
+                    # if ret < 0:
+                    #     raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to fix MCL!")
+                    #
+                    # ret = slims.close_slims(sir_no)
+                    # if ret < 0:
+                    #     raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to close Sir No!")
 
                     instance.freleasedt = current_date
             else:
@@ -229,10 +229,10 @@ class LiaisonUpdateStatusSerializer(serializers.ModelSerializer):
                         raise serializers.ValidationError("该联络票下存在已确认的测试对象，不可回滚到开始状态")
 
                     # 状态回滚到进行中时，删除SLIMS系统中的MCL数据
-                    ret = slims.delete_mcl(sir_no, slip_no)
-
-                    if ret < 0:
-                        raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to delete MCL!")
+                    # ret = slims.delete_mcl(sir_no, slip_no)
+                    #
+                    # if ret < 0:
+                    #     raise serializers.ValidationError("AMMIC2SLMS Service exception--Unable to delete MCL!")
 
                     instance.factend = None
                     instance.factmanpower = 0
@@ -242,10 +242,10 @@ class LiaisonUpdateStatusSerializer(serializers.ModelSerializer):
                         raise serializers.ValidationError("已经录入测试对象，不可回滚到初始状态")
 
                     # 状态回滚到初始时，将SLIMS中的Sir No失效
-                    ret = slims.delete_slims(sir_no)
-                    if ret < 1:
-                        raise serializers.ValidationError(
-                            "AMMIC2SLMS Service exception--Unable to fail Sir No!")
+                    # ret = slims.delete_slims(sir_no)
+                    # if ret < 1:
+                    #     raise serializers.ValidationError(
+                    #         "AMMIC2SLMS Service exception--Unable to fail Sir No!")
                     instance.factstart = None
                     instance.fsirno = None
 
