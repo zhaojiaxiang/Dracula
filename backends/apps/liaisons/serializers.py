@@ -176,8 +176,11 @@ class LiaisonUpdateStatusSerializer(serializers.ModelSerializer):
                     qa_count_close = QaHead.objects.filter(fstatus__in=('3', '4'), fslipno__exact=slip_no).count()
                     qa_count = QaHead.objects.filter(fslipno__exact=slip_no).count()
 
-                    if not (qa_count_close > 0 and qa_count_close == qa_count):
-                        raise serializers.ValidationError("当前联络票不满足完成条件，QA没有结束")
+                    if qa_count_close == 0:
+                        raise serializers.ValidationError("当前联络票没有测试记录，不可变更为完成状态")
+
+                    if qa_count_close != qa_count:
+                        raise serializers.ValidationError("当前联络票测试记录没有完全提交，不可变更为完成状态")
 
                     # 联络票结束时，第一次更新MCL测试数据到SLIMS系统中
                     # ret = slims.fix_slims_overload(sir_no, slip_no)
