@@ -119,7 +119,6 @@
             type="primary"
             :underline="false"
             style="margin-left:15px"
-            v-show="scope.row.fcontent_text"
             @click="handleContentText(scope.row.id)"
             >{{ scope.row.test_tag }}</el-link
           >

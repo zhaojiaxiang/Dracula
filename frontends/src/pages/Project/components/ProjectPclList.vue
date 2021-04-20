@@ -34,7 +34,7 @@
       >
       <el-col :span="9">
         <div>
-          <PCLTargetActual></PCLTargetActual>
+          <PCLTargetActual ref="PCLTargetActual"></PCLTargetActual>
         </div>
       </el-col>
     </el-row>
@@ -373,7 +373,40 @@ export default {
       qadetailInfo["id"] = command.row.id;
       qadetailInfo["fresult"] = command.command;
 
-      var resp = await updateQaDetailResult(command.row.id, qadetailInfo).catch(
+      var orig_result = command.row.fresult;
+      var new_result = command.command;
+
+      if (
+        (orig_result === "NG" || orig_result === "CANCEL") &&
+        new_result === "OK"
+      ) {
+        var info_message =
+          "测试结果由 " +
+          orig_result +
+          " 修改到 " +
+          new_result +
+          " 不符合规定，是否继续?";
+        this.$confirm(info_message, "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        })
+          .then(() => {
+            this.updateResult(command.row.id, qadetailInfo);
+          })
+          .catch(() => {
+            this.$message({
+              type: "info",
+              message: "取消操作",
+            });
+          });
+      } else {
+        this.updateResult(command.row.id, qadetailInfo);
+      }
+    },
+
+    async updateResult(qadetail_id, qadetailInfo) {
+      var resp = await updateQaDetailResult(qadetail_id, qadetailInfo).catch(
         () => {
           this.$message.error("测试项测试结果更新异常");
         }
@@ -383,17 +416,13 @@ export default {
         this.$message.error(resp.data.message);
       } else {
         this.$message.success("测试项更新成功");
+        this.refreshQaList();
+        this.refreshTargetActual();
       }
+    },
 
-      var newqadetail = this.qadetails;
-      for (var i in newqadetail) {
-        if (newqadetail[i].id === command.row.id) {
-          newqadetail[i] = command.command;
-        }
-      }
-      // this.qadetails = []
-      // this.qadetails = newqadetail
-      this.refreshQaList();
+    refreshTargetActual() {
+      this.$refs.PCLTargetActual.refreshTargetActual();
     },
 
     filterResult(value, row) {
@@ -410,7 +439,6 @@ export default {
       });
       if (resp.status === 200) {
         var qadata = resp.data;
-        console.log(resp);
         for (var i in qadata) {
           if (qadata[i].fapproval === "Y") {
             qadata[i].fapproval = "已审核";
@@ -514,6 +542,6 @@ export default {
 }
 
 .card-shadow {
-  box-shadow:4px 4px 40px rgba(0,0,0,.05)
+  box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.05);
 }
 </style>

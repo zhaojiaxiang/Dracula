@@ -2,7 +2,12 @@
   <el-dialog title="修改测试用例" :visible.sync="dialogFormVisible">
     <el-form ref="form" :rules="rules" :model="form">
       <el-form-item prop="fcontent" required>
-        <el-input v-model="form.fcontent" placeholder="测试用例"></el-input>
+        <el-input
+          v-model="form.fcontent"
+          type="textarea"
+          :rows="3"
+          placeholder="测试用例"
+        ></el-input>
       </el-form-item>
       <el-form-item>
         <el-col :span="12">

@@ -1,5 +1,5 @@
 <template>
-  <el-dialog title="手动添加结合测试" :visible.sync="dialogFormVisible">
+  <el-dialog title="结合测试修改" :visible.sync="dialogFormVisible">
     <el-form ref="form" :rules="rules" :model="form">
       <el-form-item>
         <el-col :span="12">
@@ -8,7 +8,6 @@
               v-model="form.fslipno"
               class="width-sytle"
               placeholder="订单号"
-              :disabled="true"
             ></el-input>
           </el-form-item>
         </el-col>
@@ -22,6 +21,32 @@
           </el-form-item>
         </el-col>
       </el-form-item>
+      <el-form-item required>
+          <el-col :span="12">
+            <el-form-item prop="fsystemcd" size="medium">
+              <el-select v-model="form.fsystemcd" placeholder="请选择系统名称">
+                <el-option
+                  v-for="(item, i) in systems"
+                  :key="i"
+                  :label="item.fsystemnm"
+                  :value="item.fsystemcd"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item prop="fprojectcd" >
+              <el-select v-model="form.fprojectcd" placeholder="请选择项目名称">
+                <el-option
+                  v-for="(item, i) in projects"
+                  :key="i"
+                  :label="projects.fprojectsn"
+                  :value="item.fprojectcd"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button type="primary" @click="onSubmit('form')">确 定</el-button>
@@ -32,11 +57,17 @@
 
 <script>
 import { getQaHead, updateQaHead } from "./../../../services/qaService";
+import {
+  getProjects,
+  getSystems,
+} from "../../../services/commonService";
 export default {
   data() {
     return {
       dialogFormVisible: false,
       qahf_id:"",
+      projects: {},
+      systems: {},
       form: {
         fsystemcd: "",
         fprojectcd: "",
@@ -89,6 +120,19 @@ export default {
       });
     },
   },
+  mounted:async function(){
+    var p_resp = await getProjects().catch(() => {
+      this.$message.error("项目主表数据获取异常");
+      return;
+    });
+    var s_resp = await getSystems().catch(() => {
+      this.$message.error("系统主表数据获取异常");
+      return;
+    });
+
+    this.projects = p_resp.data;
+    this.systems = s_resp.data;
+  }
 };
 </script>
 

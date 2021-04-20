@@ -124,6 +124,10 @@ export default {
           this.content_text = "";
         }
       }
+    }else{
+      if (this.operate_type === "approval"){
+        this.isdisable = false;
+      }
     }
   },
 };

@@ -10,6 +10,7 @@
           v-model="form.fttlcodelines"
           placeholder="影响总行数"
           type="number"
+          min="0"
         ></el-input>
       </el-form-item>
       <el-form-item prop="fmodifiedlines" label="修改行数:" required>
@@ -17,6 +18,7 @@
           v-model="form.fmodifiedlines"
           placeholder="修改行数"
           type="number"
+          min="0"
         ></el-input>
       </el-form-item>
       <el-form-item prop="fcomplexity" label="复杂度:" required>
@@ -108,7 +110,7 @@ export default {
         fttlcodelines: "",
         fmodifiedlines: "",
         fcomplexity: "",
-        fselflevel:"",
+        fselflevel: "",
       },
       rules: {
         fttlcodelines: [
@@ -122,6 +124,19 @@ export default {
         ],
       },
     };
+  },
+  watch: {
+    form: {
+      async handler(val) {
+        if (val.fttlcodelines < 0) {
+          val.fttlcodelines = 0;
+        }
+        if (val.fmodifiedlines < 0) {
+          val.fmodifiedlines = 0;
+        }
+      },
+      deep: true,
+    },
   },
   methods: {
     // tableCellClassName({row, columnIndex}) {

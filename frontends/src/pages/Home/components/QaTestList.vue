@@ -46,7 +46,9 @@
       <el-col :span="12">
         <div style="text-align:right;margin-right:40px">
           <el-button-group>
-            <el-button @click="defaultOK()" v-show="isCanDefaultOK()">Default OK</el-button>
+            <el-button @click="defaultOK()" v-show="isCanDefaultOK()"
+              >Default OK</el-button
+            >
             <el-button @click="detailModify()">修改明细</el-button>
             <el-button v-show="isCanAdd()" @click="singleAdd()"
               >逐条添加</el-button
@@ -159,17 +161,17 @@
             :underline="false"
             style="margin-left:15px"
             @click="handleContentText(scope.row.id)"
-            v-show="scope.row.fcontent_text"
+            v-show="isCanTest()"
             >{{ scope.row.test_tag }}</el-link
           >
-          <el-link
+          <!-- <el-link
             style="margin-left:20px"
             type="primary"
             :underline="false"
             @click="handleContentText(scope.row.id)"
             v-show="!scope.row.fcontent_text && isCanTest()"
             >贴图</el-link
-          >
+          > -->
         </template>
       </el-table-column>
       <el-table-column label="操作" width="100">
@@ -269,11 +271,11 @@ export default {
       return true;
     },
 
-    isCanDefaultOK(){
-      if(this.qahead.fstatus === "2"){
-        return true
-      }else{
-        return false
+    isCanDefaultOK() {
+      if (this.qahead.fstatus === "2") {
+        return true;
+      } else {
+        return false;
       }
     },
 
@@ -299,7 +301,7 @@ export default {
     },
 
     isCanBatchDelete() {
-      if (this.qahead.fstatus === "1" & this.qadetails.length > 0) {
+      if ((this.qahead.fstatus === "1") & (this.qadetails.length > 0)) {
         return false;
       }
       return true;
@@ -425,27 +427,51 @@ export default {
       qadetailInfo["id"] = command.row.id;
       qadetailInfo["fresult"] = command.command;
 
-      var resp = await updateQaDetailResult(command.row.id, qadetailInfo).catch(
+      var orig_result = command.row.fresult;
+      var new_result = command.command;
+
+      if (
+        (orig_result === "NG" || orig_result === "CANCEL") &&
+        new_result === "OK"
+      ) {
+        var info_message =
+          "测试结果由 " +
+          orig_result +
+          " 修改到 " +
+          new_result +
+          " 不符合规定，是否继续?";
+        this.$confirm(info_message, "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        })
+          .then(() => {
+            this.updateResult(command.row.id, qadetailInfo);
+          })
+          .catch(() => {
+            this.$message({
+              type: "info",
+              message: "取消操作",
+            });
+          });
+      } else {
+        this.updateResult(command.row.id, qadetailInfo);
+      }
+    },
+
+    async updateResult(qadetail_id, qadetailInfo) {
+      var resp = await updateQaDetailResult(qadetail_id, qadetailInfo).catch(
         () => {
           this.$message.error("测试项测试结果更新异常");
         }
       );
-
       if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
         this.$message.error(resp.data.message);
       } else {
         this.$message.success("测试项更新成功");
+        this.refreshQaList();
+        this.refreshTargetActual();
       }
-
-      var newqadetail = this.qadetails;
-      for (var i in newqadetail) {
-        if (newqadetail[i].id === command.row.id) {
-          newqadetail[i] = command.command;
-        }
-      }
-      // this.qadetails = []
-      // this.qadetails = newqadetail
-      this.refreshQaList();
     },
 
     filterResult(value, row) {

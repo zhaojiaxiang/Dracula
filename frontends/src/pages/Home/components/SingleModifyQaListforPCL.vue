@@ -31,7 +31,12 @@
         </el-col>
       </el-form-item>
       <el-form-item prop="fcontent" required>
-        <el-input v-model="form.fcontent" placeholder="测试用例"></el-input>
+        <el-input
+          v-model="form.fcontent"
+          type="textarea"
+          :rows="3"
+          placeholder="测试用例"
+        ></el-input>
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
@@ -62,8 +67,12 @@ export default {
           { required: true, message: "请输入测试用例", trigger: "change" },
         ],
         fregression: [{ required: false }],
-        fclass1: [{ required: true, message:"请输入分类1", trigger:"change" }],
-        fclass2: [{ required: true, message:"请输入分类2", trigger:"change" }],
+        fclass1: [
+          { required: true, message: "请输入分类1", trigger: "change" },
+        ],
+        fclass2: [
+          { required: true, message: "请输入分类2", trigger: "change" },
+        ],
         fsortrule: [{ required: false }],
       },
     };

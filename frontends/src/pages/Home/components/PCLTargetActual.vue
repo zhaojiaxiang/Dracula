@@ -28,14 +28,21 @@ export default {
       testplan: [],
     };
   },
-  mounted: async function() {
-    var qahf_id = this.$route.query.qahf_id
-    this.testplan = []
-    var plan_resp = await getQaHeadPlanActual(qahf_id).catch(() => {
-      this.$message.error("生成测试计划实绩数据异常");
-    });
-    this.qahead_status = plan_resp.data.fstatus;
-    this.testplan.push(plan_resp.data);
+
+  methods: {
+    async refreshTargetActual() {
+      var qahf_id = this.$route.query.qahf_id;
+      this.testplan = [];
+      var plan_resp = await getQaHeadPlanActual(qahf_id).catch(() => {
+        this.$message.error("生成测试计划实绩数据异常");
+      });
+      this.qahead_status = plan_resp.data.fstatus;
+      this.testplan.push(plan_resp.data);
+    },
+  },
+
+  mounted: function() {
+    this.refreshTargetActual();
   },
 };
 </script>

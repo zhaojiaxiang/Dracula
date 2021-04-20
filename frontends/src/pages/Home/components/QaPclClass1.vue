@@ -353,9 +353,9 @@ export default {
       this.refreshQaList();
     }
 
-    this.bus.$on("refreshList", function() {
-      this.refreshQaList();
-    });
+    // this.bus.$on("refreshList", function() {
+    //   this.refreshQaList();
+    // });
     this.loading = false;
   },
 };

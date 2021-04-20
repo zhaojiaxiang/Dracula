@@ -261,7 +261,7 @@ export default {
       } else {
         this.$message.success("文件上传成功");
       }
-      this.editorData += resp.data.path;
+      this.editorData = this.outEditorData + resp.data.path;
     },
     onReady(editor) {
       // 自定义上传图片插件
@@ -289,5 +289,11 @@ function RemoveFormatLinks(editor) {
     max-width: 50%;
     float: right;
     margin-left: var(--ck-image-style-spacing);
+}
+
+figure::after {
+  display: block;
+  content: "";
+  clear:both;
 }
 </style>

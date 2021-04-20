@@ -4,6 +4,7 @@
       <el-form-item>
         <el-input
           disabled
+          autofocus="true"
           placeholder="Ctrl+V实现测试Case粘贴并自动批量添加"
         ></el-input>
       </el-form-item>
