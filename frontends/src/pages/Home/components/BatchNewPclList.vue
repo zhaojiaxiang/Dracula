@@ -32,11 +32,8 @@ export default {
       fullscreenLoading: false,
     };
   },
-  methods: {
-    handleDialog(id) {
-      this.dialogFormVisible = !this.dialogFormVisible;
-      this.qaheadid = id;
-      document.addEventListener("paste", (event) => {
+  mounted(){
+    document.addEventListener("paste", (event) => {
         event.stopPropagation();
         event.preventDefault(); //消除默认粘贴
 
@@ -54,9 +51,13 @@ export default {
           .map(function(item) {
             return item.split("\t");
           });
-
         document.getElementById("submitbtn").click();
       });
+  },
+  methods: {
+    handleDialog(id) {
+      this.dialogFormVisible = !this.dialogFormVisible;
+      this.qaheadid = id;
     },
 
     async onBatchSubmit() {
@@ -80,13 +81,13 @@ export default {
           this.qadetails[i][3] = "";
         }
 
-        if(this.qadetails[i][0].length > 20){
-          this.$message.error("分类1长度不可大于20");
+        if(this.qadetails[i][0].length > 60){
+          this.$message.error("分类1长度不可大于60");
           return;
         }
 
-        if(this.qadetails[i][1].length > 20){
-          this.$message.error("分类2长度不可大于20");
+        if(this.qadetails[i][1].length > 60){
+          this.$message.error("分类2长度不可大于60");
           return;
         }
 
@@ -97,8 +98,6 @@ export default {
         form["fcontent"] = this.qadetails[i][2];
         form["fsortrule"] = this.qadetails[i][3];
         form["qahf"] = this.qaheadid;
-
-        console.log(this.qadetails[i][2]);
 
         var resp = await newQaDetail(form).catch(() => {
           this.$message.error("批量添加测试项异常");
@@ -117,8 +116,6 @@ export default {
           this.qadetails = [];
           return
         }
-
-        console.log(this.qadetails[i][2]);
       }
       this.$emit("refreshQaList");
       this.dialogFormVisible = false;

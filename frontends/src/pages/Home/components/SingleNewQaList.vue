@@ -15,6 +15,7 @@
             <el-input
               v-model="form.fclass1"
               class="width-sytle"
+              maxlength="60"
               placeholder="分类(非必输)"
             ></el-input>
           </el-form-item>

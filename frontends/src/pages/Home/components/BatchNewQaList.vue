@@ -32,31 +32,33 @@ export default {
       fullscreenLoading: false,
     };
   },
+  mounted() {
+    this.$el.addEventListener("paste", (event) => {
+      event.stopPropagation();
+      event.preventDefault(); //消除默认粘贴
+
+      this.qadetails = [];
+
+      var clipboardData = event.clipboardData || window.clipboardData;
+      var pastedData = clipboardData.getData("Text");
+
+      this.qadetails = pastedData
+        .split("\n")
+        .filter(function(item) {
+          //兼容Excel行末\n，防止出现多余空行
+          return item !== "";
+        })
+        .map(function(item) {
+          return item.split("\t");
+        });
+
+      document.getElementById("submitbtn").click();
+    });
+  },
   methods: {
     handleDialog(id) {
       this.dialogFormVisible = !this.dialogFormVisible;
       this.qaheadid = id;
-      document.addEventListener("paste", (event) => {
-        event.stopPropagation();
-        event.preventDefault(); //消除默认粘贴
-
-        this.qadetails = [];
-
-        var clipboardData = event.clipboardData || window.clipboardData;
-        var pastedData = clipboardData.getData("Text");
-
-        this.qadetails = pastedData
-          .split("\n")
-          .filter(function(item) {
-            //兼容Excel行末\n，防止出现多余空行
-            return item !== "";
-          })
-          .map(function(item) {
-            return item.split("\t");
-          });
-
-        document.getElementById("submitbtn").click();
-      });
     },
 
     async onBatchSubmit() {
@@ -85,9 +87,7 @@ export default {
         if (this.qadetails[i].length === 3) {
           this.qadetails[i][3] = "";
         }
-        if (this.qadetails[i][0] === "Y" || this.qadetails[i][0] === "N") {
-          console.log("");
-        } else {
+        if (!(this.qadetails[i][0] === "Y" || this.qadetails[i][0] === "N")) {
           var rownum = parseInt(i) + 1;
           this.$message.error("第" + rownum + "行，回归测试只能为 Y 或者 N");
           this.fullscreenLoading = false;

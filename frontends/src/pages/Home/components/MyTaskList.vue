@@ -191,7 +191,6 @@ export default {
           return true;
         } else {
           for (var i in this.qadetails) {
-            console.log(this.qadetails[i].fapproval);
             if (this.qadetails[i].fapproval === "未审核") {
               return true;
             }
