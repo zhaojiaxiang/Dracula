@@ -127,6 +127,6 @@ export default {
         component: () => import("@/pages/Checkouts/Checkouts"),
       },      
     ],
-    mode: "history",
+    mode: "hash",
   };
   
