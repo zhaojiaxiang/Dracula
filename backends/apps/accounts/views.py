@@ -11,6 +11,7 @@ from accounts.models import SystemSetting
 from accounts.serializers import UserSerializer, SystemSettingSerializer, MyGroupUserSerializer, LoginSerializer
 from liaisons.models import Liaisons
 from qa.models import QaHead
+from rbac.models import Organizations
 from utils.db_connection import db_connection_execute, query_single_with_no_parameter
 from utils.utils import get_all_organization_belong_me, get_all_organization_group_belong_me
 
@@ -198,6 +199,9 @@ class MyTaskBar(APIView):
         user = request.user
 
         all_organization_tuple = get_all_organization_belong_me(request)
+        # Organizations.objects.filter(pk_in=all_organization_tuple)
+        # all_user = User.objects.filter()
+        all_user = User.objects.values('name').filter(ammic_organization__in=all_organization_tuple)
 
         mcl = QaHead.objects.filter(fcreateusr__exact=user.name,
                                     fstatus__exact='2',
@@ -205,7 +209,7 @@ class MyTaskBar(APIView):
 
         pcl = QaHead.objects.filter(fslipno__in=Liaisons.objects.values('fodrno').
                                     filter(Q(fleader__contains=user.name) |
-                                           Q(fassignedto__in=all_organization_tuple)),
+                                           Q(fassignedto__in=all_user)),
                                     fstatus__in=(1, 2),
                                     ftesttyp__exact='PCL').count()
 

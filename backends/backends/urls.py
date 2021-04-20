@@ -87,6 +87,7 @@ urlpatterns = [
     path('api/mine_task_conform/', MyConfirm.as_view()),
     path('api/mine_task_release/', MyRelease.as_view()),
     path('api/files/<str:filename>', RecoverFile.as_view()),
+    path('files/<str:filename>', RecoverFile.as_view()),
     path('api/image_upload/', CkEditorImageUpload.as_view()),
     path('api/file_upload/', CkEditorFileUpload.as_view()),
     path('api/liaison_file_upload/', LiaisonFileUpload.as_view()),

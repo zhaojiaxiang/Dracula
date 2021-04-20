@@ -122,6 +122,10 @@ class QaHeadSerializer(serializers.ModelSerializer):
 
             if new_status == '4':
                 """确认"""
+                for qa in qa_details:
+                    if qa.fresult == 'NG':
+                        raise serializers.ValidationError("存在NG项未处理，不可确认")
+
                 instance.fstatus = new_status
                 instance.fconfirmdte = datetime.datetime.now().strftime('%Y-%m-%d')
                 instance.flevel = validated_data['flevel']
@@ -403,7 +407,7 @@ class QaDetailSerializer(serializers.ModelSerializer):
         last_submit = obj.flastsubmitid
         last_approval = obj.flastapproveid
 
-        if context_text:
+        if context_text and len(context_text) > 0:
             if ng_cnt == 0:
                 return "已贴图"
             else:
@@ -412,22 +416,26 @@ class QaDetailSerializer(serializers.ModelSerializer):
                 else:
                     return f"已贴图,{ng_cnt}"
         else:
+            if ng_cnt > 0:
+                return f"已评论,{ng_cnt}"
             return "贴图"
 
     @transaction.atomic()
     def create(self, validated_data):
-        is_exist = QaDetail.objects.filter(Q(fcontent__exact=validated_data['fcontent']),
-                                           Q(qahf_id__exact=validated_data['qahf']) & ~Q(fresult__exact='CANCEL'))
-        if is_exist.count() > 0:
-            raise serializers.ValidationError("该测试项已经在该对象下存在")
-
-        user = self.context['request'].user
-        qadetail = QaDetail.objects.create(**validated_data)
-        qadetail.fimpusr = user.name
-        qadetail.fentusr = user.name
-        qadetail.fupdteprg = "QA New"
-        qadetail.save()
-        return qadetail
+        # is_exist = QaDetail.objects.filter(Q(fcontent__exact=validated_data['fcontent']),
+        #                                    Q(qahf_id__exact=validated_data['qahf']) & ~Q(fresult__exact='CANCEL'))
+        # if is_exist.count() > 0:
+        #     raise serializers.ValidationError("该测试项已经在该对象下存在")
+        try:
+            user = self.context['request'].user
+            qadetail = QaDetail.objects.create(**validated_data)
+            qadetail.fimpusr = user.name
+            qadetail.fentusr = user.name
+            qadetail.fupdteprg = "QA New"
+            qadetail.save()
+            return qadetail
+        except Exception as ex:
+            raise serializers.ValidationError(ex.args[0])
 
     @transaction.atomic()
     def update(self, instance, validated_data):
@@ -455,12 +463,12 @@ class QaDetailUpdateResultSerializer(serializers.ModelSerializer):
         result_original = instance.fresult
         result_present = validated_data['fresult']
 
-        if result_original:
-            if "NG" in result_original and result_present == "OK":
-                raise serializers.ValidationError("测试结果不可由NG修改为OK！！！")
-
-            if result_original == "CANCEL":
-                raise serializers.ValidationError("已经取消的测试项不可修改")
+        # if result_original:
+        #     if "NG" in result_original and result_present == "OK":
+        #         raise serializers.ValidationError("测试结果不可由NG修改为OK！！！")
+        #
+        #     if result_original == "CANCEL":
+        #         raise serializers.ValidationError("已经取消的测试项不可修改")
 
         instance.fresult = result_present
         instance.ftestusr = user.name
