@@ -26,7 +26,7 @@ class CheckOutFilesViewSet(viewsets.ModelViewSet):
     filter_class = CheckOutFilesFilter
 
     def get_queryset(self):
-        return CheckOutFiles.objects.all().order_by('fchkstatus', 'fslipno', '-fregisterdte')
+        return CheckOutFiles.objects.all().order_by('fchkstatus', '-fregisterdte', 'fslipno')
 
 
 class SendEmail(APIView):

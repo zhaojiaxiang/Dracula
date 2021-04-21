@@ -30,9 +30,10 @@
 <script>
   import {
     getCheckoutList,
+    getAddressList,
     sendMail,
   } from "../../../services/checkoutService";
-  import { getGroupUsers } from "../../../services/commonService";
+  // import { getGroupUsers } from "../../../services/commonService";
 
   export default {
     data() {
@@ -57,7 +58,7 @@
       async getAddressList() {
         this.address = [];
         this.addresslist = [];
-        var resp = await getGroupUsers().catch(() => {
+        var resp = await getAddressList().catch(() => {
           this.$message.error("地址列表数据获取异常");
           return;
         });
