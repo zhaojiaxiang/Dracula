@@ -77,6 +77,7 @@ export default {
               if (Object.prototype.hasOwnProperty.call(resp.data, 'message')) {
                 this.$message.error(resp.data.message);
               }else{
+                this.bus.$emit("login_succ");
                 localStorage.setItem("login_username", this.form.username)
                 localStorage.setItem("login_password", this.form.password)
                 this.$router.push({ path: "/" });

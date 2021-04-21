@@ -57,10 +57,10 @@ export default {
     },
   },
   mounted: function() {
+    this.bus.$on("login_succ", ()=> {
+      this.userInfo = JSON.parse(localStorage.getItem("UserInfo"));
+    })
     this.userInfo = JSON.parse(localStorage.getItem("UserInfo"));
-    if (this.userInfo === null) {
-      this.userInfo = { name: "", avatar: "" };
-    }
   },
 };
 </script>
