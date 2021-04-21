@@ -72,6 +72,9 @@ class QaHeadSerializer(serializers.ModelSerializer):
         if diff_status > 0:
             if new_status == '2':
                 """审核"""
+                if qa_details.count() == 0:
+                    raise serializers.ValidationError("测试明细为空，不可审核")
+
                 lot = instance.flastapprovallot + 1
                 instance.fstatus = new_status
                 instance.fauditdte = datetime.datetime.now().strftime('%Y-%m-%d')
@@ -91,6 +94,9 @@ class QaHeadSerializer(serializers.ModelSerializer):
 
             if new_status == '3':
                 """测试结果提交"""
+                for qa in qa_details:
+                    if qa.fresult == 'NG':
+                        raise serializers.ValidationError("存在未处理NG项，不可提交")
                 if instance.ftesttyp == "MCL":
                     if instance.fobjmodification is None:
                         raise serializers.ValidationError("请先填写测试对象修改概要")
@@ -124,7 +130,7 @@ class QaHeadSerializer(serializers.ModelSerializer):
                 """确认"""
                 for qa in qa_details:
                     if qa.fresult == 'NG':
-                        raise serializers.ValidationError("存在NG项未处理，不可确认")
+                        raise serializers.ValidationError("存在未处理NG项，不可确认")
 
                 instance.fstatus = new_status
                 instance.fconfirmdte = datetime.datetime.now().strftime('%Y-%m-%d')

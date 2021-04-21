@@ -1,4 +1,7 @@
+import re
+
 from django.contrib.auth import get_user_model
+from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import permission_classes
@@ -11,7 +14,6 @@ from accounts.models import SystemSetting
 from accounts.serializers import UserSerializer, SystemSettingSerializer, MyGroupUserSerializer, LoginSerializer
 from liaisons.models import Liaisons
 from qa.models import QaHead
-from rbac.models import Organizations
 from utils.db_connection import db_connection_execute, query_single_with_no_parameter
 from utils.utils import get_all_organization_belong_me, get_all_organization_group_belong_me
 
@@ -22,6 +24,7 @@ User = get_user_model()
 class LoginView(APIView):
     """
     自定义用户登录
+    由于在实际部署到服务器上时，该接口出现跨域问题（只有这一个接口，且只在部署到服务器上时出现），没有解决掉，暂时废弃
     """
 
     def post(self, request):
@@ -38,6 +41,23 @@ class LoginView(APIView):
             'user': UserSerializer(user, context={'request': request}).data
         }
         return Response(data, status.HTTP_200_OK)
+
+
+@permission_classes((AllowAny,))
+class UsernameMobileAuthBackend(ModelBackend):
+    """
+    自定义用户登录方式，用户可以通过邮箱或者用户名进行登录
+    """
+
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        if re.match('^.+@.+$', username):  # 邮箱登录正则
+            user = User.objects.filter(email=username).first()
+        else:  # 用户名登录
+            user = User.objects.filter(username=username).first()
+        if user and user.check_password(password):
+            return user
+        else:
+            return None
 
 
 def jwt_response_payload_handler(token, user=None, request=None):

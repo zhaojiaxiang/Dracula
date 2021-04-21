@@ -182,13 +182,16 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'accounts.views.api_exception_handler'
 }
 
-# AUTHENTICATION_BACKENDS = ('accounts.views.CustomBackend',)
+# 自定义用户登录方式
+AUTHENTICATION_BACKENDS = [
+    'accounts.views.UsernameMobileAuthBackend',
+]
 
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=env.int('JWT_EXPIRATION_DELTA')),
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
     # 使用自定义用户验证返回接口
-    'JWT_RESPONSE_PAYLOAD_HANDLER': 'accounts.views.jwt_response_payload_handler'
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'accounts.views.jwt_response_payload_handler',
 }
 
 SENDFILE_BACKEND = "sendfile.backends.development"
