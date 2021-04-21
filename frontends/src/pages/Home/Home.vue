@@ -13,9 +13,23 @@
           <ProjectItem ref="ProjectItem"></ProjectItem>
           <Guide>
             <template>
-              <div>
-                <h5><strong>我参与的任务</strong></h5>
-              </div>
+              <el-row style="margin-bottom:3px">
+                <el-col :span="12">
+                  <Guide>
+                    <template>
+                      <div>
+                        <h5><strong>我参与的任务</strong></h5>
+                      </div>
+                    </template>
+                  </Guide>
+                </el-col>
+
+                <el-col :span="12">
+                  <div style="text-align:right;">
+                    <el-button plain @click="openSlipNoNew">新建联络票</el-button>
+                  </div>
+                </el-col>
+              </el-row>
             </template>
           </Guide>
           <SlipNoNew
@@ -33,8 +47,7 @@
       ></el-col>
       <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2"
         ><div>
-            <MyTaskBar ref="MyTaskBar"></MyTaskBar>
-        </div
+          <MyTaskBar ref="MyTaskBar"></MyTaskBar></div
       ></el-col>
     </el-row>
   </div>
@@ -46,7 +59,7 @@ import ProjectItem from "./components/ProjectItem";
 import SlipNoItem from "./components/SlipNoItem";
 import SlipNoNew from "./components/SlipNoNew";
 import SlipNoModify from "./components/SlipNoModify";
-import MyTaskBar from './components/MyTaskBar';
+import MyTaskBar from "./components/MyTaskBar";
 export default {
   name: "Home",
   components: {
@@ -58,6 +71,9 @@ export default {
     MyTaskBar,
   },
   methods: {
+    openSlipNoNew() {
+      this.bus.$emit("openSlipNoNew");
+    },
     refreshHome() {
       this.$refs.ProjectItem.refreshProjectItems();
       this.$refs.SlipNoItem.refreshLiaisons();
@@ -68,7 +84,7 @@ export default {
 </script>
 
 <style scoped>
-.el-row{
-    margin: 0px;
+.el-row {
+  margin: 0px;
 }
 </style>

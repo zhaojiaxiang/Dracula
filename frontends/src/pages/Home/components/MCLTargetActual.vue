@@ -57,24 +57,24 @@ export default {
       var actual_total = row.actual_total;
       if (columnIndex === 4) {
         if (actual_tests < target_tests) {
-          return "table-cell-warning";
+          return "warning-cell";
         }
         return "";
       } else if (columnIndex === 5) {
         if (actual_regressions < target_regressions) {
-          return "table-cell-warning";
+          return "warning-cell";
         }
         return "";
       } else if (columnIndex === 6) {
         if (actual_total < target_total) {
-          return "table-cell-warning";
+          return "warning-cell";
         }
         return "";
       } else if (columnIndex === 7) {
         if (actual_ng < target_ng) {
-          return "table-cell-warning";
+          return "warning-cell";
         } else if (actual_ng > target_ng * 1.2) {
-          return "table-cell-danger";
+          return "danger-cell";
         }
         return "";
       }
@@ -96,7 +96,13 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
+.warning-cell{
+  background-color: #ffd3b4;
+}
+.danger-cell{
+  background-color: #ffaaa7;
+}
 .el-table--medium td,
 .el-table--medium th {
   padding: 2px 0px;

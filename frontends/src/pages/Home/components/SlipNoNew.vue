@@ -1,6 +1,11 @@
 <template>
   <div>
-    <el-drawer class="drawer-height" :visible.sync="drawer" :with-header="false" size="55%">
+    <el-drawer
+      class="drawer-height"
+      :visible.sync="drawer"
+      :with-header="false"
+      size="55%"
+    >
       <el-form
         ref="form"
         :model="form"
@@ -33,7 +38,11 @@
         <el-form-item label="系统名称" size="medium" required>
           <el-col :span="10">
             <el-form-item prop="fsystemcd" size="medium">
-              <el-select v-model="form.fsystemcd" :disabled="isCanModify" placeholder="请选择系统名称">
+              <el-select
+                v-model="form.fsystemcd"
+                :disabled="isCanModify"
+                placeholder="请选择系统名称"
+              >
                 <el-option
                   v-for="(item, i) in systems"
                   :key="i"
@@ -49,7 +58,11 @@
           </el-col>
           <el-col :span="14">
             <el-form-item label="项目名称" prop="fprojectcd" size="medium">
-              <el-select v-model="form.fprojectcd" :disabled="isCanModify" placeholder="请选择项目名称">
+              <el-select
+                v-model="form.fprojectcd"
+                :disabled="isCanModify"
+                placeholder="请选择项目名称"
+              >
                 <el-option
                   v-for="(item, i) in projects"
                   :key="i"
@@ -68,7 +81,11 @@
         <el-form-item label="开发类型" size="medium" required>
           <el-col :span="10">
             <el-form-item prop="ftype" size="medium">
-              <el-select v-model="form.ftype" :disabled="isCanModify" placeholder="请选择开发类型">
+              <el-select
+                v-model="form.ftype"
+                :disabled="isCanModify"
+                placeholder="请选择开发类型"
+              >
                 <el-option label="追加开发" value="追加开发"></el-option>
                 <el-option label="改善需求" value="改善需求"></el-option>
                 <el-option
@@ -80,7 +97,11 @@
           </el-col>
           <el-col :span="14">
             <el-form-item label="对应者" prop="fassignedto" size="medium">
-              <el-select v-model="form.fassignedto" :disabled="isCanModify" placeholder="请选择对应者">
+              <el-select
+                v-model="form.fassignedto"
+                :disabled="isCanModify"
+                placeholder="请选择对应者"
+              >
                 <el-option
                   v-for="(item, i) in groupusers"
                   :key="i"
@@ -162,10 +183,18 @@
           </el-col>
         </el-form-item>
         <el-form-item label="开发概要" prop="fbrief" size="medium">
-          <el-input type="textarea" v-model="form.fbrief" :disabled="isCanModify"></el-input>
+          <el-input
+            type="textarea"
+            v-model="form.fbrief"
+            :disabled="isCanModify"
+          ></el-input>
         </el-form-item>
         <el-form-item label="问题描述" prop="fcontent" size="medium">
-          <el-input type="textarea" v-model="form.fcontent" :disabled="isCanModify"></el-input>
+          <el-input
+            type="textarea"
+            v-model="form.fcontent"
+            :disabled="isCanModify"
+          ></el-input>
         </el-form-item>
         <el-form-item label="计划开始" required>
           <el-col :span="7">
@@ -194,7 +223,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="4">
-            <el-form-item size="medium">
+            <el-form-item prop="fplnmanpower" size="medium">
               <el-input
                 v-model="form.fplnmanpower"
                 placeholder="计划工时"
@@ -217,7 +246,10 @@
 </template>
 
 <script>
-import { newLiaison, syncLiaisonbySirNo } from "../../../services/liaisonService";
+import {
+  newLiaison,
+  syncLiaisonbySirNo,
+} from "../../../services/liaisonService";
 import {
   getProjects,
   getSystems,
@@ -228,7 +260,7 @@ import { handleAllUser, formatDate } from "../../../static/js/commonJs";
 export default {
   data() {
     return {
-      isCanModify:false,
+      isCanModify: false,
       sync_sirno: "",
       switch_value: false,
       is_sirno: false,
@@ -251,7 +283,7 @@ export default {
         fcontent: "",
         fplnstart: "",
         fplnend: "",
-        fcreateusr :"",
+        fcreateusr: "",
         fcreatedte: "",
         factstart: null,
         factend: null,
@@ -311,12 +343,22 @@ export default {
   watch: {
     switch_value(newval) {
       //监控界面开关
-      this.sync_sirno = ""
+      this.sync_sirno = "";
       if (newval) {
         this.is_sirno = true;
       } else {
         this.is_sirno = false;
       }
+    },
+    form: {
+      handler(val) {
+        if (val.fplnend) {
+          if (val.fplnstart > val.fplnend) {
+            this.form.fplnstart = val.fplnend;
+          }
+        }
+      },
+      deep: true,
     },
   },
   methods: {
@@ -335,7 +377,7 @@ export default {
           } else {
             this.form.fhelper = this.form.fhelper.join(",");
           }
-          
+
           var resp = await newLiaison(this.form).catch(() => {
             this.loading = false;
             this.$message.error("联络票创建异常！");
@@ -347,6 +389,7 @@ export default {
               message: this.form.fslipno + "创建成功！",
               type: "success",
             });
+            this.resetForm(formName);
             this.drawer = false;
           } else {
             this.$message.error(this.form.fslipno + resp.data.message);
@@ -358,6 +401,8 @@ export default {
       this.loading = false;
     },
     resetForm(formName) {
+      this.form.fhelper = [];
+      this.form.fleader = [];
       this.$refs[formName].resetFields();
     },
 
@@ -369,33 +414,31 @@ export default {
       this.$router.push({ name: "SystemMaster" });
     },
 
-    async syncSirNo(){
-      var resp = await syncLiaisonbySirNo(this.sync_sirno).catch(()=>{
-        this.$message.error("联络票同步异常")
-      })
-      if(!Object.prototype.hasOwnProperty.call(resp.data, "message")){
-        
-        var sir_json = resp.data
+    async syncSirNo() {
+      var resp = await syncLiaisonbySirNo(this.sync_sirno).catch(() => {
+        this.$message.error("联络票同步异常");
+      });
+      if (!Object.prototype.hasOwnProperty.call(resp.data, "message")) {
+        var sir_json = resp.data;
 
-        this.form.ftype = sir_json.ftype
-        this.form.fcreateusr = sir_json.fcreateusr
-        this.form.fcreatedte = formatDate(sir_json.fcreatedte)
-        this.form.fplnstart = formatDate(sir_json.fplnstart)
-        this.form.fassignedto = sir_json.fassignedto
-        this.form.fsystemcd = sir_json.fsystemcd
-        this.form.fprojectcd = sir_json.fprojectcd
-        this.form.fodrno = sir_json.fodrno
-        this.form.fbrief = sir_json.fbrief
-        this.form.fcontent = sir_json.fcontent
-        this.form.fsirno = sir_json.fsirno
+        this.form.ftype = sir_json.ftype;
+        this.form.fcreateusr = sir_json.fcreateusr;
+        this.form.fcreatedte = formatDate(sir_json.fcreatedte);
+        this.form.fplnstart = formatDate(sir_json.fplnstart);
+        this.form.fassignedto = sir_json.fassignedto;
+        this.form.fsystemcd = sir_json.fsystemcd;
+        this.form.fprojectcd = sir_json.fprojectcd;
+        this.form.fodrno = sir_json.fodrno;
+        this.form.fbrief = sir_json.fbrief;
+        this.form.fcontent = sir_json.fcontent;
+        this.form.fsirno = sir_json.fsirno;
 
-        this.isCanModify = true
-      }else{
-        this.$message.error(resp.data.message)
-        return
+        this.isCanModify = true;
+      } else {
+        this.$message.error(resp.data.message);
+        return;
       }
-      
-    }
+    },
   },
   mounted: function() {
     var this_ = this;

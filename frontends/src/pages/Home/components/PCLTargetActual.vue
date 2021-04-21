@@ -6,6 +6,7 @@
       ref="testplan"
       style="width: 95%"
       size="medium"
+      :cell-class-name="tableCellClassName"
       :highlight-current-row="true"
     >
       <el-table-column prop="actual_tests" label="实际测试数" min-width="110">
@@ -30,6 +31,18 @@ export default {
   },
 
   methods: {
+    tableCellClassName({ row, columnIndex }) {
+      if (columnIndex === 3) {
+        var actual_ng_rate = row.actual_ng_rate;
+        actual_ng_rate = actual_ng_rate.replace("%", "");
+        actual_ng_rate = parseFloat(actual_ng_rate);
+        if ((actual_ng_rate > 10) | (actual_ng_rate < 5)) {
+          return "danger-cell";
+        }
+        return "";
+      }
+    },
+
     async refreshTargetActual() {
       var qahf_id = this.$route.query.qahf_id;
       this.testplan = [];
@@ -48,6 +61,12 @@ export default {
 </script>
 
 <style>
+.warning-cell {
+  background-color: #ffd3b4;
+}
+.danger-cell {
+  background-color: #ffaaa7;
+}
 .el-table--medium td,
 .el-table--medium th {
   padding: 2px 0px;

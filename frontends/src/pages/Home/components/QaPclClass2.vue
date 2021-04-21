@@ -56,7 +56,7 @@
       <el-table-column
         prop="fclass2"
         label="分类2"
-        width="100"
+        width="400"
         show-overflow-tooltip
       >
         <template slot-scope="scope">

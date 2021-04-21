@@ -51,7 +51,7 @@
         filter-placement="bottom-end"
       >
         <template slot-scope="scope">
-          <el-tag :type="typeTagClass(scope.row.ftype)" disable-transitions>{{
+          <el-tag :type="typeTagClass(scope.row.ftype)" disable-transitions effect="plain">{{
             scope.row.ftype
           }}</el-tag>
         </template>

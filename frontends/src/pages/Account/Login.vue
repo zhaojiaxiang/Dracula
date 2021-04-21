@@ -16,6 +16,7 @@
           v-model="form.username"
           auto-complete="off"
           placeholder="用户名"
+          clearable
         ></el-input>
       </el-form-item>
       <el-form-item prop="password">
@@ -24,14 +25,17 @@
           v-model="form.password"
           auto-complete="off"
           placeholder="密码"
+          clearable
         ></el-input>
       </el-form-item>
       <el-form-item style="width:100%;">
         <el-button
+          id="login_btn"
           type="primary"
           style="width:100%;"
           @click="handleSubmit('form')"
           :loading="logining"
+          @keyup.enter.native="handleSubmit('form')"
           >登录</el-button
         >
       </el-form-item>
@@ -73,6 +77,8 @@ export default {
               if (Object.prototype.hasOwnProperty.call(resp.data, 'message')) {
                 this.$message.error(resp.data.message);
               }else{
+                localStorage.setItem("login_username", this.form.username)
+                localStorage.setItem("login_password", this.form.password)
                 this.$router.push({ path: "/" });
               }
             })
@@ -83,6 +89,15 @@ export default {
       });
     },
   },
+  mounted(){
+    this.form.username = localStorage.getItem("login_username")
+    this.form.password = localStorage.getItem("login_password")
+    this.$el.addEventListener("keyup", (event)=>{
+      if (event.keyCode === 13) {
+        document.getElementById("login_btn").click();
+      }
+    });
+  }
 };
 </script>
 

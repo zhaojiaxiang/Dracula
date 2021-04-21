@@ -7,6 +7,7 @@ export async function login(loginInfo) {
     // 把令牌保存下来
     localStorage.setItem("token", token);
     var user = resp.data.user;
+    user.str_avatar = user.name.charAt(user.name.length-1)
     localStorage.setItem("UserInfo", JSON.stringify(user));
   }
   return resp;

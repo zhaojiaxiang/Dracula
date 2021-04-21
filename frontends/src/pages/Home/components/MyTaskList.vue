@@ -19,8 +19,11 @@
         </div></el-col
       >
       <el-col :span="14">
-        <div>
+        <div v-if="qahead.ftesttyp === 'MCL'">
           <MCLTargetActual></MCLTargetActual>
+        </div>
+        <div v-if="qahead.ftesttyp === 'PCL'">
+          <PCLTargetActual></PCLTargetActual>
         </div>
       </el-col>
     </el-row>
@@ -142,10 +145,12 @@ import {
 } from "./../../../services/qaService";
 import QaConfirm from "./QaConfirm";
 import MCLTargetActual from "./MCLTargetActual";
+import PCLTargetActual from "./PCLTargetActual";
 export default {
   components: {
     QaConfirm,
     MCLTargetActual,
+    PCLTargetActual,
   },
   data() {
     return {
