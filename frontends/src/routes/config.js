@@ -125,7 +125,25 @@ export default {
         name: "Checkouts",
         meta: { requiresAuth: true },
         component: () => import("@/pages/Checkouts/Checkouts"),
-      },      
+      },
+      {
+        path: "/report",
+        name: "Report",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/Report/Report"),
+      },
+      {
+        path: "/report/single",
+        name: "ReportSingle",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/Report/components/ReportSingle"),
+      },
+      {
+        path: "/report/multiple",
+        name: "ReportMultiple",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/Report/components/ReportMultiple"),
+      },
     ],
     mode: "hash",
   };

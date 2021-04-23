@@ -1,24 +1,18 @@
 <template>
   <div style="margin-left:60px">
-    <el-row :gutter="12" >
+    <el-row :gutter="12">
       <el-col
-        v-for="(item,index) in orderInfo"
+        v-for="(item, index) in orderInfo"
         :key="item.orderno"
         :span="11"
         class="card-style"
       >
-        <el-card
-          shadow="hover"
-          class="card-shadow"
-          :class="gapClass(index)"
-        >
+        <el-card shadow="hover" class="card-shadow" :class="gapClass(index)">
           <div slot="header" class="clearfix">
             <el-row>
               <el-col :span="23"
                 ><div>
-                  <h6
-                    class="clear-margin-padding hidden-text"
-                  >
+                  <h6 class="clear-margin-padding hidden-text">
                     {{ item.organization }} - {{ item.project }} - [{{
                       item.orderno
                     }}
@@ -31,35 +25,35 @@
               </el-col>
             </el-row>
           </div>
-          <div @click="openProjectOverView(item.orderno)" class='mouse_style_link'>
-            
+          <div
+            @click="openProjectOverView(item.orderno)"
+            class="mouse_style_link"
+          >
             <el-row>
               <el-col :span="23"
                 ><div>
-                  <h6
-                    class="clear-margin-padding hidden-text"
-                  >
+                  <h6 class="clear-margin-padding hidden-text">
                     {{ item.note }}
                   </h6>
                 </div></el-col
               >
               <el-col :span="1">
-                <el-dropdown>
+                <el-dropdown @command="handleOrder">
                   <span class="el-dropdown-link">
                     <i class="el-icon-more"></i>
                   </span>
                   <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item :disabled='true'>报表</el-dropdown-item>
-                    <el-dropdown-item :disabled='true'>分析</el-dropdown-item>
+                    <el-dropdown-item
+                      :command="beforeHandleOrder('report', item.orderno)"
+                      >报表</el-dropdown-item
+                    >
+                    <el-dropdown-item :disabled="true">分析</el-dropdown-item>
                   </el-dropdown-menu>
                 </el-dropdown>
               </el-col>
             </el-row>
             <el-row>
-              <el-col :span="24"
-                ><div style="height:40px">
-                </div></el-col
-              >
+              <el-col :span="24"><div style="height:40px"></div></el-col>
             </el-row>
             <el-row class="icon-style">
               <el-col :span="4"
@@ -160,19 +154,35 @@ export default {
     };
   },
   methods: {
-    gapClass(index) {
-      if(index === 4 || index === 5){
-        return "gap-style-bottom"
-      }else{
-        return "gap-style"
+    handleOrder(command) {
+      console.log(command);
+      var type = command.type;
+      var order_no = command.order_no;
+      if (type === "report") {
+        this.$router.push({ name: "Report", query: { order_no: order_no } });
       }
     },
 
-    statusClass(item){
-      if(item.status ===4){
-        return "is-end"
-      }else{
-        return "is-working"
+    beforeHandleOrder(type, order_no) {
+      return {
+        type: type,
+        order_no: order_no,
+      };
+    },
+
+    gapClass(index) {
+      if (index === 4 || index === 5) {
+        return "gap-style-bottom";
+      } else {
+        return "gap-style";
+      }
+    },
+
+    statusClass(item) {
+      if (item.status === 4) {
+        return "is-end";
+      } else {
+        return "is-working";
       }
     },
 
@@ -262,34 +272,42 @@ export default {
   background-color: #00136c;
 } */
 
-.gap-style-bottom{
+.gap-style-bottom {
   margin-right: 40px;
 }
 
-.gap-style{
+.gap-style {
   margin-right: 40px;
   margin-bottom: 40px;
 }
 
-.is-working{
-  width:20px;height:20px;border-radius:50%;background-color:#03c4a1
+.is-working {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #03c4a1;
 }
 
-.is-end{
-  width:20px;height:20px;border-radius:50%;background-color:#00303f
+.is-end {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #00303f;
 }
 
-.hidden-text{
-  text-overflow:ellipsis;white-space:nowrap; overflow:hidden;
+.hidden-text {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .card-shadow {
   box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.05);
 }
 
-.el-card__header{
+.el-card__header {
   padding: 0;
-  border-bottom:1px solid #EBEEF5;
+  border-bottom: 1px solid #ebeef5;
   box-sizing: border-box;
 }
 .card-style {
@@ -329,5 +347,4 @@ export default {
 .mouse_style_link {
   cursor: pointer;
 }
-
 </style>
