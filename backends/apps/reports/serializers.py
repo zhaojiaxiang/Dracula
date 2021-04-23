@@ -17,3 +17,10 @@ class ReportLiaisonSerializer(serializers.ModelSerializer):
         all_qahf = QaHead.objects.filter(fslipno__exact=obj['fodrno'])
         qahf_serializer = QaHeadDisplayNoteSerializer(all_qahf, many=True, context={'request': self.context['request']})
         return qahf_serializer.data[0]['fnote'] if qahf_serializer.data else '******'
+
+
+class ReportLiaisonListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Liaisons
+        fields = ('fodrno', 'fsystemcd', 'fslipno', 'fsirno', 'fbrief')

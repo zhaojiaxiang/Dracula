@@ -33,7 +33,7 @@ from qa.views import MCLQaHeadViewSet, QaDetailViewSet, QaDetailUpdateResultView
     PCLQaClass2ViewSet, PCLCommitJudgment, TestResultDefaultOK, QaDetailApprovalContentTextViewSet, \
     QadfProofContentTextViewSet
 from rbac.views import WorkingOrganization, WorkingProject
-from reports.views import ReportListViewSet
+from reports.views import ReportListViewSet, ReportLiaisonListViewSet, ReportLiaisonInfo, ReportQaInfo, ReportOrderInfo
 from reviews.views import DesignReviewViewSet, CodeReviewViewSet
 from systems.views import SystemsViewSet
 
@@ -69,6 +69,7 @@ router.register('qa_test_statistics', QaProjectDataStatisticsViewSet, basename='
 router.register('qa_project_group', QaProjectForGroupViewSet, basename='qa_project_group')
 router.register('qa_project_mine', QaProjectForMineViewSet, basename='qa_project_mine')
 router.register('pb_file_checkout', CheckOutFilesViewSet, basename='pb_file_checkout')
+router.register('report_list', ReportLiaisonListViewSet, basename='report_list')
 
 
 urlpatterns = [
@@ -98,6 +99,9 @@ urlpatterns = [
     path('api/default_ok/', TestResultDefaultOK.as_view()),
     path('api/sync_sir/', SyncLiaisonBySirNo.as_view()),
     path('api/sendemail/', SendEmail.as_view()),  # 发送邮件
+    path('api/report_liaison_info/', ReportLiaisonInfo.as_view()),
+    path('api/report_qa_info/', ReportQaInfo.as_view()),
+    path('api/report_order_info/', ReportOrderInfo.as_view()),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
               + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
