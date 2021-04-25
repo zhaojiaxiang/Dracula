@@ -71,6 +71,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'middlewares.middleware_logs.LogMiddleware',
 ]
 
 ROOT_URLCONF = 'backends.urls'
@@ -195,3 +196,34 @@ JWT_AUTH = {
 }
 
 SENDFILE_BACKEND = "sendfile.backends.development"
+
+LOG_PATH = os.path.join(BASE_DIR, "logs")
+
+# 访问静态文件时，不记录log
+UN_LOG_PATH_PREFIX = (
+    'media',
+    'static',
+    'files',
+    'image_upload',
+    'file_upload',
+    'liaison_file_upload'
+)
+# 访问以下接口时不记录log，以下接口的响应结果都是大批量list，因此响应结果不写入log文件
+UN_LOG_PATH = (
+    '/api/report_order_info/',
+    '/api/report_qa_info/',
+    '/api/report_liaison_info/',
+    '/api/qa_project_detail_view/',
+    '/api/qa/mcl_detail/',
+    '/api/pb_file_checkout/',
+    '/api/liaisons/',
+    '/api/mine_task_conform/',
+    '/api/mine_task_release/',
+    '/api/mine_task_approval/',
+    '/api/mine_task_mcl/',
+    '/api/mine_task_pcl/',
+    '/api/group_users/',
+    '/api/accounts/',
+    '/api/projects/',
+    '/api/systems/',
+)

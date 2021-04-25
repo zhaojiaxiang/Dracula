@@ -44,22 +44,3 @@ def get_all_organization_group_belong_me(request):
         organization = organization + organization
 
     return tuple(organization)
-
-
-# def get_qa_detail_test(slip_no):
-#     """
-#     获取总行数、总修改行数；由于SLMS中复杂度是整数，则本地将复杂度默认为1 传过去
-#     :param fslipno:
-#     :return:
-#     """
-#     qahfs = db.session.execute("select sum(fttlcodelines), sum(fmodifiedlines) from `qahf` where ftesttyp = 'MCL' and fslipno='{}'".format(fslipno))
-#     templist = list(qahfs)
-#     fttlcodelines = templist[0][0]
-#     fmodifiedlines = templist[0][1]
-#
-#     if fttlcodelines is None:
-#         fttlcodelines = 0
-#     if fmodifiedlines is None:
-#         fmodifiedlines = 0
-#
-#     return fttlcodelines, fmodifiedlines
