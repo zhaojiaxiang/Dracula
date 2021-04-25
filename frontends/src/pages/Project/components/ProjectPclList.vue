@@ -113,6 +113,7 @@
         ]"
         :filter-method="filterResult"
         filter-placement="bottom-end"
+        v-if="qahead.fstatus !== '1'"
       >
         <template slot-scope="scope">
           <el-dropdown trigger="click" @command="handleResult">
@@ -144,24 +145,24 @@
           </el-dropdown>
         </template>
       </el-table-column>
-      <el-table-column label="贴图" width="100">
+      <el-table-column label="贴图" width="100" v-if="qahead.fstatus !== '1'">
         <template slot-scope="scope">
           <el-link
             type="primary"
             :underline="false"
             style="margin-left:15px"
             @click="handleContentText(scope.row.id)"
-            v-show="scope.row.fcontent_text"
+            v-show="isCanImage(scope.row.test_tag)"
             >{{ scope.row.test_tag }}</el-link
           >
-          <el-link
+          <!-- <el-link
             style="margin-left:20px"
             type="primary"
             :underline="false"
             @click="handleContentText(scope.row.id)"
             v-show="!scope.row.fcontent_text && isCanTest()"
             >贴图</el-link
-          >
+          > -->
         </template>
       </el-table-column>
       <el-table-column label="操作" width="100">
@@ -261,6 +262,18 @@ export default {
         return true;
       }
       return false;
+    },
+
+    isCanImage(test_tag){
+      if (this.qahead.fstatus === "2") {
+        return true
+      }else{
+        if(test_tag === '贴图'){
+          console.log(test_tag);
+          return false;
+        }
+        return true;
+      }
     },
 
     isCanTest() {

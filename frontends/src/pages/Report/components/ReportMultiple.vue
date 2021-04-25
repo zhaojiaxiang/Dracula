@@ -1,5 +1,8 @@
 <template>
   <el-row>
+    <div style="margin:10px">
+      <el-page-header @back="goBack"></el-page-header>
+    </div>
     <el-col :span="el_col_span_1">
       <div class="grid-content"></div>
     </el-col>
@@ -182,6 +185,11 @@ export default {
     },
   },
   methods: {
+    goBack() {
+      //返回上一个路由
+      this.$router.go(-1)
+    },
+
     printdiv() {
       var newstr = document.getElementById("div_print").innerHTML;
       var oldstr = document.body.innerHTML;

@@ -87,17 +87,20 @@
       <el-table-column prop="fcontent" label="测试用例" show-overflow-tooltip>
       </el-table-column>
       <el-table-column
+        v-if="paramtype !== 'approval'"
         prop="ftestdte"
         label="测试日"
         width="100"
       ></el-table-column>
       <el-table-column
+        v-if="paramtype !== 'approval'"
         prop="ftestusr"
         label="测试者"
         width="100"
       ></el-table-column>
       <el-table-column
         prop="fresult"
+        v-if="paramtype !== 'approval'"
         label="结果"
         width="100"
         :filters="[
@@ -116,11 +119,12 @@
           }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="贴图" width="100">
+      <el-table-column label="贴图" width="100" v-if="paramtype !== 'approval'">
         <template slot-scope="scope">
           <el-link
             type="primary"
             :underline="false"
+            v-show="isCanImage(scope.row.test_tag)"
             style="margin-left:15px"
             @click="handleContentText(scope.row.id)"
             >{{ scope.row.test_tag }}</el-link
@@ -209,6 +213,17 @@ export default {
         return true;
       }
       return false;
+    },
+
+    isCanImage(test_tag) {
+      if (this.paramtype === "confirm") {
+        if (test_tag === "贴图" && this.qahead.fstatus === "4") {
+          return false;
+        }
+        return true;
+      } else if (this.paramtype === "approval") {
+        return false;
+      }
     },
 
     confirmed() {

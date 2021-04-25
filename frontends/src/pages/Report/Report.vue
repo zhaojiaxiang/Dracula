@@ -1,5 +1,8 @@
 <template>
   <div style="margin:0 auto">
+    <div style="margin:10px">
+      <el-page-header @back="goBack"></el-page-header>
+    </div>
     <el-row>
       <el-col :span="3">
         <div class="grid-content"></div>
@@ -58,6 +61,11 @@ export default {
     };
   },
   methods: {
+    goBack() {
+      //返回上一个路由
+      this.$router.go(-1)
+    },
+
     handleSelectionChange(val) {
       var slip_arr = []
       val.forEach(element => {

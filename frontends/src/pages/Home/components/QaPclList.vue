@@ -111,6 +111,7 @@
         width="100"
       ></el-table-column>
       <el-table-column
+        v-if="qahead.fstatus !== '1'"
         prop="fresult"
         label="结果"
         width="100"
@@ -154,14 +155,14 @@
           </el-dropdown>
         </template>
       </el-table-column>
-      <el-table-column label="贴图" width="100">
+      <el-table-column label="贴图" width="100" v-if="qahead.fstatus !== '1'">
         <template slot-scope="scope">
           <el-link
             type="primary"
             :underline="false"
             style="margin-left:15px"
             @click="handleContentText(scope.row.id)"
-            v-show="isCanTest()"
+            v-show="isCanImage(scope.row.test_tag)"
             >{{ scope.row.test_tag }}</el-link
           >
           <!-- <el-link
@@ -266,6 +267,18 @@ export default {
       return true;
     },
 
+    isCanImage(test_tag){
+      if (this.qahead.fstatus === "2") {
+        return true
+      }else{
+        if(test_tag === '贴图'){
+          console.log(test_tag);
+          return false;
+        }
+        return true;
+      }
+    },
+
     isCanAdd() {
       if (this.qahead.fstatus === "1" || this.qahead.fstatus === "2") {
         return true;
@@ -307,7 +320,10 @@ export default {
     },
 
     handleContentText(id) {
-      this.$router.push({ name: "QaContentText", query: { type:"test", qadf_id: id } });
+      this.$router.push({
+        name: "QaContentText",
+        query: { type: "test", qadf_id: id },
+      });
     },
 
     async batchDeleteQaDetail() {
