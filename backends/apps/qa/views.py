@@ -17,7 +17,7 @@ from qa.serializers import QaHeadSerializer, QaDetailSerializer, QaDetailUpdateR
     QaDetailUpdateContentTextSerializer, QaHeadUpdateObjectSummarySerializer, QaHeadModifyDetailSerializer, \
     QaHeadTargetAndActualSerializer, PCLQaClass1Serializer, PCLQaClass2Serializer, \
     QaDetailApprovalContentTextSerializer, QadfproofContentTextSerializer
-from utils.utils import create_folder
+from utils.utils import create_folder, regex_content
 
 
 class MCLQaHeadViewSet(viewsets.ModelViewSet):
@@ -163,6 +163,36 @@ class PCLQaClass2ViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, views
         queryset = QaDetail.objects.filter(qahf_id__exact=qahf, fclass1__exact=class1).values('qahf_id',
                                                                                               'fclass1').distinct()
         return queryset
+
+
+class ReFormatContentText(APIView):
+    """
+    由于CKeditor4和CKeditor5生成的数据格式不同，为了向上兼容，可使用该接口重置旧数据
+    注：上线时使用，其余不可使用
+    """
+    def get(self, request):
+        model = request.GET.get("model")
+        data = {
+            "code": 200,
+            "message": model + "数据格式化成功"
+        }
+        try:
+            proofs = ''
+            if model == "qadf":
+                proofs = QaDetail.objects.filter(fcontent_text__isnull=False)
+            elif model == "proof":
+                proofs = Qadfproof.objects.all()
+
+            for proof in proofs:
+                content_text = proof.fcontent_text
+                proof.fcontent_text = regex_content(content_text)
+                proof.save()
+        except Exception as ex:
+            data = {
+                "code": 400,
+                "message": model + str(ex)
+            }
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class PCLCommitJudgment(APIView):

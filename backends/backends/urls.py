@@ -31,7 +31,7 @@ from qa.views import MCLQaHeadViewSet, QaDetailViewSet, QaDetailUpdateResultView
     QaDetailUpdateContentTextViewSet, QaHeadUpdateObjectSummaryViewSet, QaHeadModifyDetailViewSet, \
     QaHeadTargetAndActualViewSet, CkEditorImageUpload, CkEditorFileUpload, RecoverFile, PCLQaClass1ViewSet, \
     PCLQaClass2ViewSet, PCLCommitJudgment, TestResultDefaultOK, QaDetailApprovalContentTextViewSet, \
-    QadfProofContentTextViewSet
+    QadfProofContentTextViewSet, ReFormatContentText
 from rbac.views import WorkingOrganization, WorkingProject
 from reports.views import ReportListViewSet, ReportLiaisonListViewSet, ReportLiaisonInfo, ReportQaInfo, ReportOrderInfo
 from reviews.views import DesignReviewViewSet, CodeReviewViewSet
@@ -102,6 +102,7 @@ urlpatterns = [
     path('api/report_liaison_info/', ReportLiaisonInfo.as_view()),
     path('api/report_qa_info/', ReportQaInfo.as_view()),
     path('api/report_order_info/', ReportOrderInfo.as_view()),
+    path('api/reformat_content_text/', ReFormatContentText.as_view()),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
               + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
