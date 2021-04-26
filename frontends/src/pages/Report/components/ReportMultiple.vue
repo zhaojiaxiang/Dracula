@@ -192,10 +192,11 @@ export default {
 
     printdiv() {
       var newstr = document.getElementById("div_print").innerHTML;
-      var oldstr = document.body.innerHTML;
+      // var oldstr = document.body.innerHTML;
       document.body.innerHTML = newstr;
       window.print();
-      document.body.innerHTML = oldstr;
+      // document.body.innerHTML = oldstr;
+      location.reload()
       return false;
     },
 

@@ -269,7 +269,6 @@ export default {
         return true
       }else{
         if(test_tag === '贴图'){
-          console.log(test_tag);
           return false;
         }
         return true;
