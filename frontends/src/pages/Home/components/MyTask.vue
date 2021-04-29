@@ -19,7 +19,7 @@
       <el-table-column
         prop="fodrno"
         label="订单号"
-        width="120"
+        width="100"
         :filters="order_filters"
         :filter-method="filterOrder"
         filter-placement="bottom-end"
@@ -33,6 +33,20 @@
         :filters="slip_filters"
         :filter-method="filterSlip"
         filter-placement="bottom-end"
+      >
+      </el-table-column>
+
+      <el-table-column
+        prop="fsystemcd"
+        label="系统名称"
+        width="80"
+      >
+      </el-table-column>
+
+      <el-table-column
+        prop="fprojectcd"
+        label="项目名称"
+        width="80"
       >
       </el-table-column>
 
@@ -69,7 +83,7 @@
       <el-table-column
         prop="fobjectid"
         label="测试对象"
-        width="250"
+        min-width="150"
         show-overflow-tooltip
       >
       </el-table-column>
@@ -77,11 +91,13 @@
       <el-table-column
         prop="fobjmodification"
         label="概要"
+        min-width="200"
+        v-if="paramtype!=='pcl'"
         show-overflow-tooltip
       >
       </el-table-column>
 
-      <el-table-column label="设计Review" width="110">
+      <el-table-column label="设计Review" width="110" v-if="paramtype!=='pcl'">
         <template slot-scope="scope">
           <el-link
             @click="openDesignReview(scope.row.fslipno)"
@@ -95,7 +111,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="代码Review" width="110">
+      <el-table-column label="代码Review" width="110" v-if="paramtype!=='pcl'">
         <template slot-scope="scope">
           <el-link
             @click="openCodeReview(scope.row.fslipno, scope.row.fobjectid)"
@@ -109,7 +125,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" width="120">
+      <el-table-column label="操作" width="120" fixed="right">
         <template slot-scope="scope">
           <el-link
             style="margin-left:10px"
