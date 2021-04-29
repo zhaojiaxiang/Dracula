@@ -15,8 +15,12 @@ class LogMiddleware(MiddlewareMixin):
     @classmethod
     def process_response(cls, request, response):
         path = request.path
-        path_prefix = path.split("/")[1]
-        path_prefix2 = path.split("/")[2]
+        try:
+            path_prefix = path.split("/")[1]
+            path_prefix2 = path.split("/")[2]
+        except Exception:
+            path_prefix = ''
+            path_prefix2 = ''
 
         if path_prefix not in UN_LOG_PATH_PREFIX and path_prefix2 not in UN_LOG_PATH_PREFIX:
             handle_request(request)
