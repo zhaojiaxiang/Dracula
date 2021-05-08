@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     'reviews.apps.ReviewsConfig',
     'reports.apps.ReportsConfig',
     'rest_framework',
-    'rest_framework.authtoken',
     'DjangoUeditor',
     'django_filters'
 ]
@@ -127,20 +126,20 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+# AUTH_PASSWORD_VALIDATORS = [
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+#     },
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+#     },
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+#     },
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+#     },
+# ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
@@ -198,6 +197,9 @@ JWT_AUTH = {
 SENDFILE_BACKEND = "sendfile.backends.development"
 
 LOG_PATH = os.path.join(BASE_DIR, "logs")
+
+# 该状态为False时，联络票更新不参与SLIMS数据同步
+SLIMS_STATUS = env.bool('SLIMS_STATUS', False)
 
 # 访问静态文件时，不记录log
 UN_LOG_PATH_PREFIX = (
