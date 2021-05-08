@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from accounts.models import User
+from backends.settings import SLIMS_STATUS
 from liaisons.filters import LiaisonsFilter, QAProjectFilter, QAProjectDataStatisticsFilter
 from liaisons.models import Liaisons
 from liaisons.serializers import LiaisonsSerializer, LiaisonUpdateStatusSerializer, QaProjectSerializer, \
@@ -230,9 +231,10 @@ class SyncLiaisonBySirNo(APIView):
                 }
                 return Response(data, status.HTTP_200_OK)
 
-            # slims = SLIMSExchange(request)
-            # results = slims.sync_slims(sir_no)
             results = None
+            if SLIMS_STATUS:
+                slims = SLIMSExchange(request)
+                results = slims.sync_slims(sir_no)
 
             if results:
                 sir_no_list = results[0]
