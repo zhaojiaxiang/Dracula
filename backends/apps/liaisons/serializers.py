@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 from math import ceil
 
 from django.db import transaction
@@ -467,4 +468,4 @@ class QaProjectDataStatisticsSerializer(serializers.ModelSerializer):
         ng = self.get_actual_ng(obj)
         if total == 0:
             total = 1
-        return str(round(ng / total, 4) * 100) + "%"
+        return str(round(Decimal(ng / total), 2) * 100) + "%"

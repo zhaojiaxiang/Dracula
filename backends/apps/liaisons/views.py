@@ -87,6 +87,10 @@ class AllLiaisonsViewSet(viewsets.ModelViewSet):
     """
     queryset = Liaisons.objects.all().order_by('fstatus', '-fcreatedte')
     serializer_class = LiaisonsSerializer
+    pagination_class = LiaisonsPagination
+
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
+    filter_class = LiaisonsFilter
 
 
 class LiaisonUpdateStatusViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin,

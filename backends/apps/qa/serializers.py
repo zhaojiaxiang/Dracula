@@ -1,4 +1,5 @@
 import datetime
+from decimal import Decimal
 
 from django.db import transaction
 from django.db.models import Max, Q, Sum
@@ -14,6 +15,12 @@ class QaHeadSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     fcreatedte = serializers.DateTimeField(read_only=True)
     fcreateusr = serializers.CharField(read_only=True)
+    ftestdte = serializers.DateField(read_only=True)
+    ftestusr = serializers.CharField(read_only=True)
+    fconfirmdte = serializers.DateField(read_only=True)
+    fconfirmusr = serializers.CharField(read_only=True)
+    fauditdte = serializers.DateField(read_only=True)
+    fauditor = serializers.CharField(read_only=True)
     fslipno2 = serializers.IntegerField(read_only=True)
     # ftesttyp = serializers.CharField(read_only=True)
 
@@ -22,7 +29,8 @@ class QaHeadSerializer(serializers.ModelSerializer):
     class Meta:
         model = QaHead
         fields = ('id', 'fsystemcd', 'fprojectcd', 'fslipno', 'fslipno2', 'fobjectid', 'fobjmodification',
-                  'fcreatedte', 'fcreateusr', 'ftestusr', 'fstatus', 'ftesttyp', 'qadfcount', 'freviewcode', 'flevel')
+                  'fcreatedte', 'fcreateusr', 'ftestusr', 'fstatus', 'ftesttyp', 'qadfcount', 'freviewcode', 'flevel',
+                  'ftestdte', 'ftestusr', 'fconfirmdte', 'fconfirmusr', 'fauditdte', 'fauditor')
 
     def get_qadfcount(self, obj):
         qadf = QaDetail.objects.filter(qahf_id__exact=obj.id)
@@ -383,7 +391,7 @@ class QaHeadTargetAndActualSerializer(serializers.ModelSerializer):
         total = self.get_actual_total(obj)
         if total == 0:
             total = 1
-        ng_rate = round(self.get_actual_ng(obj) / total, 4) * 100
+        ng_rate = round(Decimal(self.get_actual_ng(obj) / total * 100), 2)
 
         return str(ng_rate) + "%"
 

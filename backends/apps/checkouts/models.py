@@ -19,10 +19,10 @@ class CheckOutFiles(models.Model):
     fchkoutfile = models.CharField(verbose_name='PBL名称', max_length=80, null=True, blank=True)
     fchkinperson = models.CharField(verbose_name='迁入者', max_length=20, null=True, blank=True)
     fchkindte = models.DateField(verbose_name='迁入日期', null=True, blank=True)
+    fsendemail = models.CharField(verbose_name='邮件发送标志', max_length=1, null=True, blank=True)
     applicant = models.ForeignKey(User, null=True, blank=True, on_delete=models.DO_NOTHING)
 
     class Meta:
         db_table = 'checkouts'
         verbose_name = '程序迁出履历'
         verbose_name_plural = verbose_name
-
