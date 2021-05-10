@@ -76,7 +76,16 @@
         filter-placement="bottom-end"
       >
       </el-table-column>
+      <!-- <el-table-column fixed prop="fslipno" label="联络票号" min-width="160"> -->
       <el-table-column fixed prop="fslipno" label="联络票号" min-width="160">
+        <template slot-scope="scope">
+          <el-link
+            @click="openSlipNoQa(scope.row.fslipno)"
+            type="primary"
+            :underline="false"
+            >{{ scope.row.fslipno }}</el-link
+          >
+        </template>
       </el-table-column>
       <el-table-column
         prop="fbrief"
@@ -176,6 +185,9 @@ export default {
     },
     cellclick(id) {
       this.currentID = id;
+    },
+    openSlipNoQa(fslipno) {
+      this.$router.push({ name: "QaList", query: { slipno: fslipno } });
     },
     async refreshLiaisons() {
       this.tableData = [];

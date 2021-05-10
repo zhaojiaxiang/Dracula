@@ -18,6 +18,12 @@ export default {
         component: () => import("@/pages/Home/components/Qa"),
       },
       {
+        path: "/qalist",
+        name: "QaList",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/Home/components/QaListForRelease"),
+      },
+      {
         path: "/qa/design_review",
         name: "QaDesignReview",
         meta: { requiresAuth: true },

@@ -1,7 +1,7 @@
 <template>
   <el-dialog title="测试结果确认" :visible.sync="dialogFormVisible">
     <el-form ref="form" :rules="rules" :model="form">
-      <el-form-item prop="flevel" size="medium" required>
+      <el-form-item prop="flevel" size="medium">
         <el-select v-model="form.flevel" placeholder="请选择难易等级">
           <el-option label="01" value="01"></el-option>
           <el-option label="02" value="02"></el-option>
@@ -16,8 +16,8 @@
         </el-select>
       </el-form-item>
 
-      <el-form-item prop="freviewcode" size="medium" required>
-        <el-input placeholder="确认结果" v-model="form.freviewcode"></el-input>
+      <el-form-item prop="freviewcode" size="medium">
+        <el-input placeholder="项目评价" v-model="form.freviewcode"></el-input>
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
@@ -47,7 +47,7 @@ export default {
       },
       rules: {
         freviewcode: [
-          { required: true, message: "请输入测试结果", trigger: "change" },
+          { required: true, message: "请输入项目评价", trigger: "change" },
         ],
         flevel: [
           { required: true, message: "请选择难易等级", trigger: "change" },

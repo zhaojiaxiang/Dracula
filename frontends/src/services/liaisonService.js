@@ -25,6 +25,11 @@ export async function getSingleLiaisonBySlipNo(slipno) {
   return resp;
 }
 
+export async function getSingleALlLiaisonBySlipNo(slipno) {
+  var resp = await axios.get("/api/all_liaisons/?fslipno=" + slipno);
+  return resp;
+}
+
 export async function updateLiaisonStatus(id, StatusInfo) {
   var resp = await axios.put("/api/liaison_update_status/" + id + "/", StatusInfo);
   return resp;
