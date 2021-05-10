@@ -71,6 +71,9 @@ class SLIMSExchange:
 
         total_ng = total_ng_cases[0]
 
+        if total_ng is None:
+            total_ng = 0
+
         # 评论产生NG的总测试项目数
         sql_str_ng_approval = f"select count(*) from qadf where qahf_id in " \
                               f"(select id from qahf where fslipno = '{slip_no}') and fngcnt > 0"
@@ -79,6 +82,9 @@ class SLIMSExchange:
 
         total_ng_approval = total_ng_approval_cases[0]
 
+        if total_ng_approval is None:
+            total_ng_approval = 0
+
         # 评论产生的总NG数，一个测试项可能存在多次评论，算作多次NG
         sql_str_ng_approval_sum = f"select sum(fngcnt) from qadf where qahf_id in " \
                                         f"(select id from qahf where fslipno = '{slip_no}')  and fngcnt > 0"
@@ -86,6 +92,9 @@ class SLIMSExchange:
         total_ng_approval_sum_cases = query_single_with_no_parameter(sql_str_ng_approval_sum, 'list')
 
         total_ng_approval_sum = total_ng_approval_sum_cases[0]
+
+        if total_ng_approval_sum is None:
+            total_ng_approval_sum = 0
 
         ng_count = total_ng + total_ng_approval_sum - total_ng_approval
 

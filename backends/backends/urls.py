@@ -25,7 +25,8 @@ from accounts.views import UserViewSet, SystemSettingViewSet, MyGroupUserViewSet
 from backends import settings
 from checkouts.views import CheckOutFilesViewSet, SendEmail
 from liaisons.views import LiaisonsViewSet, LiaisonUpdateStatusViewSet, QaProjectViewSet, QaProjectForMineViewSet, \
-    QaProjectForGroupViewSet, LiaisonFileUpload, QaProjectDetailView, SyncLiaisonBySirNo, QaProjectDataStatisticsViewSet
+    QaProjectForGroupViewSet, LiaisonFileUpload, QaProjectDetailView, SyncLiaisonBySirNo, \
+    QaProjectDataStatisticsViewSet, AllLiaisonsViewSet
 from projects.views import ProjectsViewSet
 from qa.views import MCLQaHeadViewSet, QaDetailViewSet, QaDetailUpdateResultViewSet, \
     QaDetailUpdateContentTextViewSet, QaHeadUpdateObjectSummaryViewSet, QaHeadModifyDetailViewSet, \
@@ -42,6 +43,7 @@ router = DefaultRouter()
 router.register('accounts', UserViewSet, basename='accounts')
 router.register('group_users', MyGroupUserViewSet, basename='group_users')
 router.register('liaisons', LiaisonsViewSet, basename='liaisons')
+router.register('all_liaisons', AllLiaisonsViewSet, basename='all_liaisons')
 router.register('liaison_update_status', LiaisonUpdateStatusViewSet, basename='liaison_update_status')
 router.register('reports', ReportListViewSet, basename='reports')
 router.register('projects', ProjectsViewSet, basename='projects')

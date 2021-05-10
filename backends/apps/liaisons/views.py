@@ -80,6 +80,15 @@ class LiaisonsViewSet(viewsets.ModelViewSet):
             qahf.delete()
 
 
+class AllLiaisonsViewSet(viewsets.ModelViewSet):
+    """
+    LiaisonsViewSet是个人的所有联络票号接口
+    AllLiaisonsViewSet是所有的联络票接口
+    """
+    queryset = Liaisons.objects.all().order_by('fstatus', '-fcreatedte')
+    serializer_class = LiaisonsSerializer
+
+
 class LiaisonUpdateStatusViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin,
                                  mixins.UpdateModelMixin, GenericViewSet):
     queryset = Liaisons.objects.all()
