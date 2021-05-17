@@ -53,43 +53,6 @@
       <el-button @click="resetForm('form')">重 置</el-button>
       <el-button @click="dialogFormVisible = false">取 消</el-button>
     </div>
-    <!-- <el-table
-      :data="testplan"
-      border
-      ref="testplan"
-      :cell-class-name="tableCellClassName"
-      style="width: 100%"
-      :highlight-current-row="true"
-    >
-      <el-table-column prop="target_tests" label="目标测试数" width="95">
-      </el-table-column>
-      <el-table-column
-        prop="target_regressions"
-        label="目标回归测试数"
-        width="120"
-      >
-      </el-table-column>
-      <el-table-column prop="target_total" label="目标总测试数" width="120">
-      </el-table-column>
-      <el-table-column prop="target_ng" label="目标NG数" width="95">
-      </el-table-column>
-      <el-table-column prop="actual_tests" label="实际测试数" width="100">
-      </el-table-column>
-      <el-table-column
-        prop="actual_regressions"
-        label="实际回归测试数"
-        width="120"
-      >
-      </el-table-column>
-      <el-table-column prop="actual_total" label="实际总测试数" width="120">
-      </el-table-column>
-      <el-table-column
-        prop="actual_ng"
-        label="实际NG数"
-        width="100"
-      >
-      </el-table-column>
-    </el-table> -->
   </el-dialog>
 </template>
 
@@ -122,6 +85,9 @@ export default {
         fcomplexity: [
           { required: true, message: "请选择复杂度", trigger: "change" },
         ],
+        fselflevel:[
+          { required: true, message: "请选择自我评价难易等级", trigger: "change" },
+        ]
       },
     };
   },

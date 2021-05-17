@@ -43,6 +43,7 @@ export default {
     },
 
     async handleDialog(slipno, objectid) {
+      this.contentText = ""
       this.slipno = slipno;
       this.objectid = objectid;
       this.query_objectid = objectid.replace(/ /g, "+");
