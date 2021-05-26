@@ -206,8 +206,9 @@ class LiaisonUpdateStatusSerializer(serializers.ModelSerializer):
                             if pcl.fstatus != "4":
                                 raise serializers.ValidationError("该联络票下的PCL没有确认")
 
-                    if instance.freleaserpt is None or len(instance.freleaserpt.strip()) == 0:
-                        raise serializers.ValidationError("请先上传变更报告书")
+                    # 其他组并没有系统变更报告书
+                    # if instance.freleaserpt is None or len(instance.freleaserpt.strip()) == 0:
+                    #     raise serializers.ValidationError("请先上传变更报告书")
 
                     if sir_no is None or len(sir_no) == 0:
                         raise serializers.ValidationError("无法发布该联络票--Sir No为空!")
@@ -233,9 +234,10 @@ class LiaisonUpdateStatusSerializer(serializers.ModelSerializer):
                 if new_status == "3":
                     instance.freleasedt = None
                 elif new_status == "2":
-                    is_exist = QaHead.objects.filter(fslipno__exact=instance.fslipno, fstatus__exact="4")
-                    if is_exist.count() > 0:
-                        raise serializers.ValidationError("该联络票下存在已确认的测试对象，不可回滚到开始状态")
+                    # 有歧义
+                    # is_exist = QaHead.objects.filter(fslipno__exact=instance.fslipno, fstatus__exact="4")
+                    # if is_exist.count() > 0:
+                    #     raise serializers.ValidationError("该联络票下存在已确认的测试对象，不可回滚到开始状态")
 
                     # 状态回滚到进行中时，删除SLIMS系统中的MCL数据
                     if SLIMS_STATUS:
@@ -455,7 +457,7 @@ class QaProjectDataStatisticsSerializer(serializers.ModelSerializer):
         return actual_regressions
 
     def get_actual_total(self, obj):
-        return self.get_target_tests(obj) + self.get_target_regressions(obj)
+        return self.get_actual_tests(obj) + self.get_actual_regressions(obj)
 
     def get_actual_ng(self, obj):
         qa_heads = QaHead.objects.values('id').filter(fslipno__exact=obj['fslipno'])

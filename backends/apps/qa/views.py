@@ -98,7 +98,7 @@ class QaDetailViewSet(viewsets.ModelViewSet):
     """
     测试明细表 增删改查 API
     """
-    queryset = QaDetail.objects.all().order_by('fsortrule', 'fclass1', 'fclass2', 'fregression')
+    queryset = QaDetail.objects.all().order_by('fsortrule', 'fclass1', 'fclass2', 'fregression', '-pk')
     serializer_class = QaDetailSerializer
 
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
