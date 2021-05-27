@@ -1,6 +1,6 @@
 <template>
   <div class="div-style">
-    <div style="margin:10px">
+    <div style="margin: 10px">
       <el-page-header @back="goBack"> </el-page-header>
     </div>
     <el-table
@@ -9,10 +9,42 @@
       style="width: 100%"
       size="medium"
     >
+      <el-table-column label="详情" type="expand">
+        <template slot-scope="props">
+          <el-form label-position="left" inline class="demo-table-expand">
+            <el-form-item label="联络票：">
+              <span>{{ props.row.fslipno }}</span>
+            </el-form-item>
+            <el-form-item label="SIR NO：">
+              <span>{{ props.row.fsirno }}</span>
+            </el-form-item>
+            <el-form-item label="订单号：">
+              <span>{{ props.row.fodrno }}</span>
+            </el-form-item>
+            <el-form-item label="开发概要：">
+              <span>{{ props.row.fbrief }}</span>
+            </el-form-item>
+            <el-form-item label="问题描述：">
+              <span>{{ props.row.fcontent }}</span>
+            </el-form-item>
+            <el-form-item label="问题分析：">
+              <span>{{ props.row.fanalyse }}</span>
+            </el-form-item>
+            <el-form-item label="解决方案：">
+              <span>{{ props.row.fsolution }}</span>
+            </el-form-item>
+            <el-form-item label="计划工时：">
+              <span>{{ props.row.fplnmanpower }}</span>
+            </el-form-item>
+            <el-form-item label="实际工时：">
+              <span>{{ props.row.factmanpower }}</span>
+            </el-form-item>
+          </el-form>
+        </template>
+      </el-table-column>
       <el-table-column
         prop="fstatus"
         label="状态"
-        fixed
         width="80"
         filter-placement="bottom-end"
       >
@@ -38,7 +70,6 @@
         </template>
       </el-table-column>
       <el-table-column
-        fixed
         prop="ftype"
         label="类型"
         width="100"
@@ -51,13 +82,15 @@
         filter-placement="bottom-end"
       >
         <template slot-scope="scope">
-          <el-tag :type="typeTagClass(scope.row.ftype)" disable-transitions effect="plain">{{
-            scope.row.ftype
-          }}</el-tag>
+          <el-tag
+            :type="typeTagClass(scope.row.ftype)"
+            disable-transitions
+            effect="plain"
+            >{{ scope.row.ftype }}</el-tag
+          >
         </template>
       </el-table-column>
       <el-table-column
-        fixed
         prop="fassignedto"
         label="对应者"
         min-width="90"
@@ -67,7 +100,6 @@
       >
       </el-table-column>
       <el-table-column
-        fixed
         prop="fodrno"
         label="订单号"
         min-width="160"
@@ -77,7 +109,7 @@
       >
       </el-table-column>
       <!-- <el-table-column fixed prop="fslipno" label="联络票号" min-width="160"> -->
-      <el-table-column fixed prop="fslipno" label="联络票号" min-width="160">
+      <el-table-column prop="fslipno" label="联络票号" min-width="160">
         <template slot-scope="scope">
           <el-link
             @click="openSlipNoQa(scope.row.fslipno)"
@@ -94,12 +126,22 @@
         show-overflow-tooltip
       >
       </el-table-column>
-      <el-table-column prop="actual" label="实际" width="220">
+      <el-table-column fixed="right" prop="actual" label="实际" width="220">
       </el-table-column>
-      <el-table-column prop="factmanpower" label="实际工时" width="100">
+      <el-table-column
+        fixed="right"
+        prop="factmanpower"
+        label="实际工时"
+        width="100"
+      >
       </el-table-column>
 
-      <el-table-column prop="factmanpower" label="变更报表" width="100">
+      <el-table-column
+        fixed="right"
+        prop="factmanpower"
+        label="变更报表"
+        width="100"
+      >
         <template slot-scope="scope">
           <el-link :underline="false" :icon="scope.row.icon"></el-link>
         </template>
@@ -215,10 +257,15 @@ export default {
         var fodrno = liaisons[i].fodrno;
         var fassignedto = liaisons[i].fassignedto;
         var fbrief = liaisons[i].fbrief;
+        var fcontent = liaisons[i].fcontent;
+        var fanalyse = liaisons[i].fanalyse;
+        var fsolution = liaisons[i].fsolution;
+        var fsirno = liaisons[i].fsirno;
         var factstart = liaisons[i].factstart;
         var factend = liaisons[i].factend;
         var freleasedt = liaisons[i].freleasedt;
         var factmanpower = liaisons[i].factmanpower;
+        var fplnmanpower = liaisons[i].fplnmanpower;
         var freleaserpt = liaisons[i].freleaserpt;
         var actual = "";
 
@@ -281,6 +328,11 @@ export default {
           freleasedt: "media/upload/file/" + freleasedt,
           factmanpower: factmanpower,
           icon: icon,
+          fcontent,
+          fanalyse,
+          fsolution,
+          fsirno,
+          fplnmanpower,
         };
         this.tableData.push(liaison);
       }
@@ -355,7 +407,7 @@ export default {
       };
     },
   },
-  mounted: function() {
+  mounted: function () {
     this.refreshLiaisons();
   },
 };
@@ -401,5 +453,16 @@ export default {
 }
 .div-style {
   margin: 0px;
+}
+.demo-table-expand {
+  font-size: 0;
+}
+.demo-table-expand label {
+  width: 120px;
+  color: #99a9bf;
+}
+.demo-table-expand .el-form-item {
+  margin: 0;
+  width: 100%;
 }
 </style>

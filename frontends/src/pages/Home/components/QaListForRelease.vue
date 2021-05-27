@@ -38,7 +38,7 @@
               </el-col>
               <el-col :span="8">
                 <el-form-item>
-                  <el-button type="text" @click="addDesignReview(form.fslipno)"
+                  <el-button type="text" @click="addDesignReview(liaison.fslipno)"
                     >设计Review</el-button
                   >
                 </el-form-item>

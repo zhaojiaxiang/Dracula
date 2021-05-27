@@ -230,9 +230,10 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item size="medium">
+            <el-form-item label="计划工时" label-width="80px" size="medium">
               <el-input
                 v-model="form.fplnmanpower"
+                type="number"
                 :disabled="true ? form.fstatus != '1' : form.fstatus == '1'"
                 placeholder="计划工时"
               ></el-input>
@@ -272,21 +273,23 @@
             </el-form-item>
           </el-col>
           <el-col :span="9">
-            <el-form-item size="medium">
+            <el-form-item label="计划工时:" label-width="80px" size="medium">
               <el-input
                 :disabled="true ? form.fstatus != '2' : form.fstatus == '2'"
                 v-model="form.fplnmanpower"
-                style="width:80%"
+                type="number"
+                style="width:60%"
                 placeholder="计划工时"
               ></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="9">
-            <el-form-item size="medium">
+            <el-form-item label="实际工时:" label-width="80px" size="medium">
               <el-input
                 :disabled="true ? form.fstatus != '2' : form.fstatus == '2'"
                 v-model="form.factmanpower"
-                style="width:80%"
+                type="number"
+                style="width:60%"
                 placeholder="实际工时"
               ></el-input>
             </el-form-item>

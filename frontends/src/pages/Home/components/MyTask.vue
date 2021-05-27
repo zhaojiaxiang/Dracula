@@ -25,7 +25,6 @@
         filter-placement="bottom-end"
       >
       </el-table-column>
-
       <el-table-column
         prop="fslipno"
         label="联络票/订单支号"
@@ -33,6 +32,14 @@
         :filters="slip_filters"
         :filter-method="filterSlip"
         filter-placement="bottom-end"
+      >
+      </el-table-column>
+
+      <el-table-column
+        prop="fnote"
+        label="订单备注"
+        min-width="100"
+        show-overflow-tooltip
       >
       </el-table-column>
 
@@ -91,7 +98,7 @@
       <el-table-column
         prop="fobjmodification"
         label="概要"
-        min-width="200"
+        min-width="150"
         v-if="paramtype!=='pcl'"
         show-overflow-tooltip
       >

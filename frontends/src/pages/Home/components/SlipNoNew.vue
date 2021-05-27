@@ -10,7 +10,7 @@
         ref="form"
         :model="form"
         :rules="rules"
-        label-width="30%"
+        label-width="14%"
         size="medium"
         style="width: 95%; margin-top:10px"
       >
@@ -57,7 +57,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="14">
-            <el-form-item label="项目名称" prop="fprojectcd" size="medium">
+            <el-form-item label="项目名称" label-width="80px" prop="fprojectcd" size="medium">
               <el-select
                 v-model="form.fprojectcd"
                 :disabled="isCanModify"
@@ -96,7 +96,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="14">
-            <el-form-item label="对应者" prop="fassignedto" size="medium">
+            <el-form-item label="对应者" label-width="80px" prop="fassignedto" size="medium">
               <el-select
                 v-model="form.fassignedto"
                 :disabled="isCanModify"
@@ -124,7 +124,7 @@
           </el-col>
 
           <el-col :span="14">
-            <el-form-item label="订单号" prop="fodrno" size="medium">
+            <el-form-item label="订单号" label-width="80px" prop="fodrno" size="medium">
               <el-input
                 v-model="form.fodrno"
                 :disabled="isCanModify"
@@ -159,7 +159,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="14">
-            <el-form-item label="协助者" size="medium">
+            <el-form-item label="协助者" label-width="80px" size="medium">
               <el-select
                 v-model="form.fhelper"
                 multiple
@@ -197,7 +197,7 @@
           ></el-input>
         </el-form-item>
         <el-form-item label="计划开始" required>
-          <el-col :span="7">
+          <el-col :span="6">
             <el-form-item prop="fplnstart">
               <el-date-picker
                 :disabled="isCanModify"
@@ -210,22 +210,23 @@
               ></el-date-picker>
             </el-form-item>
           </el-col>
-          <el-col :span="13">
-            <el-form-item prop="fplnend" label="计划结束">
+          <el-col :span="10">
+            <el-form-item prop="fplnend" label-width="120px" label="计划结束">
               <el-date-picker
                 type="date"
                 size="medium"
                 placeholder="计划结束日期"
                 value-format="yyyy-MM-dd"
                 v-model="form.fplnend"
-                style="width:90%"
+                style="width:100%"
               ></el-date-picker>
             </el-form-item>
           </el-col>
-          <el-col :span="4">
-            <el-form-item prop="fplnmanpower" size="medium">
+          <el-col :span="8">
+            <el-form-item prop="fplnmanpower" label="计划工时" label-width="120px" size="medium">
               <el-input
                 v-model="form.fplnmanpower"
+                type="number"
                 placeholder="计划工时"
               ></el-input>
             </el-form-item>

@@ -100,6 +100,7 @@ export default {
         form["fregression"] = this.qadetails[i][0];
         form["fcontent"] = this.qadetails[i][1];
         form["fclass1"] = this.qadetails[i][2];
+        form["fclass2"] = "";
         form["fsortrule"] = this.qadetails[i][3];
         form["qahf"] = this.qaheadid;
 

@@ -1,6 +1,6 @@
 <template>
   <div class="div-style-2">
-    <el-row style="margin-bottom:5px">
+    <el-row style="margin-bottom: 5px">
       <el-col :span="12">
         <Guide>
           <template>
@@ -12,7 +12,7 @@
       </el-col>
 
       <el-col :span="12">
-        <div style="text-align:right;">
+        <div style="text-align: right">
           <el-button @click="openTestStatistics">测试数据统计</el-button>
         </div>
       </el-col>
@@ -52,6 +52,21 @@
         :filter-method="filterSlipNo"
         filter-placement="bottom-end"
       >
+      <template slot-scope="scope">
+        <el-popover trigger="hover" placement="top">
+          <p>开发概要: {{ scope.row.slip_brief }}</p>
+          <p>问题描述: {{ scope.row.slip_content }}</p>
+          <p>问题分析: {{ scope.row.slip_analyse }}</p>
+          <p>解决方案: {{ scope.row.slip_solution }}</p>
+          <p>计划工时: {{ scope.row.slip_plnmanpower }}</p>
+          <p>实际工时: {{ scope.row.slip_actmanpower }}</p>
+          <div slot="reference" class="name-wrapper">
+            {{scope.row.slip_slip}}
+          </div>
+        </el-popover>
+        
+      </template>
+      
       </el-table-column>
       <el-table-column
         prop="slip_assignedto"
@@ -89,9 +104,17 @@
       <el-table-column
         prop="qa_object"
         label="测试对象"
-        min-width="150"
+        min-width="180"
         show-overflow-tooltip
       >
+        <template slot-scope="scope">
+          <el-link
+            @click="openQaList(scope.row.qa_id)"
+            type="primary"
+            :underline="false"
+            >{{ scope.row.qa_object }}</el-link
+          >
+        </template>
       </el-table-column>
       <el-table-column
         prop="qa_status"
@@ -130,8 +153,7 @@
           >
         </template>
       </el-table-column>
-
-      <el-table-column fixed="right" label="操作" width="60">
+      <!-- <el-table-column fixed="right" label="操作" width="80">
         <template slot-scope="scope">
           <el-link
             @click="openQaList(scope.row.qa_id)"
@@ -140,7 +162,7 @@
             icon="el-icon-edit-outline"
           ></el-link>
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
     <QaObjectSummary
       ref="QaObjectSummary"
@@ -305,6 +327,9 @@ export default {
         var slip_slip = projectView[i].slip_slip;
         var slip_status = projectView[i].slip_status;
         var slip_brief = projectView[i].slip_brief;
+        var slip_content = projectView[i].slip_content;
+        var slip_analyse = projectView[i].slip_analyse;
+        var slip_solution = projectView[i].slip_solution;
         var slip_assignedto = projectView[i].slip_assignedto;
         var slip_plnstart = projectView[i].slip_plnstart;
         var slip_plnend = projectView[i].slip_plnend;
@@ -370,6 +395,9 @@ export default {
           qa_tagtype: qa_tagtype,
           qa_modification: qa_modification,
           code_id: code_id,
+          slip_content,
+          slip_analyse,
+          slip_solution,
         };
 
         slip_json.text = slip_slip;
@@ -448,7 +476,7 @@ export default {
       }
     },
   },
-  mounted: function() {
+  mounted: function () {
     this.order_no = this.$route.query.order_no;
     this.refreshProjectDetailView();
   },

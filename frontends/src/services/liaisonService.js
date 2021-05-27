@@ -10,6 +10,12 @@ export async function getLiaisonsViaPagination(page, size){
   return resp;
 }
 
+export async function getLiaisonsViaParam(system, project, slip, type, status, order, leader, helper, assigned, sirno){
+  var resp = await 
+  axios.get("/api/all_liaisons/?fsystemcd="+ system +"&fprojectcd="+ project +"&fslipno="+ slip +"&ftype="+ type +"&fstatus="+ status +"&fodrno="+ order +"&fleader="+ leader +"&fhelper="+ helper +"&fassignedto="+ assigned +"&fsirno="+ sirno +"")
+  return resp
+}
+
 export async function newLiaison(liaisonInfo) {
   var resp = await axios.post("/api/liaisons/", liaisonInfo);
   return resp;
