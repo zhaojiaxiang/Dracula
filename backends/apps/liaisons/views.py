@@ -23,7 +23,7 @@ from utils.utils import create_folder, get_all_organization_group_belong_me
 
 
 class LiaisonsPagination(PageNumberPagination):
-    page_size = 5
+    page_size = 99
     page_size_query_param = 'page_size'
     max_page_size = 1000
 
@@ -170,6 +170,9 @@ class QaProjectDetailView(APIView):
                            liaisonf.fslipno      slip_slip,
                            liaisonf.fstatus      slip_status,
                            liaisonf.fbrief       slip_brief,
+                           liaisonf.fcontent     slip_content,
+                           liaisonf.fanalyse     slip_analyse,
+                           liaisonf.fsolution    slip_solution,
                            liaisonf.fassignedto  slip_assignedto,
                            liaisonf.fplnstart    slip_plnstart,
                            liaisonf.fplnend      slip_plnend,
@@ -192,7 +195,7 @@ class QaProjectDetailView(APIView):
                              on design.fslipno = liaisonf.fslipno and design.fobjectid = 'Design Review'
                     where fodrno = '{order_no}'
                       and liaisonf.fslipno = qahf.fslipno
-                    order by liaisonf.fslipno;
+                    order by liaisonf.fstatus, liaisonf.fslipno;
                   """
 
         project_detail = db_connection_execute(sql_str, 'dict')
