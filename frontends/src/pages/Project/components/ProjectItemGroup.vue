@@ -246,11 +246,11 @@ export default {
     },
   },
   mounted: function() {
-    // this.getProjectItems(
-    //   this.query_organization_id,
-    //   this.query_project_code,
-    //   this.query_order_no
-    // );
+    this.getProjectItems(
+      this.query_organization_id,
+      this.query_project_code,
+      this.query_order_no
+    );
   },
 };
 </script>
