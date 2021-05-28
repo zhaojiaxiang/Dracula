@@ -4,15 +4,15 @@
       class="drawer-height"
       :visible.sync="drawer"
       :with-header="false"
-      size="50%"
+      size="55%"
     >
       <el-form
         ref="form"
         :model="form"
         :rules="rules"
-        label-width="10%"
+        label-width="8%"
         size="medium"
-        style="width: 95%; margin-top:20px;"
+        style="width: 95%; margin-top: 20px"
         v-loading="loading"
       >
         <el-form-item
@@ -21,7 +21,13 @@
           v-show="true ? form.fstatus == '1' : form.fstatus != '1'"
         >
           <el-col :span="8">
-            <el-form-item prop="fsystemcd" class="width-sytle" size="medium">
+            <el-form-item
+              prop="fsystemcd"
+              label="系统名称"
+              label-width="80px"
+              class="width-sytle"
+              size="medium"
+            >
               <el-select
                 v-model="form.fsystemcd"
                 :disabled="true ? form.fstatus != '1' : form.fstatus == '1'"
@@ -37,7 +43,13 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item prop="fprojectcd" class="width-sytle" size="medium">
+            <el-form-item
+              prop="fprojectcd"
+              label="项目名称"
+              label-width="80px"
+              class="width-sytle"
+              size="medium"
+            >
               <el-select
                 v-model="form.fprojectcd"
                 :disabled="true ? form.fstatus != '1' : form.fstatus == '1'"
@@ -53,7 +65,12 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item prop="ftype" size="medium">
+            <el-form-item
+              prop="ftype"
+              label="开发类型"
+              label-width="80px"
+              size="medium"
+            >
               <el-select
                 v-model="form.ftype"
                 :disabled="true ? form.fstatus != '1' : form.fstatus == '1'"
@@ -72,7 +89,13 @@
 
         <el-form-item size="medium" required>
           <el-col :span="8">
-            <el-form-item prop="fassignedto" class="width-sytle" size="medium">
+            <el-form-item
+              prop="fassignedto"
+              label="对应者"
+              label-width="80px"
+              class="width-sytle"
+              size="medium"
+            >
               <el-select
                 v-model="form.fassignedto"
                 :disabled="true ? form.fstatus != '1' : form.fstatus == '1'"
@@ -92,6 +115,8 @@
               prop="fleader"
               size="medium"
               class="width-sytle"
+              label="负责人"
+              label-width="80px"
               required
             >
               <el-select
@@ -100,17 +125,24 @@
                 :disabled="true ? form.fstatus != '1' : form.fstatus == '1'"
                 placeholder="请选择负责人"
               >
-                <el-option
-                  v-for="(item, i) in groupusers"
-                  :key="i"
-                  :v-label="item.name"
-                  :value="item.name"
-                ></el-option>
+                <el-option-group
+                  v-for="group in allusers"
+                  :key="group.label"
+                  :label="group.label"
+                >
+                  <el-option
+                    v-for="item in group.options"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  >
+                  </el-option>
+                </el-option-group>
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item size="medium">
+            <el-form-item label="协助者" label-width="80px" size="medium">
               <el-select
                 multiple
                 :disabled="true ? form.fstatus != '1' : form.fstatus == '1'"
@@ -137,7 +169,12 @@
 
         <el-form-item size="medium" required>
           <el-col :span="8">
-            <el-form-item prop="fslipno" size="medium">
+            <el-form-item
+              prop="fslipno"
+              label="联络票"
+              label-width="80px"
+              size="medium"
+            >
               <el-input
                 v-model="form.fslipno"
                 :disabled="true ? form.fstatus != '1' : form.fstatus == '1'"
@@ -148,7 +185,12 @@
           </el-col>
 
           <el-col :span="8">
-            <el-form-item prop="fodrno" size="medium">
+            <el-form-item
+              label="订单号"
+              label-width="80px"
+              prop="fodrno"
+              size="medium"
+            >
               <el-input
                 v-model="form.fodrno"
                 class="width-sytle"
@@ -158,7 +200,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item size="medium">
+            <el-form-item label="SIR NO" label-width="80px" size="medium">
               <el-input
                 disabled
                 v-model="form.fsirno"
@@ -167,44 +209,62 @@
             </el-form-item>
           </el-col>
         </el-form-item>
-        <el-form-item prop="fbrief" size="medium">
-          <el-input
-            type="textarea"
-            :disabled="true ? form.fstatus != '1' : form.fstatus == '1'"
-            v-model="form.fbrief"
-            placeholder="开发概要"
-          ></el-input>
+        <el-form-item size="medium" required>
+          <el-form-item
+            label="开发概要"
+            label-width="80px"
+            prop="fbrief"
+            size="medium"
+          >
+            <el-input
+              type="textarea"
+              :disabled="true ? form.fstatus != '1' : form.fstatus == '1'"
+              v-model="form.fbrief"
+              placeholder="开发概要"
+            ></el-input>
+          </el-form-item>
         </el-form-item>
-        <el-form-item prop="fcontent" size="medium">
-          <el-input
-            type="textarea"
-            :disabled="true ? form.fstatus != '1' : form.fstatus == '1'"
-            v-model="form.fcontent"
-            placeholder="问题描述"
-          ></el-input>
+        <el-form-item size="medium" required>
+          <el-form-item
+            label="问题描述"
+            label-width="80px"
+            prop="fcontent"
+            size="medium"
+          >
+            <el-input
+              type="textarea"
+              :disabled="true ? form.fstatus != '1' : form.fstatus == '1'"
+              v-model="form.fcontent"
+              placeholder="问题描述"
+            ></el-input>
+          </el-form-item>
         </el-form-item>
-        <el-form-item size="medium">
-          <el-input
-            type="textarea"
-            :disabled="true ? form.fstatus == '5' : form.fstatus != '5'"
-            v-model="form.fanalyse"
-            placeholder="问题分析"
-          ></el-input>
+        <el-form-item size="medium" required>
+          <el-form-item label="问题分析" label-width="80px" size="medium">
+            <el-input
+              type="textarea"
+              :disabled="true ? form.fstatus == '5' : form.fstatus != '5'"
+              v-model="form.fanalyse"
+              placeholder="问题分析"
+            ></el-input>
+          </el-form-item>
         </el-form-item>
-        <el-form-item size="medium">
-          <el-input
-            type="textarea"
-            :disabled="true ? form.fstatus == '5' : form.fstatus != '5'"
-            v-model="form.fsolution"
-            placeholder="解决方案"
-          ></el-input>
+        <el-form-item size="medium" required>
+          <el-form-item label="解决方案" label-width="80px" size="medium">
+            <el-input
+              type="textarea"
+              :disabled="true ? form.fstatus == '5' : form.fstatus != '5'"
+              v-model="form.fsolution"
+              placeholder="解决方案"
+            ></el-input>
+          </el-form-item>
         </el-form-item>
         <el-form-item
           required
           v-show="true ? form.fstatus == '1' : form.fstatus == '1'"
         >
           <el-col :span="8">
-            <el-form-item prop="fplnstart">
+            <el-form-item label="计划开始" label-width="80px" prop="fplnstart">
               <el-date-picker
                 type="date"
                 size="medium"
@@ -217,7 +277,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item prop="fplnend">
+            <el-form-item label="计划结束" label-width="80px" prop="fplnend">
               <el-date-picker
                 type="date"
                 size="medium"
@@ -278,7 +338,7 @@
                 :disabled="true ? form.fstatus != '2' : form.fstatus == '2'"
                 v-model="form.fplnmanpower"
                 type="number"
-                style="width:60%"
+                style="width: 60%"
                 placeholder="计划工时"
               ></el-input>
             </el-form-item>
@@ -289,7 +349,7 @@
                 :disabled="true ? form.fstatus != '2' : form.fstatus == '2'"
                 v-model="form.factmanpower"
                 type="number"
-                style="width:60%"
+                style="width: 60%"
                 placeholder="实际工时"
               ></el-input>
             </el-form-item>
@@ -324,14 +384,14 @@ import { liaisonfileUpdate } from "../../../services/liaisonService";
 export default {
   data() {
     return {
-      loading:false,
+      loading: false,
       drawer: false,
-      iscanupdate:false,
+      iscanupdate: false,
       projects: {},
       systems: {},
       groupusers: {},
       allusers: [],
-      ori_form:{},
+      ori_form: {},
       form: {
         id: "",
         fsystemcd: "",
@@ -409,7 +469,6 @@ export default {
         if (valid) {
           var fleader_arr = this.form.fleader;
 
-
           if (fleader_arr) {
             this.form.fleader = fleader_arr.join(",");
           } else {
@@ -482,14 +541,14 @@ export default {
           return;
         });
         this.form = resp_l.data;
-        this.form.freleaserpt = "media/upload/file/" + this.form.freleaserpt
+        this.form.freleaserpt = "media/upload/file/" + this.form.freleaserpt;
       }
     },
   },
-  mounted: function() {
+  mounted: function () {
     this.loading = true;
     var this_ = this;
-    this.bus.$on("openSlipNoModifiy", async function(id) {
+    this.bus.$on("openSlipNoModifiy", async function (id) {
       this_.drawer = true;
       var p_resp = await getProjects().catch(() => {
         this.$message.error("项目主表数据获取异常");
@@ -530,8 +589,8 @@ export default {
         liaison.fleader = [];
       }
       this_.form = resp.data;
-      if(this_.form.freleaserpt){
-        this_.form.freleaserpt = "media/upload/file/" + this_.form.freleaserpt
+      if (this_.form.freleaserpt) {
+        this_.form.freleaserpt = "media/upload/file/" + this_.form.freleaserpt;
       }
 
       this_.projects = p_resp.data;
