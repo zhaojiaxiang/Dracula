@@ -1,3 +1,4 @@
+from django.core.mail import send_mail
 from rest_framework import filters, status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
@@ -9,7 +10,6 @@ from backends.settings import env
 from checkouts.filters import CheckOutFilesFilter
 from checkouts.models import CheckOutFiles
 from checkouts.serializers import CheckOutFilesSerializer
-from utils.email import send_email
 
 
 class CheckOutFilesPagination(PageNumberPagination):
@@ -39,6 +39,7 @@ class SendEmail(APIView):
     def post(self, request):
         data = request.data
         user = request.user
+        mail_user = env('MAIL_USER')
 
         check_list = data['tableData']
 
@@ -59,44 +60,6 @@ class SendEmail(APIView):
                            </table>
                            <p>''' + user.name + ''', 谢谢</p>'''
 
-        '''多邮件发送'''
-        # old_fslipno = ''
-        # mail_html_mid = ''
-        # for inx, row in enumerate(chklist):
-        #     new_fslipno = row['fslipno']
-        #     if new_fslipno != old_fslipno and old_fslipno != '':
-        #         if not send_email(mail_html_start + mail_html_mid + mail_html_end, sender, data['addresslist'],
-        #                           '[ AMMIC ] 程序迁出-' + user.name + '-' + old_fslipno, mail_host, mail_post,
-        #                           mail_user,
-        #                           mail_pass,
-        #                           receivers):
-        #             ret_data = {
-        #                 'code': '400',
-        #                 'message': '邮件发送失败'
-        #             }
-        #             return Response(ret_data, status=status.HTTP_200_OK)
-        #
-        #         mail_html_mid = ''
-        #
-        #     mail_html_mid += "<tr>"
-        #     mail_html_mid += "<td>" + row['fsystem'] + "</td>"
-        #     mail_html_mid += "<td>" + row['fcomment'] + "</td>"
-        #     mail_html_mid += "<td>" + row['fslipno'] + "</td>"
-        #     mail_html_mid += "<td>" + row['fchkoutobj'] + "</td>"
-        #     mail_html_mid += "</tr>"
-        #     old_fslipno = new_fslipno
-        #     if inx == len(chklist) - 1:
-        #         if not send_email(mail_html_start + mail_html_mid + mail_html_end, sender, data['addresslist'],
-        #                           '[ AMMIC ] 程序迁出-' + user.name + '-' + old_fslipno, mail_host, mail_post,
-        #                           mail_user,
-        #                           mail_pass,
-        #                           receivers):
-        #             ret_data = {
-        #                 'code': '400',
-        #                 'message': '邮件发送失败'
-        #             }
-        #             return Response(ret_data, status=status.HTTP_200_OK)
-
         '''单邮件发送'''
         mail_html_mid = ''
         for row in check_list:
@@ -111,11 +74,26 @@ class SendEmail(APIView):
         email_content = mail_html_start + mail_html_mid + mail_html_end
         address_list = data['addresslist']
         receivers = address_list.split(',')
+        try:
+            num = send_mail(
+                email_title,
+                email_content,
+                mail_user,
+                receivers,
+                fail_silently=False,
+                html_message=email_content
+            )
 
-        if not send_email(email_title, email_content, address_list, receivers):
+            if num == 0:
+                ret_data = {
+                    'code': '400',
+                    'message': '邮件发送失败'
+                }
+                return Response(ret_data, status=status.HTTP_200_OK)
+        except Exception as e:
             ret_data = {
                 'code': '400',
-                'message': '邮件发送失败'
+                'message': str(e)
             }
             return Response(ret_data, status=status.HTTP_200_OK)
 

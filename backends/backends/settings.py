@@ -167,6 +167,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
+# 使用Django自带邮件发送服务，配置项
+EMAIL_HOST = env('MAIL_HOST')
+EMAIL_HOST_USER = env('MAIL_USER')
+EMAIL_HOST_PASSWORD = env('MAIL_KEY')
+EMAIL_PORT = env('MAIL_PORT')
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
