@@ -71,7 +71,7 @@
       <el-table-column
         prop="slip_assignedto"
         label="对应者"
-        min-width="70"
+        min-width="80"
         :filters="slip_assignedto_filters"
         :filter-method="filterSlipAssignedto"
         filter-placement="bottom-end"
@@ -105,6 +105,7 @@
         prop="qa_object"
         label="测试对象"
         min-width="180"
+        fixed="right"
         show-overflow-tooltip
       >
         <template slot-scope="scope">
@@ -120,6 +121,7 @@
         prop="qa_status"
         label="状态"
         width="80"
+        fixed="right"
         :filters="qa_status_filters"
         :filter-method="filterQAStatus"
         filter-placement="bottom-end"
@@ -131,7 +133,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="qa_modification" label="概要" min-width="60">
+      <el-table-column fixed="right" prop="qa_modification" label="概要" min-width="60">
         <template slot-scope="scope">
           <el-link
             type="primary"
@@ -142,7 +144,7 @@
           >
         </template>
       </el-table-column>
-      <el-table-column prop="code_id" label="代码Review" min-width="100">
+      <el-table-column fixed="right" prop="code_id" label="代码Review" min-width="100">
         <template slot-scope="scope">
           <el-link
             type="primary"
@@ -464,7 +466,7 @@ export default {
       var clientHeight = document.documentElement.clientHeight;
       var maxHeight = 600;
 
-      this.tableHeight = this.tableData.length * 43 + 60;
+      this.tableHeight = this.tableData.length * 43 + 100;
       if (clientHeight > 900) {
         maxHeight = 600;
       } else {
