@@ -52,7 +52,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'last_login', 'is_superuser', 'username', 'is_staff', 'is_active', 'name', 'email', 'avatar',
-                  'ammic_group', 'ammic_role')
+                  'slmsname', 'fmaildays', 'ammic_group', 'ammic_role')
 
 
 class MyGroupUserSerializer(serializers.ModelSerializer):

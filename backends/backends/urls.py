@@ -21,7 +21,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_jwt.views import obtain_jwt_token
 
 from accounts.views import UserViewSet, SystemSettingViewSet, MyGroupUserViewSet, UserDevelopmentDetail, MyTaskBar, \
-    MyMcl, MyRelease, MyConfirm, MyApproval, MyPcl, LoginView
+    MyMcl, MyRelease, MyConfirm, MyApproval, MyPcl, LoginView, UpdatePassword, UpdateEmailDays, UpdateAvatar
 from backends import settings
 from checkouts.views import CheckOutFilesViewSet, SendEmail
 from liaisons.views import LiaisonsViewSet, LiaisonUpdateStatusViewSet, QaProjectViewSet, QaProjectForMineViewSet, \
@@ -105,6 +105,9 @@ urlpatterns = [
     path('api/report_qa_info/', ReportQaInfo.as_view()),
     path('api/report_order_info/', ReportOrderInfo.as_view()),
     path('api/reformat_content_text/', ReFormatContentText.as_view()),
+    path('api/update_password/', UpdatePassword.as_view()),
+    path('api/update_email_days/', UpdateEmailDays.as_view()),
+    path('api/update_avatar/', UpdateAvatar.as_view()),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
               + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

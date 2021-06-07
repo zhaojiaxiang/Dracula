@@ -1,4 +1,6 @@
+import os
 import re
+import uuid
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
@@ -15,7 +17,7 @@ from accounts.serializers import UserSerializer, SystemSettingSerializer, MyGrou
 from liaisons.models import Liaisons
 from qa.models import QaHead
 from utils.db_connection import db_connection_execute, query_single_with_no_parameter
-from utils.utils import get_all_organization_belong_me, get_all_organization_group_belong_me
+from utils.utils import get_all_organization_belong_me, get_all_organization_group_belong_me, create_folder
 
 User = get_user_model()
 
@@ -97,6 +99,73 @@ def api_exception_handler(exc, context):
                     data['message'] = exc.detail[list(exc.detail)[0]][0]
 
     return Response(data=data, status=status.HTTP_200_OK)
+
+
+class UpdatePassword(APIView):
+
+    def post(self, request):
+        user = request.user
+        old_password = request.data['password']
+        new_password = request.data['new_password']
+        if user.check_password(old_password):
+            user.set_password(new_password)
+            user.save()
+        else:
+            data = {
+                'code': '400',
+                'message': "旧密码不正确"
+            }
+            return Response(data)
+        data = {
+            "code": 200,
+        }
+        return Response(data)
+
+
+class UpdateEmailDays(APIView):
+
+    def post(self, request):
+        user = request.user
+        email_days = request.data['email_days']
+
+        user.fmaildays = email_days
+        user.save()
+
+        data = {
+            "code": 200,
+        }
+        return Response(data)
+
+
+class UpdateAvatar(APIView):
+
+    def post(self, request):
+        user = request.user
+
+        avatar = request.FILES.get('avatar')
+
+        extension = avatar.name.split('.')[1].lower()
+
+        file_name = "A" + str(uuid.uuid4()) + '.' + extension
+
+        upload_path = "media/avatar"
+
+        create_folder(upload_path)
+
+        file_path = os.path.join(upload_path, file_name)
+
+        with open(file_path, 'wb') as f:
+            for i in avatar.chunks():
+                f.write(i)
+
+        avatar_str = "avatar/"+file_name
+        user.avatar = avatar_str
+        user.save()
+
+        data = {
+            "code": 200,
+        }
+        return Response(data)
 
 
 class UserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
