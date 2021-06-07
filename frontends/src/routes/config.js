@@ -6,6 +6,12 @@ export default {
         component: () => import("@/pages/Account/Login"),
       },
       {
+        path: "/profile",
+        name: "Profile",
+        meta: { requiresAuth: true },
+        component: () => import("@/pages/Account/Profile"),
+      },
+      {
         path: "/",
         name: "Home",
         meta: { requiresAuth: true },

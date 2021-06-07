@@ -22,3 +22,27 @@ export async function getLiaisons(loginInfo) {
   }
   return resp;
 }
+
+export async function getUserInfo(id){
+  var resp = await axios.get("/api/accounts/" + id +"/")
+  return resp
+}
+
+
+export async function updateUserPassword(passwordInfo){
+  var resp = await axios.post("/api/update_password/", passwordInfo)
+  return resp;
+}
+
+export async function updateEmailDays(email_days){
+  var info = {
+    "email_days":email_days
+  }
+  var resp = await axios.post("/api/update_email_days/", info)
+  return resp;
+}
+
+export async function updateAvatar(form){
+  var resp = await axios.post("/api/update_avatar/", form)
+  return resp;
+}

@@ -21,7 +21,7 @@
             <template #button-content>
               <b-icon icon="person-fill"></b-icon>{{ userInfo.name }}
             </template>
-            <!-- <b-dropdown-item disabled><b-icon icon="gear-fill" aria-hidden="true"></b-icon>  设置</b-dropdown-item> -->
+            <b-dropdown-item @click="profile"><b-icon icon="gear-fill" aria-hidden="true"></b-icon>个人中心</b-dropdown-item>
             <b-dropdown-item @click="logout"
               ><b-icon icon="power" aria-hidden="true"></b-icon>
               退出</b-dropdown-item
@@ -55,6 +55,11 @@ export default {
       removeToken();
       window.location.reload();
     },
+    profile(){
+      this.$router.push({
+        name: "Profile"
+      });
+    }
   },
   mounted: function() {
     this.bus.$on("login_succ", ()=> {
