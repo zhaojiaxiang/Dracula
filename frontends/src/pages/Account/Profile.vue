@@ -29,7 +29,7 @@
       <el-col :span="18">
         <el-tabs type="border-card">
           <el-tab-pane label="个人信息">
-            <el-form :model="userInfo" label-width="100px" style="width: 50%">
+            <el-form :model="userInfo" label-width="100px" style="width: 60%">
               <el-form-item label="用户名:">
                 <el-input
                   :disabled="true"
@@ -56,7 +56,7 @@
               :rules="rules"
               ref="ruleForm"
               label-width="100px"
-              style="width: 50%"
+              style="width: 60%"
             >
               <el-form-item
                 label="旧密码："
@@ -94,7 +94,7 @@
             </el-form>
           </el-tab-pane>
           <el-tab-pane label="工时系统">
-            <el-form label-width="100px" style="width: 50%">
+            <el-form label-width="100px">
               <el-form-item label="同步日期：">
                 <el-checkbox-group v-model="weeksGroup" size="medium">
                   <el-checkbox-button
