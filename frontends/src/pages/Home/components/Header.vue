@@ -21,7 +21,10 @@
             <template #button-content>
               <b-icon icon="person-fill"></b-icon>{{ userInfo.name }}
             </template>
-            <b-dropdown-item @click="profile"><b-icon icon="gear-fill" aria-hidden="true"></b-icon>个人中心</b-dropdown-item>
+            <b-dropdown-item @click="profile"
+              ><b-icon icon="gear-fill" aria-hidden="true"></b-icon>
+              个人中心</b-dropdown-item
+            >
             <b-dropdown-item @click="logout"
               ><b-icon icon="power" aria-hidden="true"></b-icon>
               退出</b-dropdown-item
@@ -51,20 +54,20 @@ export default {
     };
   },
   methods: {
-    logout: function() {
+    logout: function () {
       removeToken();
       window.location.reload();
     },
-    profile(){
+    profile() {
       this.$router.push({
-        name: "Profile"
+        name: "Profile",
       });
-    }
+    },
   },
-  mounted: function() {
-    this.bus.$on("login_succ", ()=> {
+  mounted: function () {
+    this.bus.$on("login_succ", () => {
       this.userInfo = JSON.parse(localStorage.getItem("UserInfo"));
-    })
+    });
     this.userInfo = JSON.parse(localStorage.getItem("UserInfo"));
   },
 };
