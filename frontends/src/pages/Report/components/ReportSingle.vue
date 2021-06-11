@@ -68,6 +68,7 @@
           :span-method="liaisonSpanMethod"
           :cell-class-name="liaisonCellClass"
           size="medium"
+          v-if="liaison_show"
         >
           <el-table-column prop="row_1" min-width="70"></el-table-column>
           <el-table-column prop="row_2" min-width="120"></el-table-column>
@@ -126,6 +127,7 @@ export default {
       fullscreenLoading: false,
       is_imagemode: false,
       is_bigscreen: false,
+      liaison_show:true,
       clientHeight: 1080,
       el_col_span_1: 4,
       el_col_span_2: 15,
@@ -246,6 +248,7 @@ export default {
       this.liaisonData = resp_liaison.data;
     }else{
       this.title = "结合测试计划书"
+      this.liaison_show = false
     }
 
     var resp_qa = await getReportQaInfo(this.slip_no).catch(() => {
