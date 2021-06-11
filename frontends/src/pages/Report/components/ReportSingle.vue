@@ -57,7 +57,7 @@
       </div>
       <div id="div_print" style="padding-left:42px;padding-right:42px">
         <div style="text-align:center">
-          <h4>单体测试计划书兼报告书</h4>
+          <h4>{{title}}</h4>
         </div>
 
         <el-table
@@ -121,6 +121,7 @@ import DisplayEditor from "../../Commond/DisplayEditor";
 export default {
   data() {
     return {
+      title:"单体测试计划书兼报告书",
       slip_no: "",
       fullscreenLoading: false,
       is_imagemode: false,
@@ -240,7 +241,12 @@ export default {
       this.fullscreenLoading = false;
       this.$message.error("联络票报表数据获取异常");
     });
-    this.liaisonData = resp_liaison.data;
+
+    if(resp_liaison.data && JSON.stringify(resp_liaison.data) != "{}"){
+      this.liaisonData = resp_liaison.data;
+    }else{
+      this.title = "结合测试计划书"
+    }
 
     var resp_qa = await getReportQaInfo(this.slip_no).catch(() => {
       this.fullscreenLoading = false;

@@ -5,6 +5,11 @@ export async function getReportList(order_no) {
   return resp;
 }
 
+export async function getReportPCLList(order_no) {
+  var resp = await axios.get("/api/report_list_pcl/?fodrno=" + order_no);
+  return resp;
+}
+
 export async function getReportLiaisonInfo(slip_no) {
   var resp = await axios.get("/api/report_liaison_info/?slip_no=" + slip_no);
   return resp;

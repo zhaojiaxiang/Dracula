@@ -21,7 +21,7 @@
             size="medium"
             @selection-change="handleSelectionChange"
           >
-            <el-table-column type="selection" width="55"> </el-table-column>
+            <el-table-column type="selection" width="55" :selectable="selecttable"> </el-table-column>
             <el-table-column prop="fsystemcd" label="系统名称" width="120">
             </el-table-column>
             <el-table-column prop="fslipno" label="联络票号" width="250">
@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import { getReportList } from "../../services/report";
+import { getReportList, getReportPCLList } from "../../services/report";
 export default {
   data() {
     return {
@@ -64,6 +64,14 @@ export default {
     goBack() {
       //返回上一个路由
       this.$router.go(-1)
+    },
+
+    selecttable(row) {
+      if (row.fsystemcd === "PCL") {
+        return false;
+      } else {
+        return true;
+      }
     },
 
     handleSelectionChange(val) {
@@ -93,6 +101,19 @@ export default {
       this.$message.error("报表列表数据获取异常");
     });
     this.tableData = resp.data;
+
+    var resp_pcl = await getReportPCLList(this.order_no).catch(() => {
+      this.$message.error("报表PCL列表数据获取异常");
+    });
+
+    // this.tableData = resp.data + resp_pcl.data;
+
+    if(resp_pcl.data){
+      resp_pcl.data.forEach(element => {
+        this.tableData.push(element)
+      });
+    }
+    
   },
 };
 </script>
