@@ -4,8 +4,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from liaisons.models import Liaisons
-from reports.filters import ReportLiaisonsFilter
-from reports.serializers import ReportLiaisonSerializer, ReportLiaisonListSerializer
+from qa.models import QaHead
+from reports.filters import ReportLiaisonsFilter, QaHeadFilter
+from reports.serializers import ReportLiaisonSerializer, ReportLiaisonListSerializer, QaHeadPCLListSerializer
 from reports.utils import get_liaison_with_list, get_qa_with_list
 
 
@@ -23,6 +24,14 @@ class ReportLiaisonListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filter_class = ReportLiaisonsFilter
+
+
+class ReportLiaisonPCLViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    queryset = QaHead.objects.filter(ftesttyp__exact='PCL').order_by('fslipno2')
+    serializer_class = QaHeadPCLListSerializer
+
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
+    filter_class = QaHeadFilter
 
 
 class ReportLiaisonInfo(APIView):

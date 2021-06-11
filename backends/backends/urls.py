@@ -34,7 +34,8 @@ from qa.views import MCLQaHeadViewSet, QaDetailViewSet, QaDetailUpdateResultView
     PCLQaClass2ViewSet, PCLCommitJudgment, TestResultDefaultOK, QaDetailApprovalContentTextViewSet, \
     QadfProofContentTextViewSet, ReFormatContentText
 from rbac.views import WorkingOrganization, WorkingProject
-from reports.views import ReportListViewSet, ReportLiaisonListViewSet, ReportLiaisonInfo, ReportQaInfo, ReportOrderInfo
+from reports.views import ReportListViewSet, ReportLiaisonListViewSet, ReportLiaisonInfo, ReportQaInfo, ReportOrderInfo, \
+    ReportLiaisonPCLViewSet
 from reviews.views import DesignReviewViewSet, CodeReviewViewSet
 from systems.views import SystemsViewSet
 
@@ -72,6 +73,7 @@ router.register('qa_project_group', QaProjectForGroupViewSet, basename='qa_proje
 router.register('qa_project_mine', QaProjectForMineViewSet, basename='qa_project_mine')
 router.register('pb_file_checkout', CheckOutFilesViewSet, basename='pb_file_checkout')
 router.register('report_list', ReportLiaisonListViewSet, basename='report_list')
+router.register('report_list_pcl', ReportLiaisonPCLViewSet, basename='report_list_pcl')
 
 
 urlpatterns = [

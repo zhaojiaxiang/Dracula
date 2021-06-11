@@ -1,6 +1,7 @@
 import django_filters
 
 from liaisons.models import Liaisons
+from qa.models import QaHead
 
 
 class ReportLiaisonsFilter(django_filters.rest_framework.FilterSet):
@@ -14,3 +15,15 @@ class ReportLiaisonsFilter(django_filters.rest_framework.FilterSet):
     class Meta:
         model = Liaisons
         fields = ['fsystemcd', 'fprojectcd', 'fodrno']
+
+
+class QaHeadFilter(django_filters.rest_framework.FilterSet):
+    """
+    Report Liaison的过滤类
+    """
+
+    fodrno = django_filters.CharFilter(field_name='fslipno', lookup_expr='contains')
+
+    class Meta:
+        model = QaHead
+        fields = ['fodrno']

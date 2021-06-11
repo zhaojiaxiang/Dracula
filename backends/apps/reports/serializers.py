@@ -1,4 +1,3 @@
-
 from rest_framework import serializers
 
 from liaisons.models import Liaisons
@@ -20,7 +19,29 @@ class ReportLiaisonSerializer(serializers.ModelSerializer):
 
 
 class ReportLiaisonListSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Liaisons
         fields = ('fodrno', 'fsystemcd', 'fslipno', 'fsirno', 'fbrief')
+
+
+class QaHeadPCLListSerializer(serializers.ModelSerializer):
+    fodrno = serializers.SerializerMethodField()
+    fsirno = serializers.SerializerMethodField()
+    fbrief = serializers.SerializerMethodField()
+    fsystemcd = serializers.SerializerMethodField()
+
+    class Meta:
+        model = QaHead
+        fields = ('fodrno', 'fslipno', 'fsirno', 'fsystemcd', 'fbrief')
+
+    def get_fodrno(self, obj):
+        return obj.fslipno
+
+    def get_fsirno(self, obj):
+        return obj.fslipno2
+
+    def get_fbrief(self, obj):
+        return obj.fnote
+
+    def get_fsystemcd(self, obj):
+        return obj.ftesttyp
