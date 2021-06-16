@@ -26,10 +26,11 @@ class CheckOutFilesSerializer(serializers.ModelSerializer):
 
         system = validated_data['fsystem']
         chkoutobj = validated_data['fchkoutobj']
+        comment = validated_data['fcomment']
 
         ask_status = ('2-Check Out', '1-ASK')
 
-        files = CheckOutFiles.objects.filter(fsystem__exact=system, fchkoutobj__exact=chkoutobj,
+        files = CheckOutFiles.objects.filter(fsystem__exact=system, fchkoutobj__exact=chkoutobj, fcomment=comment,
                                              fchkstatus__in=ask_status)
 
         if files.count() > 0:
