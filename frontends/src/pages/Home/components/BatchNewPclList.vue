@@ -33,27 +33,28 @@ export default {
       fullscreenLoading: false,
     };
   },
-  mounted(){
-    document.addEventListener("paste", (event) => {
-        event.stopPropagation();
-        event.preventDefault(); //消除默认粘贴
+  mounted() {
+    this.$el.addEventListener("paste", (event) => {
+      event.stopPropagation();
+      event.preventDefault(); //消除默认粘贴
 
-        this.qadetails = [];
+      this.qadetails = [];
 
-        var clipboardData = event.clipboardData || window.clipboardData;
-        var pastedData = clipboardData.getData("Text");
+      var clipboardData = event.clipboardData || window.clipboardData;
+      var pastedData = clipboardData.getData("Text");
 
-        this.qadetails = pastedData
-          .split("\n")
-          .filter(function(item) {
-            //兼容Excel行末\n，防止出现多余空行
-            return item !== "";
-          })
-          .map(function(item) {
-            return item.split("\t");
-          });
-        document.getElementById("submitbtn").click();
-      });
+      this.qadetails = pastedData
+        .split("\n")
+        .filter(function (item) {
+          //兼容Excel行末\n，防止出现多余空行
+          return item !== "";
+        })
+        .map(function (item) {
+          return item.split("\t");
+        });
+
+      document.getElementById("submitbtn").click();
+    });
   },
   methods: {
     handleDialog(id) {
@@ -73,7 +74,9 @@ export default {
 
       for (var i in this.qadetails) {
         if (this.qadetails[i].length < 3) {
-          this.$message.error("粘贴文本格式错误: 分类1，分类2，测试用例，排序规则(非必须)");
+          this.$message.error(
+            "粘贴文本格式错误: 分类1，分类2，测试用例，排序规则(非必须)"
+          );
           this.fullscreenLoading = false;
           this.qadetails = [];
           return;
@@ -82,18 +85,18 @@ export default {
           this.qadetails[i][3] = "";
         }
 
-        if(this.qadetails[i][0].length > 60){
+        if (this.qadetails[i][0].length > 60) {
           this.$message.error("分类1长度不可大于60");
           return;
         }
 
-        if(this.qadetails[i][1].length > 60){
+        if (this.qadetails[i][1].length > 60) {
           this.$message.error("分类2长度不可大于60");
           return;
         }
 
         var form = {};
-        form["fregression"] = "N"
+        form["fregression"] = "N";
         form["fclass1"] = this.qadetails[i][0];
         form["fclass2"] = this.qadetails[i][1];
         form["fcontent"] = this.qadetails[i][2];
@@ -109,13 +112,13 @@ export default {
           return;
         });
 
-        if(Object.prototype.hasOwnProperty.call(resp.data, "message")){
-          this.$message.error(resp.data.message)
+        if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
+          this.$message.error(resp.data.message);
           this.$emit("refreshQaList");
           this.dialogFormVisible = false;
           this.fullscreenLoading = false;
           this.qadetails = [];
-          return
+          return;
         }
       }
       this.$emit("refreshQaList");
