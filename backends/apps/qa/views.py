@@ -17,6 +17,7 @@ from qa.serializers import QaHeadSerializer, QaDetailSerializer, QaDetailUpdateR
     QaDetailUpdateContentTextSerializer, QaHeadUpdateObjectSummarySerializer, QaHeadModifyDetailSerializer, \
     QaHeadTargetAndActualSerializer, PCLQaClass1Serializer, PCLQaClass2Serializer, \
     QaDetailApprovalContentTextSerializer, QadfproofContentTextSerializer
+from reviews.models import CodeReview
 from utils.utils import create_folder, regex_content
 
 
@@ -236,6 +237,23 @@ class TestResultDefaultOK(APIView):
             data = {
                 'code': '500',
                 'message': str(e)
+            }
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class CodeReviewInspection(APIView):
+
+    def get(self, request):
+        data = {}
+        object_id = request.GET.get('object_id')
+        slip_no = request.GET.get('slip_no')
+
+        code_review = CodeReview.objects.filter(fobjectid__exact=object_id,
+                                                fslipno__exact=slip_no)
+        if code_review.count() == 0:
+            data = {
+                'code': '400',
+                'message': '代码Review没填写'
             }
         return Response(data, status=status.HTTP_200_OK)
 

@@ -110,15 +110,15 @@ class QaHeadSerializer(serializers.ModelSerializer):
                         raise serializers.ValidationError("请先填写测试对象修改概要")
 
                     if instance.fcomplexity is None:
-                        raise serializers.ValidationError("请先填写测试明细")
+                        raise serializers.ValidationError("请先填写修改明细")
 
                     if instance.fttlcodelines is None:
                         raise serializers.ValidationError("请先填写修改明细")
 
-                    code_review = CodeReview.objects.filter(fobjectid__exact=instance.fobjectid,
-                                                            fslipno__exact=instance.fslipno)
-                    if code_review.count() == 0:
-                        raise serializers.ValidationError("请先填写代码Review")
+                    # code_review = CodeReview.objects.filter(fobjectid__exact=instance.fobjectid,
+                    #                                         fslipno__exact=instance.fslipno)
+                    # if code_review.count() == 0:
+                    #     raise serializers.ValidationError("请先填写代码Review")
 
                     liaison = Liaisons.objects.filter(fslipno__exact=instance.fslipno)
                     if liaison[0].ftype == "追加开发":
@@ -136,6 +136,12 @@ class QaHeadSerializer(serializers.ModelSerializer):
 
             if new_status == '4':
                 """确认"""
+
+                code_review = CodeReview.objects.filter(fobjectid__exact=instance.fobjectid,
+                                                        fslipno__exact=instance.fslipno)
+                if code_review.count() == 0:
+                    raise serializers.ValidationError("请先填写代码Review")
+
                 for qa in qa_details:
                     if qa.fresult == 'NG':
                         raise serializers.ValidationError("存在未处理NG项，不可确认")

@@ -168,6 +168,7 @@ class QaProjectDetailView(APIView):
         sql_str = f"""
                     select liaisonf.id           slip_id,
                            liaisonf.fslipno      slip_slip,
+                           liaisonf.ftype        slip_type,
                            liaisonf.fstatus      slip_status,
                            liaisonf.fbrief       slip_brief,
                            liaisonf.fcontent     slip_content,
