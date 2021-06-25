@@ -651,7 +651,7 @@ class MyConfirm(APIView):
                                         qahf.ftesttyp,
                                         qahf.fslipno,
                                         qahf.fslipno2 fslipno,
-                                        (select fnote from qahf where fslipno = liaisonf.fodrno) fnote,
+                                        (select fnote from qahf where fslipno = liaisonf.fodrno and fslipno2 = 1) fnote,
                                         qahf.fobjectid,
                                         qahf.fsystemcd,
                                         qahf.fprojectcd,
