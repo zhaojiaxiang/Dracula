@@ -5,7 +5,7 @@
         ><div>
           <el-breadcrumb
             separator-class="el-icon-arrow-right"
-            style="font-size:16px;margin-top: 5px;"
+            style="font-size: 16px; margin-top: 5px"
           >
             <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
             <el-breadcrumb-item
@@ -31,7 +31,7 @@
       </el-col>
     </el-row>
 
-    <el-row style="margin-top:5px">
+    <el-row style="margin-top: 5px">
       <el-col :span="12">
         <div>
           <el-button
@@ -44,7 +44,7 @@
         </div>
       </el-col>
       <el-col :span="12">
-        <div style="text-align:right;margin-right:40px">
+        <div style="text-align: right; margin-right: 40px">
           <el-button-group>
             <el-button @click="defaultOK()" v-show="isCanDefaultOK()"
               >Default OK</el-button
@@ -75,7 +75,7 @@
       tooltip-effect="dark"
       border
       size="medium"
-      style="width: 98%; margin-top:5px"
+      style="width: 98%; margin-top: 5px"
       @selection-change="handleSelectionChange"
       v-loading="loading"
       class="card-shadow"
@@ -155,12 +155,12 @@
           </el-dropdown>
         </template>
       </el-table-column>
-      <el-table-column label="贴图" width="100" >
+      <el-table-column label="贴图" width="100">
         <template slot-scope="scope">
           <el-link
             type="primary"
             :underline="false"
-            style="margin-left:15px"
+            style="margin-left: 15px"
             @click="handleContentText(scope.row.id)"
             v-if="isCanImage(scope.row.test_tag)"
             >{{ scope.row.test_tag }}</el-link
@@ -183,10 +183,10 @@
             icon="el-icon-edit-outline"
             @click="singleModify(scope.row.id)"
             v-show="isCanEdit(scope.row)"
-            style="margin-left:15px"
+            style="margin-left: 15px"
           ></el-link>
           <el-link
-            style="margin-left:20px"
+            style="margin-left: 20px"
             type="primary"
             :underline="false"
             v-show="isCanEdit(scope.row)"
@@ -232,6 +232,7 @@ import {
   updateQaDetailResult,
   updateQaHead,
   putDefaultOK,
+  codeReviewInspection,
 } from "./../../../services/qaService";
 import SingleNewQaList from "../components/SingleNewQaList";
 import BatchNewQaList from "../components/BatchNewQaList";
@@ -294,11 +295,11 @@ export default {
       return false;
     },
 
-    isCanImage(test_tag){
+    isCanImage(test_tag) {
       if (this.qahead.fstatus === "2") {
-        return true
-      }else{
-        if(test_tag === '贴图'){
+        return true;
+      } else {
+        if (test_tag === "贴图") {
           return false;
         }
         return true;
@@ -407,16 +408,54 @@ export default {
     },
 
     async resultSubmit() {
-      this.qahead.fstatus = "3";
-      var resp = await updateQaHead(this.qahead.id, this.qahead).catch(() => {
-        this.$message.error("测试结果提交异常");
+      var resp_code_review = await codeReviewInspection(
+        this.qahead.fobjectid,
+        this.qahead.fslipno
+      ).catch(() => {
+        this.$message.error("CodeReview数据检查异常");
       });
-      if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
-        this.$message.error(resp.data.message);
-        this.qahead.fstatus = "2";
-        return;
+
+      if (
+        Object.prototype.hasOwnProperty.call(resp_code_review.data, "message")
+      ) {
+        this.$confirm("Code ReView没有填写，是否继续提交！", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        })
+          .then(async () => {
+            this.qahead.fstatus = "3";
+            var resp = await updateQaHead(this.qahead.id, this.qahead).catch(
+              () => {
+                this.$message.error("测试结果提交异常");
+              }
+            );
+            if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
+              this.$message.error(resp.data.message);
+              this.qahead.fstatus = "2";
+              return;
+            } else {
+              this.$message.success("测试结果提交成功");
+            }
+          })
+          .catch(() => {
+            this.$message({
+              type: "info",
+              message: "取消操作",
+            });
+          });
       } else {
-        this.$message.success("测试结果提交成功");
+        this.qahead.fstatus = "3";
+        var resp = await updateQaHead(this.qahead.id, this.qahead).catch(() => {
+          this.$message.error("测试结果提交异常");
+        });
+        if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
+          this.$message.error(resp.data.message);
+          this.qahead.fstatus = "2";
+          return;
+        } else {
+          this.$message.success("测试结果提交成功");
+        }
       }
     },
 
@@ -425,7 +464,6 @@ export default {
       var resp = await updateQaHead(this.qahead.id, this.qahead).catch(() => {
         this.$message.error("测试结果撤回异常");
       });
-      console.log(resp);
       if (Object.prototype.hasOwnProperty.call(resp.data, "message")) {
         this.$message.error(resp.data.message);
       } else {
@@ -562,7 +600,7 @@ export default {
       this.refreshQaList();
     },
   },
-  mounted: async function() {
+  mounted: async function () {
     this.loading = true;
     var id = this.$route.query.qahf_id;
     this.paramtype = this.$route.query.type;

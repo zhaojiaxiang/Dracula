@@ -52,21 +52,19 @@
         :filter-method="filterSlipNo"
         filter-placement="bottom-end"
       >
-      <template slot-scope="scope">
-        <el-popover trigger="hover" placement="top">
-          <p>开发概要: {{ scope.row.slip_brief }}</p>
-          <p>问题描述: {{ scope.row.slip_content }}</p>
-          <p>问题分析: {{ scope.row.slip_analyse }}</p>
-          <p>解决方案: {{ scope.row.slip_solution }}</p>
-          <p>计划工时: {{ scope.row.slip_plnmanpower }}</p>
-          <p>实际工时: {{ scope.row.slip_actmanpower }}</p>
-          <div slot="reference" class="name-wrapper">
-            {{scope.row.slip_slip}}
-          </div>
-        </el-popover>
-        
-      </template>
-      
+        <template slot-scope="scope">
+          <el-popover trigger="hover" placement="top">
+            <p>开发概要: {{ scope.row.slip_brief }}</p>
+            <p>问题描述: {{ scope.row.slip_content }}</p>
+            <p>问题分析: {{ scope.row.slip_analyse }}</p>
+            <p>解决方案: {{ scope.row.slip_solution }}</p>
+            <p>计划工时: {{ scope.row.slip_plnmanpower }}</p>
+            <p>实际工时: {{ scope.row.slip_actmanpower }}</p>
+            <div slot="reference" class="name-wrapper">
+              {{ scope.row.slip_slip }}
+            </div>
+          </el-popover>
+        </template>
       </el-table-column>
       <el-table-column
         prop="slip_assignedto"
@@ -87,9 +85,9 @@
       <el-table-column prop="design_id" label="设计Review" min-width="100">
         <template slot-scope="scope">
           <el-link
-            type="primary"
+            :type="linkStyle(scope.row.design_id)"
             :underline="false"
-            v-show="scope.row.design_id"
+            v-show="designShow(scope.row.slip_type, scope.row.design_id)"
             @click="openDesignReview(scope.row.slip_slip)"
             >设计Review</el-link
           >
@@ -133,7 +131,12 @@
         </template>
       </el-table-column>
 
-      <el-table-column fixed="right" prop="qa_modification" label="概要" min-width="60">
+      <el-table-column
+        fixed="right"
+        prop="qa_modification"
+        label="概要"
+        min-width="60"
+      >
         <template slot-scope="scope">
           <el-link
             type="primary"
@@ -144,12 +147,16 @@
           >
         </template>
       </el-table-column>
-      <el-table-column fixed="right" prop="code_id" label="代码Review" min-width="100">
+      <el-table-column
+        fixed="right"
+        prop="code_id"
+        label="代码Review"
+        min-width="100"
+      >
         <template slot-scope="scope">
           <el-link
-            type="primary"
             :underline="false"
-            v-show="scope.row.code_id"
+            :type="linkStyle(scope.row.code_id)"
             @click="openCodeReview(scope.row.slip_slip, scope.row.qa_object)"
             >代码Review</el-link
           >
@@ -198,7 +205,7 @@ export default {
   data() {
     return {
       order_no: "",
-      isdisable: true,
+      isdisable: false,
       tableHeight: 100,
       spanArr: [],
       pos: 0,
@@ -212,6 +219,25 @@ export default {
   methods: {
     openTestStatistics() {
       this.$refs.TestDataStatistics.handleDialog(this.order_no);
+    },
+
+    linkStyle(id) {
+      if (id) {
+        return "success";
+      } else {
+        return "danger";
+      }
+    },
+
+    designShow(type, id){
+      if(type==='追加开发'){
+        return true
+      }else{
+        if(id){
+          return true
+        }
+      }
+      return false
     },
 
     getSpanArr(data) {
@@ -327,6 +353,7 @@ export default {
 
         var slip_id = projectView[i].slip_id;
         var slip_slip = projectView[i].slip_slip;
+        var slip_type = projectView[i].slip_type;
         var slip_status = projectView[i].slip_status;
         var slip_brief = projectView[i].slip_brief;
         var slip_content = projectView[i].slip_content;
@@ -382,6 +409,7 @@ export default {
         var project = {
           slip_id: slip_id,
           slip_slip: slip_slip,
+          slip_type: slip_type,
           slip_status: slip_status,
           slip_brief: slip_brief,
           slip_assignedto: slip_assignedto,

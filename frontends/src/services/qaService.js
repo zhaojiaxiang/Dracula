@@ -193,3 +193,8 @@ export async function putDefaultOK(qahf_id){
   var resp = await axios.put("/api/default_ok/", qahf_form)
   return resp;
 }
+
+export async function codeReviewInspection(object_id, slip_no){
+  var resp = await axios.get("/api/codereview_inspection/?object_id="+ object_id +"&slip_no=" + slip_no)
+  return resp
+}
