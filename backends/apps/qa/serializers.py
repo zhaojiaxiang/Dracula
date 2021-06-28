@@ -137,10 +137,11 @@ class QaHeadSerializer(serializers.ModelSerializer):
             if new_status == '4':
                 """确认"""
 
-                code_review = CodeReview.objects.filter(fobjectid__exact=instance.fobjectid,
-                                                        fslipno__exact=instance.fslipno)
-                if code_review.count() == 0:
-                    raise serializers.ValidationError("请先填写代码Review")
+                if instance.ftesttyp == "MCL":
+                    code_review = CodeReview.objects.filter(fobjectid__exact=instance.fobjectid,
+                                                            fslipno__exact=instance.fslipno)
+                    if code_review.count() == 0:
+                        raise serializers.ValidationError("请先填写代码Review")
 
                 for qa in qa_details:
                     if qa.fresult == 'NG':
