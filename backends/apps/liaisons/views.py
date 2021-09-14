@@ -38,7 +38,9 @@ class LiaisonsViewSet(viewsets.ModelViewSet):
     ordering_fields = ['fstatus', 'fcreatedte']
 
     def get_queryset(self):
-        return Liaisons.objects.filter(fassignedto=self.request.user.name).order_by('fstatus', '-fcreatedte')
+        return Liaisons.objects.filter(
+            Q(fassignedto=self.request.user.name) | Q(fhelptester=self.request.user.name)).order_by('fstatus',
+                                                                                                    '-fcreatedte')
 
     def destroy(self, request, *args, **kwargs):
         try:
@@ -152,6 +154,7 @@ class QaProjectDataStatisticsViewSet(mixins.RetrieveModelMixin, mixins.ListModel
     """
     订单下联络票的测试数据统计
     """
+
     def get_queryset(self):
         return Liaisons.objects.values("fslipno", "fassignedto").distinct().order_by('fslipno')
 

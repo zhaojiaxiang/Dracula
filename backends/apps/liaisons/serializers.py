@@ -79,6 +79,8 @@ class LiaisonsSerializer(serializers.ModelSerializer):
                 liaison.fstatus = '1'
                 liaison.fcreateusr = user.name
             liaison.forganization = organization_id
+            # 2021-09-13 赵加响修改，增加协助测试者。该字段默认为对应者，通过后台手动修改。
+            liaison.fhelptester = user.name
             liaison.fentusr = user.name
             liaison.fupdteprg = "Liaison No New"
             liaison.save()
