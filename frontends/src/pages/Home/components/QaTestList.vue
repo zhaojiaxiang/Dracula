@@ -83,6 +83,13 @@
       <el-table-column type="selection" width="40"> </el-table-column>
       <el-table-column label="序号" type="index" width="50"> </el-table-column>
       <el-table-column
+        prop="fsortrule"
+        label="排序"
+        width="100"
+        show-overflow-tooltip
+      >
+      </el-table-column>
+      <el-table-column
         prop="fclass1"
         label="分类"
         width="100"
